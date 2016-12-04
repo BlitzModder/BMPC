@@ -1,0 +1,39 @@
+!!! 5
+%html
+  %head
+    %meta(charset="utf-8")
+    %meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    %meta(http-equiv="x-ua-compatible" content="ie=edge")
+    %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
+    %link(rel="stylesheet" type="text/css" href="css/core.css")
+  %body
+    .pos-f-t
+      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
+        %form.form-inline.float-xs-left
+          %a(href="./index.html")
+            %button.btn(type="button")
+              %img(src="./img/circle-left.svg" height="30px" width="30px")
+        %form.form-inline.float-xs-right
+          %button.btn#reload(type="button")
+            %img(src="./img/loop2.svg" height="30px" width="30px")
+          %button.btn#apply(type="button")
+            %img(src="./img/checkmark2.svg" height="30px" width="30px")
+    .container-fluid
+      .row#root
+        .col-xs(v-if="loading") Loading...
+        .col-xs#errorMsg(v-else-if="error") エラーが発生しました
+        %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
+    .modal.fade#progress(:phase="phase" :log="log")
+      .modal-dialog
+        .modal-content
+          .modal-header
+            %h4.modal-title
+          %modal-body(:phase="phase" :log="log")
+          .modal-footer
+            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal" :disable="!finished" @click="reset") Close
+    %script(type="text/javascript")
+      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
+    %script(src="../node_modules/tether/dist/js/tether.min.js")
+    %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
+    %script(src="../node_modules/vue/dist/vue.min.js")
+    %script(src="./js/repo.js")

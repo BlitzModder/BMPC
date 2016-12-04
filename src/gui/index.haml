@@ -1,0 +1,38 @@
+!!! 5
+%html
+  %head
+    %meta(charset="utf-8")
+    %meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    %meta(http-equiv="x-ua-compatible" content="ie=edge")
+    %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
+    %link(rel="stylesheet" type="text/css" href="css/core.css")
+  %body
+    .pos-f-t
+      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
+        %form.form-inline.float-xs-left
+          %a(href="./setting.html")
+            %button.btn(type="button")
+              %img(src="./img/wrench.svg" height="30px" width="30px")
+    .container-fluid
+      .row#repo
+        .col-xs(v-if="remoteRepos.length > 0")
+          .card.card-block
+            %h4.card-title#remoteHeader リモートリポジトリ
+            %ul.list-group
+              %li(is="repo" v-for="r in remoteRepos" :name="r" repotype="remote")
+        .col-xs(v-if="localRepos.length > 0")
+          .card.card-block
+            %h4.card-title#localHeader ローカルリポジトリ
+            %ul.list-group
+              %li(is="repo" v-for="r in localRepos" :name="r" repotype="local")
+        .col-xs(v-if="debugRepo !== \"\"")
+          .card.card-block
+            %h4.card-title#debugHeader デバッグ用リポジトリ
+            .card.card-block
+              %debug-repo(:name="debugRepo")
+    %script(type="text/javascript")
+      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
+    %script(src="../node_modules/tether/dist/js/tether.min.js")
+    %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
+    %script(src="../node_modules/vue/dist/vue.min.js")
+    %script(src="./js/index.js")

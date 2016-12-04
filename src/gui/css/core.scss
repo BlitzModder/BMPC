@@ -1,0 +1,26 @@
+body {
+  padding-top: 5rem;
+}
+
+.with-form {
+  margin-bottom: 10px;
+}
+
+#remoteRepoInput {
+  margin-top: 5px;
+  margin-right: 5px;
+}
+#remoteRepoButton {
+  margin-top: 5px;
+}
+#debugRepo, #blitzFolder {
+  padding: 10px;
+}
+
+.remove {
+  float: right;
+}
+
+li {
+  word-wrap: break-word;
+}

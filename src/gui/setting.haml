@@ -1,0 +1,65 @@
+!!! 5
+%html
+  %head
+    %meta(charset="utf-8")
+    %meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+    %meta(http-equiv="x-ua-compatible" content="ie=edge")
+    %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
+    %link(rel="stylesheet" type="text/css" href="./css/core.css")
+  %body
+    .pos-f-t
+      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
+        %form.form-inline.float-xs-left
+          %a(href="./index.html")
+            %button.btn(type="button")
+              %img(src="./img/circle-left.svg" height="30px" width="30px")
+    .container-fluid
+      .row#setting
+        .col-xs
+          .card.card-block
+            %h4.card-title#remoteHeader リモートリポジトリ一覧
+            %p#remoteDesc 「ユーザー名/リポジトリ名/ブランチ名」の形式で入力してください
+            %ul.list-group.with-form
+              %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
+            %form.form-inline
+              .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
+                %input.form-control#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
+                %button.btn.btn-primary#remoteRepoButton(type="button" @click="addRemoteRepo") 追加
+                .form-control-feedback
+                  %p#remoteRepoErr(v-show="remoteRepoAddStrErr") 入力が不正です
+        .col-xs
+          .card.card-block
+            %h4.card-title#localHeader ローカルリポジトリ一覧
+            %ul.list-group.with-form
+              %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
+            %button.btn.btn-primary#localRepoButton(type="button" @click="addLocalRepo") 追加
+        .col-xs
+          .card.card-block
+            %h4.card-title#debugHeader デバッグ用リポジトリ
+            %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
+            %button.btn.btn-primary#debugRepoButton(type="button" @click="setDebugRepo") 設定
+        .col-xs
+          .card.card-block
+            %h4.card-title#blitzPathHeader Blitzのフォルダ位置
+            %blitz-path(:name="blitzPath")
+            %button.btn.btn-primary#blitzPathButton(type="button" @click="setBlitzPath") 設定
+        .col-xs
+          .card.card-block
+            %h4.card-title#langHeader 言語(Language)
+            %form.form-inline
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="lang" value="en" v-model="lang")
+                English(英語)
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="lang" value="ja" v-model="lang")
+                日本語(Japanese)
+        .col-xs
+          .card.card-block
+            %h4.card-title#resetHeader 設定をリセットする
+            %button.btn.btn-primary#resetButton(type="button" @click="reset") リセット
+    %script(type="text/javascript")
+      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
+    %script(src="../node_modules/tether/dist/js/tether.min.js")
+    %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
+    %script(src="../node_modules/vue/dist/vue.min.js")
+    %script(src="./js/setting.js")

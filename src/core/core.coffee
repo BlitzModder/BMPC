@@ -21,6 +21,10 @@ createWindow = ->
     icon: path.join(app.getAppPath(), "gui/img/image.jpg"),
     autoHideMenuBar: true
   )
+  mainWindow.once("ready-to-show", ->
+    win.show()
+    return
+  )
   mainWindow.loadURL("file://#{app.getAppPath()}/gui/index.html")
   mainWindow.webContents.openDevTools()
   mainWindow.on("closed", ->

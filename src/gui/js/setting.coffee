@@ -9,6 +9,16 @@ lang = config.get("lang")
 langList = config.LANG_LIST
 for l in langList when l isnt lang
   $(".#{l}").addClass("hidden")
+switch lang
+  when "ja"
+    CONFIRM_DELETE_STRING = "本当に削除してよろしいですか？"
+    CONFIRM_RESET_STRING = "本当にリセットしてよろしいですか？"
+  when "en"
+    CONFIRM_DELETE_STRING = "Really want to delete?"
+    CONFIRM_RESET_STRING = "Really want to reset?"
+  else
+    CONFIRM_DELETE_STRING = "UNLOCALIZED_CONFIRM_DELETE_STRING"
+    CONFIRM_RESET_STRING = "UNLOCALIZED_RESET_DELETE_STRING"
 
 getFolderByWindow = (func) ->
   focusedWindow = BrowserWindow.getFocusedWindow()
@@ -27,7 +37,7 @@ Vue.component("repo",
       return util.escape(@name)
   methods:
     removeRepo: ->
-      if confirm("本当に削除してよろしいですか？")
+      if confirm(CONFIRM_DELETE_STRING)
         @repos.splice(@num, 1)
       return
 )
@@ -39,7 +49,7 @@ Vue.component("debug-repo",
       return util.escape(@name)
   methods:
     remove: ->
-      if confirm("本当に削除してよろしいですか？")
+      if confirm(CONFIRM_DELETE_STRING)
         @name = ""
         config.set("debugRepo", "")
       return
@@ -94,7 +104,7 @@ new Vue(
       )
       return
     reset: ->
-      if confirm("本当にリセットしてよろしいですか？")
+      if confirm(CONFIRM_RESET_STRING)
         config.reset()
         @remoteRepos = config.get("repos")
         @localRepos = config.get("localRepos")

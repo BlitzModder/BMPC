@@ -4,23 +4,11 @@ config = remote.require("./config")
 util = remote.require("./util")
 fs = require "fs"
 
+
 lang = config.get("lang")
-if lang is "en"
-  document.getElementById("remoteHeader").innerText = "List of Remote Repository"
-  document.getElementById("remoteDesc").innerText = "Enter in the form of \"UserName/RepositoryName/BranchName\""
-  document.getElementById("remoteRepoButton").innerText = "Add"
-  document.getElementById("remoteRepoErr").innerText = "Invalid input string"
-  document.getElementById("remoteRepoButton").innerText = "Add"
-  document.getElementById("remoteRepoButton").innerText = "Add"
-  document.getElementById("remoteRepoButton").innerText = "Add"
-  document.getElementById("localHeader").innerText = "List of Local Repository"
-  document.getElementById("localRepoButton").innerText = "Add"
-  document.getElementById("debugHeader").innerText = "Debug Repository"
-  document.getElementById("debugRepoButton").innerText = "Set"
-  document.getElementById("blitzPathHeader").innerText = "Path to Blitz"
-  document.getElementById("blitzPathButton").innerText = "Set"
-  document.getElementById("resetHeader").innerText = "Reset all settings"
-  document.getElementById("resetButton").innerText = "Reset"
+langList = config.LANG_LIST
+for l in langList when l isnt lang
+  $(".#{l}").addClass("hidden")
 
 getFolderByWindow = (func) ->
   focusedWindow = BrowserWindow.getFocusedWindow()
@@ -130,5 +118,9 @@ new Vue(
       return
     lang: (val) ->
       config.set("lang", val)
+      lang = val
+      $(".#{lang}").removeClass("hidden")
+      for l in langList when l isnt lang
+        $(".#{l}").addClass("hidden")
       return
 )

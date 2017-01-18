@@ -17,46 +17,58 @@
       .row#setting
         .col-xs
           .card.card-block
-            %h4.card-title#remoteHeader リモートリポジトリ一覧
-            %p#remoteDesc 「ユーザー名/リポジトリ名/ブランチ名」の形式で入力してください
+            %h4.card-title.ja リモートリポジトリ一覧
+            %h4.card-title.en List of Remote Repository
+            %p.ja 「ユーザー名/リポジトリ名/ブランチ名」の形式で入力してください
+            %p.en Enter in the form of "UserName/RepositoryName/BranchName"
             %ul.list-group.with-form
               %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
             %form.form-inline
               .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
                 %input.form-control#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
-                %button.btn.btn-primary#remoteRepoButton(type="button" @click="addRemoteRepo") 追加
+                %button.btn.btn-primary.remoteRepoButton.ja(type="button" @click="addRemoteRepo") 追加
+                %button.btn.btn-primary.remoteRepoButton.en(type="button" @click="addRemoteRepo") Add
                 .form-control-feedback
-                  %p#remoteRepoErr(v-show="remoteRepoAddStrErr") 入力が不正です
+                  %p.ja(v-show="remoteRepoAddStrErr") 入力が不正です
+                  %p.en(v-show="remoteRepoAddStrErr") Invalid input string
         .col-xs
           .card.card-block
-            %h4.card-title#localHeader ローカルリポジトリ一覧
+            %h4.card-title.ja ローカルリポジトリ一覧
+            %h4.card-title.en List of Local Repository
             %ul.list-group.with-form
               %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
-            %button.btn.btn-primary#localRepoButton(type="button" @click="addLocalRepo") 追加
+            %button.btn.btn-primary.ja(type="button" @click="addLocalRepo") 追加
+            %button.btn.btn-primary.en(type="button" @click="addLocalRepo") Add
         .col-xs
           .card.card-block
-            %h4.card-title#debugHeader デバッグ用リポジトリ
+            %h4.card-title.ja デバッグ用リポジトリ
+            %h4.card-title.en Debug Repository
             %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
-            %button.btn.btn-primary#debugRepoButton(type="button" @click="setDebugRepo") 設定
+            %button.btn.btn-primary.ja(type="button" @click="setDebugRepo") 設定
+            %button.btn.btn-primary.en(type="button" @click="setDebugRepo") Set
         .col-xs
           .card.card-block
-            %h4.card-title#blitzPathHeader Blitzのフォルダ位置
+            %h4.card-title.ja Blitzのフォルダ位置
+            %h4.card-title.en Path to Blitz
             %blitz-path(:name="blitzPath")
-            %button.btn.btn-primary#blitzPathButton(type="button" @click="setBlitzPath") 設定
+            %button.btn.btn-primary.ja(type="button" @click="setBlitzPath") 設定
+            %button.btn.btn-primary.en(type="button" @click="setBlitzPath") Set
         .col-xs
           .card.card-block
             %h4.card-title#langHeader 言語(Language)
             %form.form-inline
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="lang" value="en" v-model="lang")
-                English(英語)
+                English
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="lang" value="ja" v-model="lang")
-                日本語(Japanese)
+                日本語
         .col-xs
           .card.card-block
-            %h4.card-title#resetHeader 設定をリセットする
-            %button.btn.btn-primary#resetButton(type="button" @click="reset") リセット
+            %h4.card-title.ja 設定をリセットする
+            %h4.card-title.en Reset all settings
+            %button.btn.btn-primary.ja(type="button" @click="reset") リセット
+            %button.btn.btn-primary.en(type="button" @click="reset") Reset
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

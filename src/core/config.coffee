@@ -12,6 +12,10 @@ os = require "os"
  * @const
  ###
 CONFIG_FOLDER_NAME = "config"
+LANG_LIST = [
+  "ja"
+  "en"
+]
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
@@ -97,6 +101,7 @@ reset = ->
   return
 
 module.exports =
+  LANG_LIST: LANG_LIST
   data: data
   init: init
   get: get

@@ -11,8 +11,10 @@ lang = config.get("lang")
 appliedMods = ->
   return config.get("appliedMods")
 
-if lang is "en"
-  document.getElementById("errorMsg").innerText = "Error has happen"
+lang = config.get("lang")
+langList = config.LANG_LIST
+for l in langList when l isnt lang
+  $(".#{l}").addClass("hidden")
 
 Vue.component("big-category",
   template: """
@@ -195,12 +197,12 @@ document.getElementById("apply").addEventListener("click", ->
           if lang is "ja"
             p.addLog("#{mod.name} - 適応失敗(#{err})")
           else if lang is "en"
-            p.addLog("#{mod.name} - Failed to Apply")
+            p.addLog("#{mod.name} - Failed to Apply(#{err})")
         when "delete"
           if lang is "ja"
             p.addLog("#{mod.name} - 解除失敗(#{err})")
           else if lang is "en"
-            p.addLog("#{mod.name} - Failed to Remove")
+            p.addLog("#{mod.name} - Failed to Remove(#{err})")
     return
   ).then( ->
     p.changePhase("done")

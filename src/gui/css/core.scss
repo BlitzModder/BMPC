@@ -10,7 +10,7 @@ body {
   margin-top: 5px;
   margin-right: 5px;
 }
-#remoteRepoButton {
+.remoteRepoButton {
   margin-top: 5px;
 }
 #debugRepo, #blitzFolder {
@@ -23,4 +23,8 @@ body {
 
 li {
   word-wrap: break-word;
+}
+
+.hidden {
+  display: none;
 }

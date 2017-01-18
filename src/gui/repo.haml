@@ -21,7 +21,8 @@
     .container-fluid
       .row#root
         .col-xs(v-if="loading") Loading...
-        .col-xs#errorMsg(v-else-if="error") エラーが発生しました
+        .col-xs.ja(v-else-if="error") エラーが発生しました
+        .col-xs.en(v-else-if="error") Error has happen
         %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog

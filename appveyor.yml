@@ -1,0 +1,36 @@
+branches:
+  only:
+    - master
+skip_non_tags: true
+
+init:
+  - git config --global core.autocrlf false
+
+environment:
+  matrix:
+    - nodejs_version: 6.2.1
+
+cache:
+  - node_modules
+
+install:
+  - ps: Update-NodeJsInstallation (Get-NodeJsLatestBuild $env:nodejs_version)
+  - npm install -g npm
+  - npm install --build-from-source --msvs_version=2013
+  - npm run pack:win
+
+artifacts:
+  - path: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip
+  - path: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: TA6/JQT5hBqM+wyKht9skPyNN1mR/qigXl/0Lcvoi6YkJsF0+I1TuqCU/6fTw0jW
+    artifact: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip,dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+      branch: master
+      appveyor_repo_tag: true

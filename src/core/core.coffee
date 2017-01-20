@@ -26,7 +26,6 @@ createWindow = ->
     return
   )
   mainWindow.loadURL("file://#{app.getAppPath()}/gui/index.html")
-  mainWindow.webContents.openDevTools()
   mainWindow.on("closed", ->
     # guiの終了
     mainWindow = null

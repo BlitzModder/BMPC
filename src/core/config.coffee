@@ -29,7 +29,7 @@ data = {}
  * @const
  ###
 DEFAULT_DATA =
-  repos: ["subdiox/BMRepository/PC"]
+  repos: ["BlitzModder/BMRepository/master"]
   localRepos: []
   debugRepo: ""
   appliedMods: []

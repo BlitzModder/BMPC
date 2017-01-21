@@ -69,10 +69,9 @@ init = ->
   return ensureFile(filePath).then( ->
     return readJson(filePath, throws: false)
   ).then( (content) ->
+    data = Object.assign({}, DEFAULT_DATA)
     if content?
-      data = content
-    else
-      data = Object.assign({}, DEFAULT_DATA)
+      data = Object.assign(data, content)
     _update()
   )
 

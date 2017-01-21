@@ -20,10 +20,12 @@
             %img(src="./img/checkmark2.svg" height="30px" width="30px")
     .container-fluid
       .row#root
-        .col-xs(v-if="loading") Loading...
-        .col-xs.ja(v-else-if="error") エラーが発生しました
-        .col-xs.en(v-else-if="error") Error has happen
-        .col-xs(v-else-if="error") {{errorMsg}}
+        .col-xs(v-if="loading")
+          %p Loading...
+        .col-xs(v-else-if="error")
+          %p.ja エラーが発生しました
+          %p.en Error has happen
+          %p {{errorMsg}}
         %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog

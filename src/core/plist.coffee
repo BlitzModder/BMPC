@@ -118,7 +118,6 @@ filter = (parsedObj) ->
       resolve(obj)
       return
     , (err) ->
-      console.log err
       reject(err)
       return
     )

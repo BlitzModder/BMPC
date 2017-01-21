@@ -20,14 +20,14 @@ install:
   - npm run pack:win
 
 artifacts:
-  - path: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip
-  - path: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip
+  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win.zip
 
 deploy:
   - provider: GitHub
     auth_token:
       secure: TA6/JQT5hBqM+wyKht9skPyNN1mR/qigXl/0Lcvoi6YkJsF0+I1TuqCU/6fTw0jW
-    artifact: dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip,dist\BlitzModderPC-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+    artifact: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip,dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win.zip
     draft: false
     prerelease: false
     force_update: true

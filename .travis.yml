@@ -1,4 +1,7 @@
-language: objective-c #OSXで動かすようにするため
+language: node_js
+node_js:
+  - "6.2.1"
+os: osx
 cache:
   directories:
   - node_modules
@@ -6,13 +9,6 @@ cache:
 branches:
   only:
   - /^v?[0-9\\.]+/
-env:
-  - NODE_VERSION="6.2.1"
-before_install:
-  - git clone https://github.com/creationix/nvm.git /tmp/.nvm
-  - source /tmp/.nvm/nvm.sh
-  - nvm install $NODE_VERSION
-  - nvm use --delete-prefix $NODE_VERSION
 install:
   - npm install
 script:

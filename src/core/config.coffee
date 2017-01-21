@@ -5,7 +5,7 @@
 fs = require "fs-extra"
 path = require "path"
 Promise = require "promise"
-os = require "os"
+util = require "./util"
 
 ###*
  * 設定をおくフォルダ
@@ -15,6 +15,12 @@ CONFIG_FOLDER_NAME = "config"
 LANG_LIST = [
   "ja"
   "en"
+]
+PLATFORM_LIST = [
+  "w"
+  "m"
+  "a"
+  "i"
 ]
 
 ensureFile = Promise.denodeify(fs.ensureFile)
@@ -29,20 +35,23 @@ data = {}
  * @const
  ###
 DEFAULT_DATA =
-  repos: ["subdiox/BMRepository/PC"]
+  repos: ["BlitzModder/BMRepository/master"]
   localRepos: []
   debugRepo: ""
   appliedMods: []
   lang: "ja"
 
 do ->
-  if os.type().includes("Windows")
-    DEFAULT_DATA.blitzPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
-  else if os.type().includes("Darwin")
-    DEFAULT_DATA.blitzPath = "~/Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/"
-    # DEFAULT_DATA.blitzPath = "Applications/World of Tanks Blitz.app/Contents/Resources/"
-  else
-    DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
+  DEFAULT_DATA.platform = util.getPlatform()
+  switch DEFAULT_DATA.platform
+    when "w"
+      DEFAULT_DATA.blitzPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+    when "m"
+      DEFAULT_DATA.blitzPath = "~/Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/"
+      # DEFAULT_DATA.blitzPath = "Applications/World of Tanks Blitz.app/Contents/Resources/"
+    else
+      DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
+  return
 
 ###
  * エラー出力
@@ -69,10 +78,9 @@ init = ->
   return ensureFile(filePath).then( ->
     return readJson(filePath, throws: false)
   ).then( (content) ->
+    data = Object.assign({}, DEFAULT_DATA)
     if content?
-      data = content
-    else
-      data = Object.assign({}, DEFAULT_DATA)
+      data = Object.assign(data, content)
     _update()
   )
 
@@ -102,6 +110,7 @@ reset = ->
 
 module.exports =
   LANG_LIST: LANG_LIST
+  PLATFORM_LIST: PLATFORM_LIST
   data: data
   init: init
   get: get

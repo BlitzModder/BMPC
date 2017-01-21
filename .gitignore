@@ -14,5 +14,6 @@
 /cache
 
 # other
+.DS_Store
 /temp
 /customRepo

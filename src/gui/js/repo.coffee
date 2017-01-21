@@ -89,7 +89,14 @@ r = new Vue(
     get: ->
       @loading = true
       @error = false
+      console.log "aa"
       plist.get(repo, lang).then( (obj) =>
+        console.log "a"
+        console.log obj
+        return plist.filter(obj)
+      ).then( (obj) =>
+        console.log "b"
+        console.log obj
         @loading = false
         @plist = obj
       ).catch( =>

@@ -1,6 +1,10 @@
 path = require "path"
+fs = require "fs-extra"
 shell = require("electron").shell
-config = require "./config"
+os = require "os"
+Promise = require "promise"
+
+readFile = Promise.denodeify(fs.readFile)
 
 ###*
  * HTMLエスケープ
@@ -24,6 +28,36 @@ openBlitz = ->
   shell.openItem(path.join(config.get("blitzPath"), "wotblitz.exe"))
   return
 
+###*
+ * Blitzのバージョンを取得します
+ ###
+getVersion = ->
+  return new Promise( (resolve, reject) ->
+    readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
+      reg = /^\d+\.\d+\.\d+/.exec(text)
+      if reg?
+        resolve(reg[0])
+      else
+        reject("Error: Version Regexp Error")
+      return
+    , (err) ->
+      console.log err
+      reject(err)
+      return
+    )
+    return
+  )
+
+###*
+ * 利用している端末を取得します
+ ###
+getPlatform = ->
+  return "w" if os.type().includes("Windows")
+  return "m" if os.type().includes("Darwin")
+  return "w"
+
 module.exports =
   escape: escape
   openBlitz: openBlitz
+  getVersion: getVersion
+  getPlatform: getPlatform

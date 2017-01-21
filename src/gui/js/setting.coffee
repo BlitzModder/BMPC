@@ -71,6 +71,7 @@ new Vue(
     localRepos: config.get("localRepos")
     debugRepo: config.get("debugRepo")
     blitzPath: config.get("blitzPath")
+    platform: config.get("platform")
     lang: config.get("lang")
     remoteRepoAddStr: ""
     remoteRepoAddStrErr: false
@@ -125,6 +126,9 @@ new Vue(
       return
     blitzPath: (val) ->
       config.set("blitzPath", val)
+      return
+    platform: (val) ->
+      config.set("platform", val)
       return
     lang: (val) ->
       config.set("lang", val)

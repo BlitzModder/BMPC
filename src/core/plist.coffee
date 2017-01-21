@@ -4,6 +4,8 @@ plist = require "plist"
 Promise = require "promise"
 request = require "./request"
 cache = require "./cache"
+config = require "./config"
+util = require "./util"
 
 readFile = Promise.denodeify(fs.readFile)
 
@@ -33,9 +35,16 @@ parse = (plistObj) ->
     for k, v of val
       [n, i] = k.split(":")
       obj[name][n] = {}
-      for k_ of v
+      for k_, v_ of v
         [n_, i_] = k_.split(":")
-        obj[name][n][n_] = "#{id}.#{i}.#{i_}"
+        if v_? and v_ isnt ""
+          [version, platform] = v_.split(":")
+        else
+          [version, platform] = ["", ""]
+        obj[name][n][n_] =
+          name: "#{id}.#{i}.#{i_}"
+          version: version
+          platform: platform
   return obj
 
 ###*
@@ -86,6 +95,37 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
     )
   )
 
+###*
+ * バージョン/端末でフィルタをかけます
+ * @param {Object} parse()で変換したもの
+ * @return {Object}
+ ###
+filter = (parsedObj) ->
+  return new Promise( (resolve, reject) ->
+    util.getVersion().then( (ver) ->
+      plat = config.get("platform")
+      obj = {}
+      for k1, v1 of parsedObj
+        obj[k1] = {}
+        for k2, v2 of v1
+          obj[k1][k2] = {}
+          for k3, v3 of v2
+            if (
+              v3.version is ver and
+              v3.platform.includes(plat)
+            )
+              obj[k1][k2][k3] = v3.name
+      resolve(obj)
+      return
+    , (err) ->
+      console.log err
+      reject(err)
+      return
+    )
+    return
+  )
+
 module.exports =
   get: get
+  filter: filter
 

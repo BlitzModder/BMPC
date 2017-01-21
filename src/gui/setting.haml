@@ -55,6 +55,20 @@
             %button.btn.btn-primary.en(type="button" @click="setBlitzPath") Set
         .col-xs
           .card.card-block
+            %h4.card-title.ja 適応端末
+            %h4.card-title.en Vevice to apply
+            %form.form-inline
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="platform" value="w" v-model="platform")
+                Windows
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="platform" value="m" v-model="platform")
+                Mac
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="platform" value="a" v-model="platform")
+                Android
+        .col-xs
+          .card.card-block
             %h4.card-title#langHeader 言語(Language)
             %form.form-inline
               %label.form-check-inline

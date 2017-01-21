@@ -8,7 +8,7 @@ cache:
   - "$HOME/.nvm"
 branches:
   only:
-  - /^v?[0-9\\.]+/
+  - master
 install:
   - npm install
 script:

@@ -34,11 +34,11 @@ openBlitz = ->
 getVersion = ->
   return new Promise( (resolve, reject) ->
     readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
-      reg = /^\d+\.\d+\.\d+/.exec(text)
+      reg = /_(\d+\.\d+\.\d+)_/.exec(text)
       if reg?
-        resolve(reg[0])
+        resolve(reg[1])
       else
-        reject("Error: Version Regexp Error")
+        reject("Error: Version Regexp Error (#{text})")
       return
     , (err) ->
       reject(err)

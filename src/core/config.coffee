@@ -4,14 +4,17 @@
 
 fs = require "fs-extra"
 path = require "path"
+{app} = require "electron"
 Promise = require "promise"
 util = require "./util"
+os = require "os"
 
 ###*
  * 設定をおくフォルダ
  * @const
  ###
-CONFIG_FOLDER_NAME = "config"
+CONFIG_FOLDER_PATH = path.join(app.getPath("userData"), "config")
+GENERAL_CONFIG_PATH = path.join(CONFIG_FOLDER_PATH, "general.json")
 LANG_LIST = [
   "ja"
   "en"
@@ -22,6 +25,10 @@ PLATFORM_LIST = [
   "a"
   "i"
 ]
+BLITZ_WINDOWS_64_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+BLITZ_WINDOWS_32_PATH = "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
+BLITZ_MAC_STEAM_PATH = path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
+BLITZ_MAC_STORE_PATH = path.join(os.homedir(), "Applications/World of Tanks Blitz.app/Contents/Resources/")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
@@ -45,10 +52,11 @@ do ->
   DEFAULT_DATA.platform = util.getPlatform()
   switch DEFAULT_DATA.platform
     when "w"
-      DEFAULT_DATA.blitzPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+      switch os.arch()
+        when "x64" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_64_PATH
+        when "ia32" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_32_PATH
     when "m"
-      DEFAULT_DATA.blitzPath = "~/Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/"
-      # DEFAULT_DATA.blitzPath = "~/Applications/World of Tanks Blitz.app/Contents/Resources/"
+      DEFAULT_DATA.blitzPath = BLITZ_MAC_STEAM_PATH
     else
       DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
   return
@@ -66,7 +74,7 @@ _outputError = (err) ->
  * @private
  ###
 _update = ->
-  fs.outputJson(path.resolve("#{CONFIG_FOLDER_NAME}/general.json"), data, _outputError)
+  fs.outputJson(GENERAL_CONFIG_PATH, data, _outputError)
   return
 
 ###
@@ -74,9 +82,8 @@ _update = ->
  * @constructor
  ###
 init = ->
-  filePath = path.resolve("#{CONFIG_FOLDER_NAME}/general.json")
-  return ensureFile(filePath).then( ->
-    return readJson(filePath, throws: false)
+  return ensureFile(GENERAL_CONFIG_PATH).then( ->
+    return readJson(GENERAL_CONFIG_PATH, throws: false)
   ).then( (content) ->
     data = Object.assign({}, DEFAULT_DATA)
     if content?

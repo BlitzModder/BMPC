@@ -4,13 +4,14 @@
 
 fs = require "fs-extra"
 path = require "path"
+{app} = require "electron"
 Promise = require "promise"
 
 ###*
  * キャッシュをおくフォルダ
  * @const
  ###
-CACHE_FOLDER_NAME = "cache"
+CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "cache")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
@@ -39,7 +40,7 @@ _outputError = (err) ->
  * @private
  ###
 _update = ->
-  fs.outputJson(path.resolve("#{CACHE_FOLDER_NAME}/table.json"), table, _outputError)
+  fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table, _outputError)
   return
 
 ###
@@ -47,7 +48,7 @@ _update = ->
  * @constructor
  ###
 init = ->
-  filePath = path.resolve("#{CACHE_FOLDER_NAME}/table.json")
+  filePath = path.join(CACHE_FOLDER_PATH,"table.json")
   return ensureFile(filePath).then( ->
     return readJson(filePath, throws: false)
   ).then( (content) ->
@@ -77,7 +78,7 @@ add = (key) ->
 setStringFile = (repoName, fileName, fileContent, callback = _outputError) ->
   num = add("#{repoName}/#{fileName}")
   table["#{repoName}/#{fileName}"] = num
-  fs.outputFile(path.resolve("#{CACHE_FOLDER_NAME}/#{num}.txt"), fileContent, callback)
+  fs.outputFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), fileContent, callback)
   return
 
 ###
@@ -89,7 +90,7 @@ getStringFile = (repoName, fileName, force = false) ->
     if force
       reject()
       return
-    fs.readFile(path.resolve("#{CACHE_FOLDER_NAME}/#{num}.txt"), "utf8", (err, content) ->
+    fs.readFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), "utf8", (err, content) ->
       if err?
         reject(err)
         return

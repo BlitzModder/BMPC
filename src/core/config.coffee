@@ -25,6 +25,10 @@ PLATFORM_LIST = [
   "a"
   "i"
 ]
+BLITZ_WINDOWS_64_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+BLITZ_WINDOWS_32_PATH = "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
+BLITZ_MAC_STEAM_PATH = path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
+BLITZ_MAC_STORE_PATH = path.join(os.homedir(), "Applications/World of Tanks Blitz.app/Contents/Resources/")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
@@ -48,9 +52,11 @@ do ->
   DEFAULT_DATA.platform = util.getPlatform()
   switch DEFAULT_DATA.platform
     when "w"
-      DEFAULT_DATA.blitzPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+      switch os.arch()
+        when "x64" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_64_PATH
+        when "ia32" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_32_PATH
     when "m"
-      DEFAULT_DATA.blitzPath = path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
+      DEFAULT_DATA.blitzPath = BLITZ_MAC_STEAM_PATH
     else
       DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
   return

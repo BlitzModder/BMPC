@@ -106,19 +106,18 @@ filter = (parsedObj) ->
       plat = config.get("platform")
       obj = {}
       for k1, v1 of parsedObj
-        obj[k1] = {}
         for k2, v2 of v1
-          obj[k1][k2] = {}
           for k3, v3 of v2
             if (
               v3.version is ver and
               v3.platform.includes(plat)
             )
+              obj[k1] = {} if !obj[k1]?
+              obj[k1][k2] = {} if !obj[k1][k2]?
               obj[k1][k2][k3] = v3.name
       resolve(obj)
       return
     , (err) ->
-      console.log err
       reject(err)
       return
     )

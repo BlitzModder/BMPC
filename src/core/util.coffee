@@ -41,7 +41,6 @@ getVersion = ->
         reject("Error: Version Regexp Error")
       return
     , (err) ->
-      console.log err
       reject(err)
       return
     )

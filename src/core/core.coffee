@@ -51,7 +51,6 @@ app.on("window-all-closed", ->
   return
 )
 
-app.on("activate", ->
-  createWindow() if !win?
+app.on("activate", (e, hasVisibleWindows) ->
+  createWindow() if !hasVisibleWindows
 )
-

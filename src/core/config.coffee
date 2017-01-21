@@ -48,7 +48,7 @@ do ->
       DEFAULT_DATA.blitzPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
     when "m"
       DEFAULT_DATA.blitzPath = "~/Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/"
-      # DEFAULT_DATA.blitzPath = "Applications/World of Tanks Blitz.app/Contents/Resources/"
+      # DEFAULT_DATA.blitzPath = "~/Applications/World of Tanks Blitz.app/Contents/Resources/"
     else
       DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
   return

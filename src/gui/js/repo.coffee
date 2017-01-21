@@ -122,20 +122,17 @@ Vue.component("modal-body",
     message: ->
       switch @phase
         when "standby", "doing"
-          if lang is "ja"
-            return "適応中..."
-          if lang is "en"
-            return "Applying..."
+          switch lang
+            when "ja" then return "適応中..."
+            when "en" then return "Applying..."
         when "done"
-          if lang is "ja"
-            return "適応完了"
-          if lang is "en"
-            return "Applied Successfully"
+          switch lang
+            when "ja" then return "適応完了"
+            when "en" then return "Applied Successfully"
         when "failed"
-          if lang is "ja"
-            return "適応失敗"
-          if lang is "en"
-            return "Failed to Apply"
+          switch lang
+            when "ja" then return "適応失敗"
+            when "en" then return "Failed to Apply"
 )
 p = new Vue(
   el: "#progress"
@@ -183,28 +180,24 @@ document.getElementById("apply").addEventListener("click", ->
       switch type
         when "add"
           $checkbox.addClass("applied")
-          if lang is "ja"
-            p.addLog("#{mod.name} - 適応完了")
-          else if lang is "en"
-            p.addLog("#{mod.name} - Applied Successfully")
+          switch lang
+            when "ja" then p.addLog("#{mod.name} - 適応完了")
+            when "en" then p.addLog("#{mod.name} - Applied Successfully")
         when "delete"
           $checkbox.removeClass("applied")
-          if lang is "ja"
-            p.addLog("#{mod.name} - 解除完了")
-          else if lang is "en"
-            p.addLog("#{mod.name} - Removed Successfully")
+          switch lang
+            when "ja" then p.addLog("#{mod.name} - 解除完了")
+            when "en" then p.addLog("#{mod.name} - Removed Successfully")
     else
       switch type
         when "add"
-          if lang is "ja"
-            p.addLog("#{mod.name} - 適応失敗(#{err})")
-          else if lang is "en"
-            p.addLog("#{mod.name} - Failed to Apply(#{err})")
+          switch lang
+            when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
+            when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
         when "delete"
-          if lang is "ja"
-            p.addLog("#{mod.name} - 解除失敗(#{err})")
-          else if lang is "en"
-            p.addLog("#{mod.name} - Failed to Remove(#{err})")
+          switch lang
+            when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
+            when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
     return
   ).then( ->
     p.changePhase("done")

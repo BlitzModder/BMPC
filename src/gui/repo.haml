@@ -23,6 +23,7 @@
         .col-xs(v-if="loading") Loading...
         .col-xs.ja(v-else-if="error") エラーが発生しました
         .col-xs.en(v-else-if="error") Error has happen
+        .col-xs(v-else-if="error") {{errorMsg}}
         %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog

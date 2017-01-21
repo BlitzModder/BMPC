@@ -84,6 +84,7 @@ r = new Vue(
   data:
     loading: false
     error: false
+    errorMsg: ""
     plist: {}
   methods:
     get: ->
@@ -94,9 +95,10 @@ r = new Vue(
       ).then( (obj) =>
         @loading = false
         @plist = obj
-      ).catch( =>
+      ).catch( (err) =>
         @loading = false
         @error = true
+        @errorMsg = err
       )
       return
 )
@@ -201,8 +203,10 @@ document.getElementById("apply").addEventListener("click", ->
     return
   ).then( ->
     p.changePhase("done")
-  ).catch( ->
+  ).catch( (err) ->
     p.changePhase("failed")
+    p.addLog("\n")
+    p.addLog(err)
   )
   return
 )

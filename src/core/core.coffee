@@ -47,8 +47,7 @@ app.on("ready", ->
 
 app.on("window-all-closed", ->
   # アプリ終了
-  if process.platform isnt "darwin"
-    app.quit()
+  app.quit()
   return
 )
 

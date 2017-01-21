@@ -4,6 +4,7 @@
 
 fs = require "fs-extra"
 path = require "path"
+{app} = require "electron"
 Promise = require "promise"
 util = require "./util"
 
@@ -11,7 +12,8 @@ util = require "./util"
  * 設定をおくフォルダ
  * @const
  ###
-CONFIG_FOLDER_NAME = "config"
+CONFIG_FOLDER_PATH = path.join(app.getPath("userData"), "config")
+GENERAL_CONFIG_PATH = path.join(CONFIG_FOLDER_PATH, "general.json")
 LANG_LIST = [
   "ja"
   "en"
@@ -66,7 +68,7 @@ _outputError = (err) ->
  * @private
  ###
 _update = ->
-  fs.outputJson(path.resolve("#{CONFIG_FOLDER_NAME}/general.json"), data, _outputError)
+  fs.outputJson(GENERAL_CONFIG_PATH, data, _outputError)
   return
 
 ###
@@ -74,9 +76,8 @@ _update = ->
  * @constructor
  ###
 init = ->
-  filePath = path.resolve("#{CONFIG_FOLDER_NAME}/general.json")
-  return ensureFile(filePath).then( ->
-    return readJson(filePath, throws: false)
+  return ensureFile(GENERAL_CONFIG_PATH).then( ->
+    return readJson(GENERAL_CONFIG_PATH, throws: false)
   ).then( (content) ->
     data = Object.assign({}, DEFAULT_DATA)
     if content?

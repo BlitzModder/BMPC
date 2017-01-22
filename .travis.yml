@@ -9,6 +9,7 @@ cache:
 branches:
   only:
   - master
+  - /^v?[0-9\\.]+/
 install:
   - npm install
 script:

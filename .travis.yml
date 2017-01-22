@@ -19,7 +19,7 @@ deploy:
   api_key:
     secure: M39EPkWuvv7LBabi45Oj+2KEtUyjjxL+61TIGDxpgoT27PVnCNdR/EUa6SQLxG6g9nJedvNXsEBpPQpQZTwK9dtX2HpBGwhtm63oQSgkU9J0vakhtau5+HBAcSdGB2BzFcXAVCmzIxtPYga39kD5kOXC6VaIYtlx7JPoneUjOXnCQAvPYNJ48+uI24fcZB/s5YfJbLszuwrxpHkdvVqaQuSqP5cvDUTFg7iO8Ss1jKx9IO8HmNM2EtbzYCxIwi1mt2hpOVUxUlr5Dp9aR/Xgv0HX0v042z3SCotRYVd2HmHoELwGgf34PJNtsVawTE6QJ7txlzdb5fS1TAHtQvKwt6uZTKhMhPwP5Js1/xzwvZHoVRyu6AIppw27KEbloR6dUVQgy0lV44ye5sXwe8B7ykWgtppVdSu23XD81tT3BUFgnz1XU3/pi0o0j3NzLS/yGqXeYG4Y6e+8YZz/asOs+L3eDn3HjBRjmATWBFjzYPiIQefQQAo5l/DA1DwDU4JygMOIiN5E6r6nNZgLrUXFq9l/9UMvU5vpzBOxS7VKoTiBoL3Fca6BztQY0ye4lIsw7S2h2uHI2YJJIhP3crGG/X2k/6yC0+tkVsDMohUHZLGvEwwkla+2TCXityBt/WFvA93KgQhH36ulvsjzbVgaYcwNCy36AATPBqF1RGP0pTs=
   file:
-    - dist/app/BlitzModder-$TRAVIS_TAG-mac.zip
+    - dist/mac/BlitzModder-$TRAVIS_TAG-mac.zip
   skip_cleanup: true
   on:
     repo: BlitzModder/BMPC

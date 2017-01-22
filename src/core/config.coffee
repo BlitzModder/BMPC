@@ -25,10 +25,11 @@ PLATFORM_LIST = [
   "a"
   "i"
 ]
-BLITZ_WINDOWS_64_PATH = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
-BLITZ_WINDOWS_32_PATH = "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
-BLITZ_MAC_STEAM_PATH = path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
-BLITZ_MAC_STORE_PATH = path.join(os.homedir(), "Applications/World of Tanks Blitz.app/Contents/Resources/")
+BLITZ_PATH =
+  WIN64: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
+  WIN32: "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
+  MACSTEAM: path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
+  MACSTORE: path.join(os.homedir(), "Applications/World of Tanks Blitz.app/Contents/Resources/")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
@@ -53,13 +54,21 @@ do ->
   switch DEFAULT_DATA.platform
     when "w"
       switch os.arch()
-        when "x64" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_64_PATH
-        when "ia32" then DEFAULT_DATA.blitzPath = BLITZ_WINDOWS_32_PATH
+        when "x64" then DEFAULT_DATA.blitzPath = BLITZ_PATH.WIN64
+        when "ia32" then DEFAULT_DATA.blitzPath = BLITZ_PATH.WIN32
+      DEFAULT_DATA.blitzPathRadio = "win"
     when "m"
-      DEFAULT_DATA.blitzPath = BLITZ_MAC_STEAM_PATH
+      DEFAULT_DATA.blitzPath = BLITZ_PATH.MACSTEAM
+      DEFAULT_DATA.blitzPathRadio = "macsteam"
     else
       DEFAULT_DATA.blitzPath = "World of Tanks Blitz"
+      DEFAULT_DATA.blitzPathRadio = "other"
   return
+
+getDefaultWinBlitzPath = ->
+  switch os.arch()
+    when "x64" then return BLITZ_PATH.WIN64
+    when "ia32" then return BLITZ_PATH.WIN32
 
 ###
  * エラー出力
@@ -118,6 +127,8 @@ reset = ->
 module.exports =
   LANG_LIST: LANG_LIST
   PLATFORM_LIST: PLATFORM_LIST
+  BLITZ_PATH: BLITZ_PATH
+  getDefaultWinBlitzPath: getDefaultWinBlitzPath
   data: data
   init: init
   get: get

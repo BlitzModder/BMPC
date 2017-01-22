@@ -50,9 +50,23 @@
           .card.card-block
             %h4.card-title.ja Blitzのフォルダ位置
             %h4.card-title.en Path to Blitz
+            %form.form-inline
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
+                Windows(Steam)
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="blitzPathRadio" value="macsteam" v-model="blitzPathRadio")
+                Mac(Steam)
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="blitzPathRadio" value="macapp" v-model="blitzPathRadio")
+                Mac(AppStore)
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
+                Other
             %blitz-path(:name="blitzPath")
-            %button.btn.btn-primary.ja(type="button" @click="setBlitzPath") 設定
-            %button.btn.btn-primary.en(type="button" @click="setBlitzPath") Set
+            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPath")
+              %span.ja 設定
+              %span.en Set
         .col-xs
           .card.card-block
             %h4.card-title.ja 適応端末

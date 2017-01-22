@@ -71,6 +71,7 @@ new Vue(
     localRepos: config.get("localRepos")
     debugRepo: config.get("debugRepo")
     blitzPath: config.get("blitzPath")
+    blitzPathRadio: config.get("blitzPathRadio")
     platform: config.get("platform")
     lang: config.get("lang")
     remoteRepoAddStr: ""
@@ -126,6 +127,16 @@ new Vue(
       return
     blitzPath: (val) ->
       config.set("blitzPath", val)
+      return
+    blitzPathRadio: (val) ->
+      config.set("blitzPathRadio", val)
+      if val isnt "other"
+        switch val
+          when "win" then path = config.getDefaultWinBlitzPath()
+          when "macsteam" then path = config.BLITZ_PATH.MACSTEAM
+          when "macapp" then path = config.BLITZ_PATH.MACSTORE
+        config.set("blitzPath", path)
+        @blitzPath = path
       return
     platform: (val) ->
       config.set("platform", val)

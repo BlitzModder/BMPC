@@ -103,13 +103,17 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
 filter = (parsedObj) ->
   return new Promise( (resolve, reject) ->
     util.getVersion().then( (ver) ->
+      return {ok: true, ver}
+    , (err) ->
+      return {ok: false}
+    ).then( ({ok, ver}) ->
       plat = config.get("platform")
       obj = {}
       for k1, v1 of parsedObj
         for k2, v2 of v1
           for k3, v3 of v2
             if (
-              v3.version is ver and
+              (!ok or v3.version is ver) and
               v3.platform.includes(plat)
             )
               obj[k1] = {} if !obj[k1]?
@@ -117,7 +121,7 @@ filter = (parsedObj) ->
               obj[k1][k2][k3] = v3.name
       resolve(obj)
       return
-    , (err) ->
+    ).catch( (err) ->
       reject(err)
       return
     )

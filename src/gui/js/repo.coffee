@@ -87,10 +87,10 @@ r = new Vue(
     errorMsg: ""
     plist: {}
   methods:
-    get: ->
+    get: (force = false) ->
       @loading = true
       @error = false
-      plist.get(repo, lang).then( (obj) =>
+      plist.get(repo, lang, force).then( (obj) =>
         return plist.filter(obj)
       ).then( (obj) =>
         @loading = false
@@ -164,7 +164,7 @@ p = new Vue(
 )
 
 document.getElementById("reload").addEventListener("click", ->
-  r.get()
+  r.get(true)
   return
 )
 document.getElementById("apply").addEventListener("click", ->

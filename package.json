@@ -1,13 +1,13 @@
 {
   "name": "BlitzModder",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "bin/core/core.js",
   "scripts": {
     "teststart": "node_modules\\electron\\dist\\electron.exe bin",
     "start": "npm run start:win64",
-    "start:win32": "build -w --ia32 --dir && .\\dist\\win-ia32-unpacked\\BlitzModderPC",
-    "start:win64": "build -w --x64 --dir && .\\dist\\win-unpacked\\BlitzModderPC",
+    "start:win32": "build -w --ia32 --dir && .\\dist\\win-ia32-unpacked\\BlitzModder",
+    "start:win64": "build -w --x64 --dir && .\\dist\\win-unpacked\\BlitzModder",
     "start:mac": "build -m --dir",
     "build": "gulp",
     "pack": "npm run pack:win && npm run pack:mac",

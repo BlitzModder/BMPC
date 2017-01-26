@@ -29,7 +29,7 @@ BLITZ_PATH =
   WIN64: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\World of Tanks Blitz"
   WIN32: "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
   MACSTEAM: path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
-  MACSTORE: path.join(os.homedir(), "Applications/World of Tanks Blitz.app/Contents/Resources/")
+  MACSTORE: "/Applications/World of Tanks Blitz.app/Contents/Resources/"
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)

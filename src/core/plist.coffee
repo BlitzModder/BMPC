@@ -95,6 +95,16 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
     )
   )
 
+_is_needed = (ok, ver, plat, obj) ->
+  ov = obj.version
+  op = obj.platform
+  if (
+    (!ok or ov is "" or ov is ver) and
+    (op is "" or op.includes(plat))
+  )
+    return true
+  return false
+
 ###*
  * バージョン/端末でフィルタをかけます
  * @param {Object} parse()で変換したもの
@@ -112,10 +122,7 @@ filter = (parsedObj) ->
       for k1, v1 of parsedObj
         for k2, v2 of v1
           for k3, v3 of v2
-            if (
-              (!ok or v3.version is ver) and
-              v3.platform.includes(plat)
-            )
+            if _is_needed(ok, ver, plat, v3)
               obj[k1] = {} if !obj[k1]?
               obj[k1][k2] = {} if !obj[k1][k2]?
               obj[k1][k2][k3] = v3.name

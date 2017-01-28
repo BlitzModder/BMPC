@@ -113,7 +113,7 @@ Vue.component("modal-body",
               <progress v-show="finished" value="100" max="100" />
             </div>
             <div class="modal-progress">
-              {{log}}
+              <p v-html="log"></p>
             </div>
             </div>
             """
@@ -149,7 +149,7 @@ p = new Vue(
       if @log is ""
         @log = s
       else
-        @log += "\n#{s}"
+        @log += "<br>#{s}"
       return
     deleteLog: ->
       @log = ""
@@ -205,7 +205,7 @@ document.getElementById("apply").addEventListener("click", ->
     p.changePhase("done")
   ).catch( (err) ->
     p.changePhase("failed")
-    p.addLog("\n")
+    p.addLog("<br>")
     p.addLog(err)
   )
   return

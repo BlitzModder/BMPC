@@ -147,9 +147,12 @@ p = new Vue(
   methods:
     addLog: (s) ->
       if @log is ""
-        @log = s
+        @log = util.escape(s)
       else
-        @log += "<br>#{s}"
+        @log += "<br>#{util.escape(s)}"
+      return
+    nextLog: ->
+      @log += "<br>"
       return
     deleteLog: ->
       @log = ""
@@ -205,7 +208,7 @@ document.getElementById("apply").addEventListener("click", ->
     p.changePhase("done")
   ).catch( (err) ->
     p.changePhase("failed")
-    p.addLog("<br>")
+    p.nextLog()
     p.addLog(err)
   )
   return

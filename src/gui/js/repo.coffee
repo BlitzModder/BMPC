@@ -20,7 +20,7 @@ Vue.component("big-category",
   template: """
             <div class="col-xs">
               <div class="card card-block">
-                <h4 class="card-title">{{escapedName}}</h4>
+                <h4 class="card-title">{{name}}</h4>
                 <ul class="list-group">
                   <li is="small-category" v-for="(v, k) in val" :parentname="name" :name="k" :val="v"></li>
                 </ul>
@@ -28,14 +28,11 @@ Vue.component("big-category",
             </div>
             """
   props: ["name", "val"]
-  computed:
-    escapedName: ->
-      return util.escape(@name)
 )
 Vue.component("small-category",
   template: """
             <li class="list-group-item">
-              <a data-toggle="collapse" :href="id">{{escapedName}}</a>
+              <a data-toggle="collapse" :href="id">{{name}}</a>
               <div class="collapse" :id="idName">
                 <ul class="list-group">
                   <li is="mod" v-for="(v, k) in val" :name="k" :val="v"></li>
@@ -45,8 +42,6 @@ Vue.component("small-category",
             """
   props: ["parentname", "name", "val"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
     id: ->
       return "#"+@idName
     idName: ->
@@ -58,7 +53,7 @@ Vue.component("mod",
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
-                  {{escapedName}}
+                  {{name}}
                 </label>
               </div>
             </li>
@@ -75,9 +70,6 @@ Vue.component("mod",
       checked: applied
       applied: applied
     }
-  computed:
-    escapedName: ->
-      return util.escape(@name)
 )
 r = new Vue(
   el: "#root"

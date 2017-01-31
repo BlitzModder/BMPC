@@ -99,6 +99,12 @@
             %button.btn.btn-primary.en(type="button" @click="clearCache") Clear
         .col-xs
           .card.card-block
+            %h4.card-title.ja 設定フォルダを開く
+            %h4.card-title.en Open config folder
+            %button.btn.btn-primary.ja(type="button" @click="openConfigFolder") 開く
+            %button.btn.btn-primary.en(type="button" @click="openConfigFolder") Open
+        .col-xs
+          .card.card-block
             %h4.card-title.ja 設定をリセットする
             %h4.card-title.en Reset all settings
             %button.btn.btn-primary.ja(type="button" @click="reset") リセット

@@ -1,5 +1,5 @@
 {remote} = require "electron"
-{app, dialog, BrowserWindow} = remote
+{app, dialog, BrowserWindow, shell} = remote
 config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
@@ -132,6 +132,9 @@ new Vue(
       return
     clearCache: ->
       cache.clear()
+      return
+    openConfigFolder: ->
+      shell.showItemInFolder(config.GENERAL_CONFIG_PATH)
       return
     reset: ->
       if confirm(CONFIRM_RESET_STRING)

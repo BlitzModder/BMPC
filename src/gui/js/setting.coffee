@@ -1,6 +1,7 @@
 {remote} = require "electron"
 {app, dialog, BrowserWindow} = remote
 config = remote.require("./config")
+cache = remote.require("./cache")
 util = remote.require("./util")
 fs = require "fs"
 
@@ -128,6 +129,9 @@ new Vue(
         @blitzPath = dir
         return
       )
+      return
+    clearCache: ->
+      cache.clear()
       return
     reset: ->
       if confirm(CONFIRM_RESET_STRING)

@@ -93,6 +93,12 @@
                 日本語
         .col-xs
           .card.card-block
+            %h4.card-title.ja キャッシュを削除する
+            %h4.card-title.en Clear cache
+            %button.btn.btn-primary.ja(type="button" @click="clearCache") 削除
+            %button.btn.btn-primary.en(type="button" @click="clearCache") Clear
+        .col-xs
+          .card.card-block
             %h4.card-title.ja 設定をリセットする
             %h4.card-title.en Reset all settings
             %button.btn.btn-primary.ja(type="button" @click="reset") リセット

@@ -84,7 +84,10 @@ new Vue(
       err = false
       if str isnt ""
         if str.startsWith("http:")
-          @remoteRepos.push(str)
+          if str.endsWith("/")
+            @remoteRepos.push(str.slice(0, -1))
+          else
+            @remoteRepos.push(str)
         else
           s = str.split("/")
           switch s.length

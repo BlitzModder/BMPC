@@ -4,7 +4,6 @@ config = remote.require("./config")
 util = remote.require("./util")
 fs = require "fs"
 
-
 lang = config.get("lang")
 langList = config.LANG_LIST
 for l in langList when l isnt lang
@@ -29,12 +28,21 @@ getFolderByWindow = (func) ->
   )
   return
 
+formatRepoName = (name) ->
+  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]} (#{name})"
+  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]} (#{name})"
+  return name
+
 Vue.component("repo",
-  template: "<li class=\"list-group-item\">{{escapedName}}<removeRepoButton @remove=\"removeRepo\"></li>"
+  template: "<li class=\"list-group-item\">{{formatedName}}<removeRepoButton @remove=\"removeRepo\"></li>"
   props: ["name", "num", "repos"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
   methods:
     removeRepo: ->
       if confirm(CONFIRM_DELETE_STRING)
@@ -42,11 +50,11 @@ Vue.component("repo",
       return
 )
 Vue.component("debug-repo",
-  template: "<div class=\"card card-block\" id=\"debugRepo\">{{escapedName}}<removeRepoButton @remove=\"remove\"></div>"
+  template: "<div class=\"card card-block\" id=\"debugRepo\">{{formatedName}}<removeRepoButton @remove=\"remove\"></div>"
   props: ["name"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
   methods:
     remove: ->
       if confirm(CONFIRM_DELETE_STRING)
@@ -55,11 +63,11 @@ Vue.component("debug-repo",
       return
 )
 Vue.component("blitz-path",
-  template: "<div class=\"card card-block\" id=\"blitzFolder\">{{escapedName}}</div>"
+  template: "<div class=\"card card-block\" id=\"blitzFolder\">{{formatedName}}</div>"
   props: ["name"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
 )
 Vue.component("removeRepoButton",
   template: "<button type=\"button\" class=\"remove close\" @click=\"$emit('remove')\"><span>&times;</span></button>"
@@ -83,7 +91,7 @@ new Vue(
       str = @remoteRepoAddStr
       err = false
       if str isnt ""
-        if str.startsWith("http:")
+        if str.startsWith("http:") or str.startsWith("https:")
           if str.endsWith("/")
             @remoteRepos.push(str.slice(0, -1))
           else

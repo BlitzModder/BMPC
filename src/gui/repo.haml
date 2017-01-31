@@ -32,7 +32,7 @@
         .modal-content
           .modal-header
             %h4.modal-title
-          .modal-body(:phase="phase" :log="log")
+          %modal-body(:phase="phase" :log="log")
           .modal-footer
             %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal" :disable="!finished" @click="reset") Close
     .modal.fade#detail

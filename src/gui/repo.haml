@@ -35,6 +35,16 @@
           %modal-body(:phase="phase" :log="log")
           .modal-footer
             %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal" :disable="!finished" @click="reset") Close
+    .modal.fade#detail
+      .modal-dialog
+        .modal-content
+          .modal-header
+            %button.close(type="button" data-dismiss="modal")
+              %span &times;
+          .modal-body#outwebview
+            %webview(src="about:blank" autosize="on")
+          .modal-footer
+            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal") Close
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

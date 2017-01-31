@@ -33,6 +33,16 @@
             %h4.card-title.en Debug Repository
             .card.card-block
               %debug-repo(:name="debugRepo")
+      .card.card-block.card-inverse.card-info#update.hidden
+        %h4.card-title.ja アップデート通知
+        %h4.card-title.en Update available
+        %p.ja
+          %span.newVersion
+          へのアップデートが利用可能です
+        %p.en
+          %span.newVersion
+           is available
+        %a.card-link#updateLink(href="#") Open
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

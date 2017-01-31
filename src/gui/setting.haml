@@ -70,7 +70,7 @@
         .col-xs
           .card.card-block
             %h4.card-title.ja 適応端末
-            %h4.card-title.en Vevice to apply
+            %h4.card-title.en Device to apply
             %form.form-inline
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="platform" value="w" v-model="platform")
@@ -93,10 +93,30 @@
                 日本語
         .col-xs
           .card.card-block
+            %h4.card-title.ja キャッシュを削除する
+            %h4.card-title.en Clear cache
+            %button.btn.btn-primary.ja(type="button" @click="clearCache") 削除
+            %button.btn.btn-primary.en(type="button" @click="clearCache") Clear
+        .col-xs
+          .card.card-block
+            %h4.card-title.ja 設定フォルダを開く
+            %h4.card-title.en Open config folder
+            %button.btn.btn-primary.ja(type="button" @click="openConfigFolder") 開く
+            %button.btn.btn-primary.en(type="button" @click="openConfigFolder") Open
+        .col-xs
+          .card.card-block
             %h4.card-title.ja 設定をリセットする
             %h4.card-title.en Reset all settings
             %button.btn.btn-primary.ja(type="button" @click="reset") リセット
             %button.btn.btn-primary.en(type="button" @click="reset") Reset
+        .col-xs
+          .card.card-block
+            %h4.card-title.ja バージョン情報
+            %h4.card-title.en About
+            %p
+              {{appName}} {{version}}
+              %br
+              (C) S(29314) 2016 MIT License
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

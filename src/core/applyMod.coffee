@@ -9,14 +9,10 @@ unzip = require "unzipper"
 config = require "./config"
 
 ###*
- * GitHubからのMODを適応します
+ * リモートからのMODを適応します
  ###
-_applyFromGitHub = (folder, mod, outputFolder) ->
+_applyFromRemote = (folder, mod, outputFolder) ->
   return new Promise( (resolve, reject) ->
-    names = mod.repo.name.split("/")
-    if names.length < 3
-      reject("RepoName is unvalid")
-      return
     extractor = unzip.Extract(path: outputFolder)
     extractor.on("error", (err) ->
       reject(err)
@@ -26,7 +22,7 @@ _applyFromGitHub = (folder, mod, outputFolder) ->
       resolve()
       return
     )
-    new fetch.FetchStream("https://raw.githubusercontent.com/#{names[0]}/#{names[1]}/#{names[2]}/#{folder}/#{mod.name}.zip")
+    new fetch.FetchStream("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
       .pipe(extractor)
     return
   )
@@ -110,7 +106,7 @@ applyMod = (type, mod, callback) ->
       when "delete" then folder = "Remove"
       else reject("Unknown type")
     if mod.repo.type is "remote"
-      _applyFromGitHub(folder, mod, outputFolder).then( ->
+      _applyFromRemote(folder, mod, outputFolder).then( ->
         resolve()
         return
       ).catch( (err) ->

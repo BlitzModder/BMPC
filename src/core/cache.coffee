@@ -15,6 +15,7 @@ CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "cache")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)
+remove = Promise.denodeify(fs.remove)
 
 ###
  * キャッシュファイルと実際のファイルのテーブル
@@ -99,7 +100,11 @@ getStringFile = (repoName, fileName, force = false) ->
     )
   )
 
+clear = ->
+  return remove(CACHE_FOLDER_PATH)
+
 module.exports =
   init: init
   setStringFile: setStringFile
   getStringFile: getStringFile
+  clear: clear

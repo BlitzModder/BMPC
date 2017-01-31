@@ -3,6 +3,7 @@ plist = remote.require("./plist")
 util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
+request = remote.require("./request")
 
 params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
@@ -20,7 +21,7 @@ Vue.component("big-category",
   template: """
             <div class="col-xs">
               <div class="card card-block">
-                <h4 class="card-title">{{escapedName}}</h4>
+                <h4 class="card-title">{{name}}</h4>
                 <ul class="list-group">
                   <li is="small-category" v-for="(v, k) in val" :parentname="name" :name="k" :val="v"></li>
                 </ul>
@@ -28,14 +29,11 @@ Vue.component("big-category",
             </div>
             """
   props: ["name", "val"]
-  computed:
-    escapedName: ->
-      return util.escape(@name)
 )
 Vue.component("small-category",
   template: """
             <li class="list-group-item">
-              <a data-toggle="collapse" :href="id">{{escapedName}}</a>
+              <a data-toggle="collapse" :href="id">{{name}}</a>
               <div class="collapse" :id="idName">
                 <ul class="list-group">
                   <li is="mod" v-for="(v, k) in val" :name="k" :val="v"></li>
@@ -45,8 +43,6 @@ Vue.component("small-category",
             """
   props: ["parentname", "name", "val"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
     id: ->
       return "#"+@idName
     idName: ->
@@ -58,8 +54,8 @@ Vue.component("mod",
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
-                  {{escapedName}}
                 </label>
+                <a href="#" data-toggle="modal" data-target="#detail" :data-whatever="val">{{name}}</a>
               </div>
             </li>
             """
@@ -75,9 +71,6 @@ Vue.component("mod",
       checked: applied
       applied: applied
     }
-  computed:
-    escapedName: ->
-      return util.escape(@name)
 )
 r = new Vue(
   el: "#root"
@@ -113,7 +106,7 @@ Vue.component("modal-body",
               <progress v-show="finished" value="100" max="100" />
             </div>
             <div class="modal-progress">
-              {{log}}
+              <p v-html="log"></p>
             </div>
             </div>
             """
@@ -147,9 +140,12 @@ p = new Vue(
   methods:
     addLog: (s) ->
       if @log is ""
-        @log = s
+        @log = util.escape(s)
       else
-        @log += "\n#{s}"
+        @log += "<br>#{util.escape(s)}"
+      return
+    nextLog: ->
+      @log += "<br>"
       return
     deleteLog: ->
       @log = ""
@@ -205,8 +201,26 @@ document.getElementById("apply").addEventListener("click", ->
     p.changePhase("done")
   ).catch( (err) ->
     p.changePhase("failed")
-    p.addLog("\n")
+    p.nextLog()
     p.addLog(err)
   )
+  return
+)
+
+firstExec = true
+$("#detail").on("show.bs.modal", (e) ->
+  button = $(e.relatedTarget)
+  id = button.data("whatever")
+  webview = $(@).find("webview")[0]
+  link = request.getDetailUrl(repo, id, lang)
+  if firstExec
+    webview.addEventListener("dom-ready",ready = ->
+      webview.removeEventListener("dom-ready", ready)
+      firstExec = false
+      webview.loadURL(link)
+      return
+    )
+  else
+    webview.loadURL(link)
   return
 )

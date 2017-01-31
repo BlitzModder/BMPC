@@ -43,7 +43,7 @@ data = {}
  * @const
  ###
 DEFAULT_DATA =
-  repos: ["BlitzModder/BMRepository/master"]
+  repos: ["https://github.com/BlitzModder/BMRepository/raw/master"]
   localRepos: []
   debugRepo: ""
   appliedMods: []
@@ -125,6 +125,7 @@ reset = ->
   return
 
 module.exports =
+  GENERAL_CONFIG_PATH: GENERAL_CONFIG_PATH
   LANG_LIST: LANG_LIST
   PLATFORM_LIST: PLATFORM_LIST
   BLITZ_PATH: BLITZ_PATH

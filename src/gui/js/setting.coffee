@@ -1,9 +1,9 @@
 {remote} = require "electron"
-{dialog, BrowserWindow} = remote
+{app, dialog, BrowserWindow, shell} = remote
 config = remote.require("./config")
+cache = remote.require("./cache")
 util = remote.require("./util")
 fs = require "fs"
-
 
 lang = config.get("lang")
 langList = config.LANG_LIST
@@ -29,12 +29,21 @@ getFolderByWindow = (func) ->
   )
   return
 
+formatRepoName = (name) ->
+  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]} (#{name})"
+  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]} (#{name})"
+  return name
+
 Vue.component("repo",
-  template: "<li class=\"list-group-item\">{{escapedName}}<removeRepoButton @remove=\"removeRepo\"></li>"
+  template: "<li class=\"list-group-item\">{{formatedName}}<removeRepoButton @remove=\"removeRepo\"></li>"
   props: ["name", "num", "repos"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
   methods:
     removeRepo: ->
       if confirm(CONFIRM_DELETE_STRING)
@@ -42,11 +51,11 @@ Vue.component("repo",
       return
 )
 Vue.component("debug-repo",
-  template: "<div class=\"card card-block\" id=\"debugRepo\">{{escapedName}}<removeRepoButton @remove=\"remove\"></div>"
+  template: "<div class=\"card card-block\" id=\"debugRepo\">{{formatedName}}<removeRepoButton @remove=\"remove\"></div>"
   props: ["name"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
   methods:
     remove: ->
       if confirm(CONFIRM_DELETE_STRING)
@@ -55,11 +64,11 @@ Vue.component("debug-repo",
       return
 )
 Vue.component("blitz-path",
-  template: "<div class=\"card card-block\" id=\"blitzFolder\">{{escapedName}}</div>"
+  template: "<div class=\"card card-block\" id=\"blitzFolder\">{{formatedName}}</div>"
   props: ["name"]
   computed:
-    escapedName: ->
-      return util.escape(@name)
+    formatedName: ->
+      return formatRepoName(@name)
 )
 Vue.component("removeRepoButton",
   template: "<button type=\"button\" class=\"remove close\" @click=\"$emit('remove')\"><span>&times;</span></button>"
@@ -76,16 +85,32 @@ new Vue(
     lang: config.get("lang")
     remoteRepoAddStr: ""
     remoteRepoAddStrErr: false
+    appName: app.getName()
+    version: app.getVersion()
   methods:
     addRemoteRepo: ->
       str = @remoteRepoAddStr
+      err = false
       if str isnt ""
-        unless /.+\/.+\/.+/.test(str)
+        if str.startsWith("http:") or str.startsWith("https:")
+          if str.endsWith("/")
+            @remoteRepos.push(str.slice(0, -1))
+          else
+            @remoteRepos.push(str)
+        else
+          s = str.split("/")
+          switch s.length
+            when 1
+              @remoteRepos.push("https://github.com/#{str}/BMRepository/raw/master")
+            when 2
+              @remoteRepos.push("https://github.com/#{str}/raw/master")
+            else
+              err = true
+        if err
           @remoteRepoAddStrErr = true
-          return
-        @remoteRepos.push(str)
-        @remoteRepoAddStr = ""
-        @remoteRepoAddStrErr = false
+        else
+          @remoteRepoAddStr = ""
+          @remoteRepoAddStrErr = false
       return
     addLocalRepo: ->
       getFolderByWindow( (dir) =>
@@ -104,6 +129,12 @@ new Vue(
         @blitzPath = dir
         return
       )
+      return
+    clearCache: ->
+      cache.clear()
+      return
+    openConfigFolder: ->
+      shell.showItemInFolder(config.GENERAL_CONFIG_PATH)
       return
     reset: ->
       if confirm(CONFIRM_RESET_STRING)

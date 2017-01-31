@@ -2,6 +2,7 @@ fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
 Promise = require "promise"
+semver = require "semver"
 request = require "./request"
 cache = require "./cache"
 config = require "./config"
@@ -99,7 +100,7 @@ _is_needed = (ok, ver, plat, obj) ->
   ov = obj.version
   op = obj.platform
   if (
-    (!ok or ov is "" or ov is ver) and
+    (!ok or ov is "" or semver.gt(ov, ver)) and
     (op is "" or op.includes(plat))
   )
     return true

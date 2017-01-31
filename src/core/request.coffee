@@ -3,6 +3,7 @@
  ###
 
 fetch = require "fetch"
+path = require "path"
 Promise = require "promise"
 
 ###*
@@ -27,6 +28,22 @@ getFromGitHub = (repoName, fileName) ->
   )
 
 ###
+ * 詳細のURLを取得します
+ * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
+ * @param {string} id 取得するmodのid
+ * @param {string} lang 言語
+ * @return {string}
+ ###
+getDetailUrl = (repo, id, lang) ->
+  switch repo.type
+    when "remote"
+      names = repo.name.split("/")
+      return "https://#{names[0]}.github.io/#{names[1]}/Detail/#{lang}/#{id}.html"
+    when "local"
+      return "file://" + path.join(repo.name, "Detail", lang, "#{id}.html")
+  return ""
+
+###
  * 最終リリースバージョンを取得します
  * @return {Promise}
  ###
@@ -42,4 +59,5 @@ getLastestVersion = ->
 
 module.exports =
   getFromGitHub: getFromGitHub
+  getDetailUrl: getDetailUrl
   getLastestVersion: getLastestVersion

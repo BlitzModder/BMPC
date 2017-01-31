@@ -3,6 +3,7 @@ plist = remote.require("./plist")
 util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
+request = remote.require("./request")
 
 params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
@@ -53,8 +54,8 @@ Vue.component("mod",
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
-                  {{name}}
                 </label>
+                <a href="#" data-toggle="modal" data-target="#detail" :data-whatever="val">{{name}}</a>
               </div>
             </li>
             """
@@ -203,5 +204,23 @@ document.getElementById("apply").addEventListener("click", ->
     p.nextLog()
     p.addLog(err)
   )
+  return
+)
+
+firstExec = true
+$("#detail").on("show.bs.modal", (e) ->
+  button = $(e.relatedTarget)
+  id = button.data("whatever")
+  webview = $(@).find("webview")[0]
+  link = request.getDetailUrl(repo, id, lang)
+  if firstExec
+    webview.addEventListener("dom-ready",ready = ->
+      webview.removeEventListener("dom-ready", ready)
+      firstExec = false
+      webview.loadURL(link)
+      return
+    )
+  else
+    webview.loadURL(link)
   return
 )

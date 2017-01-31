@@ -81,13 +81,24 @@ new Vue(
   methods:
     addRemoteRepo: ->
       str = @remoteRepoAddStr
+      err = false
       if str isnt ""
-        unless /.+\/.+\/.+/.test(str)
+        if str.startsWith("http:")
+          @remoteRepos.push(str)
+        else
+          s = str.split("/")
+          switch s.length
+            when 1
+              @remoteRepos.push("https://github.com/#{str}/BMRepository/raw/master")
+            when 2
+              @remoteRepos.push("https://github.com/#{str}/raw/master")
+            else
+              err = true
+        if err
           @remoteRepoAddStrErr = true
-          return
-        @remoteRepos.push(str)
-        @remoteRepoAddStr = ""
-        @remoteRepoAddStrErr = false
+        else
+          @remoteRepoAddStr = ""
+          @remoteRepoAddStrErr = false
       return
     addLocalRepo: ->
       getFolderByWindow( (dir) =>

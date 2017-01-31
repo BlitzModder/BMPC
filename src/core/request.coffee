@@ -7,19 +7,18 @@ path = require "path"
 Promise = require "promise"
 
 ###*
- * GitHubからファイルを取得します
+ * リモートからファイルを取得します
  * @param {string} repoName ファイルがあるリポジトリ名
- *     「ユーザー名/レポジトリ名/ブランチ名」の形式。
  * @param {string} fileName 取得するファイル名
  * @return {Promise}
  ###
-getFromGitHub = (repoName, fileName) ->
+getFromRemote = (repoName, fileName) ->
   return new Promise( (resolve, reject) ->
     names = repoName.split("/")
     if names.length < 3
       reject()
       return
-    fetch.fetchUrl("https://raw.githubusercontent.com/#{names[0]}/#{names[1]}/#{names[2]}/#{fileName}", (err, meta, body) ->
+    fetch.fetchUrl("#{repoName}/#{fileName}", (err, meta, body) ->
       if err? or meta.status is 404
         reject(err)
       resolve(body)
@@ -38,7 +37,7 @@ getDetailUrl = (repo, id, lang) ->
   switch repo.type
     when "remote"
       names = repo.name.split("/")
-      return "https://#{names[0]}.github.io/#{names[1]}/Detail/#{lang}/#{id}.html"
+      return "#{repo.name}/Detail/#{lang}/#{id}.html"
     when "local"
       return "file://" + path.join(repo.name, "Detail", lang, "#{id}.html")
   return ""
@@ -58,6 +57,6 @@ getLastestVersion = ->
   )
 
 module.exports =
-  getFromGitHub: getFromGitHub
+  getFromRemote: getFromRemote
   getDetailUrl: getDetailUrl
   getLastestVersion: getLastestVersion

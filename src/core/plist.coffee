@@ -68,7 +68,7 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
       return
     , (err) ->
       if repoType is "remote"
-        request.getFromGitHub(repoName, "#{lang}.plist").then( (content) ->
+        request.getFromRemote(repoName, "#{lang}.plist").then( (content) ->
           string = content.toString()
           cache.setStringFile(repoName, "#{lang}.plist", string)
           data[repoName] = {} if !data[repoName]?

@@ -36,7 +36,9 @@ getFromRemote = (repoName, fileName) ->
 getDetailUrl = (repo, id, lang) ->
   switch repo.type
     when "remote"
-      names = repo.name.split("/")
+      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
+      if m?
+        return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/Detail/#{lang}/#{id}.html"
       return "#{repo.name}/Detail/#{lang}/#{id}.html"
     when "local"
       return "file://" + path.join(repo.name, "Detail", lang, "#{id}.html")

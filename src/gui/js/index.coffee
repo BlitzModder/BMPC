@@ -1,5 +1,8 @@
-{remote} = require "electron"
+{remote, shell} = require "electron"
+{app} = remote
+semver = remote.require("semver")
 config = remote.require("./config")
+request = remote.require("./request")
 util = remote.require("./util")
 
 lang = config.get("lang")
@@ -26,4 +29,16 @@ new Vue(
     remoteRepos: config.get("repos")
     localRepos: config.get("localRepos")
     debugRepo: config.get("debugRepo")
+)
+
+request.getLastestVersion().then( (newVer) ->
+  if semver.gt(newVer, app.getVersion())
+    for tag in document.getElementsByClassName("newVersion")
+      tag.textContent = newVer
+    $("#update").removeClass("hidden")
+  return
+)
+$("#updateLink").on("click", ->
+  shell.openExternal("https://github.com/BlitzModder/BMPC/releases")
+  return
 )

@@ -26,5 +26,20 @@ getFromGitHub = (repoName, fileName) ->
     return
   )
 
+###
+ * 最終リリースバージョンを取得します
+ * @return {Promise}
+ ###
+getLastestVersion = ->
+  return new Promise( (resolve, reject) ->
+    fetch.fetchUrl("https://api.github.com/repos/BlitzModder/BMPC/releases/latest", (err, meta, body) ->
+      if err? or meta.status is 404
+        reject(err)
+      resolve(JSON.parse(body).name)
+    )
+    return
+  )
+
 module.exports =
   getFromGitHub: getFromGitHub
+  getLastestVersion: getLastestVersion

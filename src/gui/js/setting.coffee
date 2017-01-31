@@ -1,5 +1,5 @@
 {remote} = require "electron"
-{dialog, BrowserWindow} = remote
+{app, dialog, BrowserWindow} = remote
 config = remote.require("./config")
 util = remote.require("./util")
 fs = require "fs"
@@ -76,6 +76,8 @@ new Vue(
     lang: config.get("lang")
     remoteRepoAddStr: ""
     remoteRepoAddStrErr: false
+    appName: app.getName()
+    version: app.getVersion()
   methods:
     addRemoteRepo: ->
       str = @remoteRepoAddStr

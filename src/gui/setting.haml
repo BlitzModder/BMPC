@@ -97,6 +97,14 @@
             %h4.card-title.en Reset all settings
             %button.btn.btn-primary.ja(type="button" @click="reset") リセット
             %button.btn.btn-primary.en(type="button" @click="reset") Reset
+        .col-xs
+          .card.card-block
+            %h4.card-title.ja バージョン情報
+            %h4.card-title.en About
+            %p
+              {{appName}} {{version}}
+              %br
+              (C) S(29314) 2016 MIT License
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

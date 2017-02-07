@@ -19,8 +19,8 @@
           .card.card-block
             %h4.card-title.ja リモートリポジトリ一覧
             %h4.card-title.en List of Remote Repository
-            %p.ja 「ユーザー名/リポジトリ名/ブランチ名」の形式で入力してください
-            %p.en Enter in the form of "UserName/RepositoryName/BranchName"
+            %p.ja 「ユーザー名/リポジトリ名」の形式でまたはURLを入力してください
+            %p.en Enter in the form of "UserName/RepositoryName" or the URL
             %ul.list-group.with-form
               %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
             %form.form-inline

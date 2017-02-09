@@ -38,10 +38,10 @@ getDetailUrl = (repo, id, lang) ->
     when "remote"
       m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
       if m?
-        return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/Detail/#{lang}/#{id}.html"
-      return "#{repo.name}/Detail/#{lang}/#{id}.html"
+        return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/detail/html/#{id}.html"
+      return "#{repo.name}/detail/html/#{id}.html"
     when "local"
-      return "file://" + path.join(repo.name, "Detail", lang, "#{id}.html")
+      return "file://" + path.join(repo.name, "detail/html/#{id}.html")
   return ""
 
 ###

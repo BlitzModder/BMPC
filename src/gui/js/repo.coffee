@@ -83,7 +83,7 @@ r = new Vue(
     get: (force = false) ->
       @loading = true
       @error = false
-      plist.get(repo, lang, force).then( (obj) =>
+      plist.getUntilDone(repo, lang, force).then( (obj) =>
         return plist.filter(obj)
       ).then( (obj) =>
         @loading = false

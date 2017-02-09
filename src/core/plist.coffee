@@ -49,6 +49,22 @@ parse = (plistObj) ->
   return obj
 
 ###*
+ * plistを取得できるまで取得(言語順)
+ * @param {repo: "remote"|"local", name: string} repo
+ * @param {string} lang
+ * @param {boolean} force キャッシュを無視して元ファイルを取得するか 既定値は"false"
+ * @return {Object} plistのオブジェクト
+ ###
+getUntilDone = (repo, lang, force = false) ->
+  return get(repo, lang, force).catch( ->
+    return get(repo, "en", force)
+  ).catch( ->
+    return get(repo, "ja", force)
+  ).catch( ->
+    return get(repo, "ru", force)
+  )
+
+###*
  * plistを取得してパースしたものを返します
  * @param {"remote"|"local"} repoType
  * @param {string} repoName
@@ -61,16 +77,16 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
     if data[repoName]?[lang]? and !force
       resolve(data[repoName][lang])
       return
-    cache.getStringFile(repoName, "#{lang}.plist", force).then( (content) ->
+    cache.getStringFile(repoName, "plist/#{lang}.plist", force).then( (content) ->
       data[repoName] = {} if !data[repoName]?
       data[repoName][lang] = parse(plist.parse(content))
       resolve(data[repoName][lang])
       return
     , (err) ->
       if repoType is "remote"
-        request.getFromRemote(repoName, "#{lang}.plist").then( (content) ->
+        request.getFromRemote(repoName, "plist/#{lang}.plist").then( (content) ->
           string = content.toString()
-          cache.setStringFile(repoName, "#{lang}.plist", string)
+          cache.setStringFile(repoName, "plist/#{lang}.plist", string)
           data[repoName] = {} if !data[repoName]?
           data[repoName][lang] = parse(plist.parse(string))
           resolve(data[repoName][lang])
@@ -80,8 +96,8 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
           return
         )
       else if repoType is "local"
-        readFile(path.join(repoName, "#{lang}.plist"), "utf8").then( (res) ->
-          cache.setStringFile(repoName, "#{lang}.plist", res)
+        readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8").then( (res) ->
+          cache.setStringFile(repoName, "plist/#{lang}.plist", res)
           data[repoName] = {} if !data[repoName]?
           data[repoName][lang] = parse(plist.parse(res))
           resolve(data[repoName][lang])
@@ -137,6 +153,7 @@ filter = (parsedObj) ->
   )
 
 module.exports =
+  getUntilDone: getUntilDone
   get: get
   filter: filter
 

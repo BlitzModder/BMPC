@@ -9,6 +9,15 @@ params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
 repo = {type: params.get("type"), name: path}
 lang = config.get("lang")
+switch lang
+  when "ja"
+    CONFIRM_APPLY_STRING = "本当に適応してよろしいですか？"
+  when "en"
+    CONFIRM_APPLY_STRING = "Really want to apply?"
+  when "ru"
+    CONFIRM_APPLY_STRING = "На самом деле хотите, чтобы подать заявление?"
+  else
+    CONFIRM_APPLY_STRING = "UNLOCALIZED_CONFIRM_APPLY_STRING"
 appliedMods = ->
   return config.get("appliedMods")
 
@@ -164,46 +173,47 @@ document.getElementById("reload").addEventListener("click", ->
   return
 )
 document.getElementById("apply").addEventListener("click", ->
-  addMods = []
-  deleteMods = []
-  for $mod in $("input:checked").not(".applied")
-    addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
-  for $mod in $("input.applied").not(":checked")
-    deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+  if confirm(CONFIRM_APPLY_STRING)
+    addMods = []
+    deleteMods = []
+    for $mod in $("input:checked").not(".applied")
+      addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+    for $mod in $("input.applied").not(":checked")
+      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
 
-  $("#progress").modal({ keyboard: false, backdrop: "static" })
-  applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-    $checkbox = $("input[data-path=\"#{mod.name}\"]")
-    if done
-      switch type
-        when "add"
-          $checkbox.addClass("applied")
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 適応完了")
-            when "en" then p.addLog("#{mod.name} - Applied Successfully")
-        when "delete"
-          $checkbox.removeClass("applied")
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 解除完了")
-            when "en" then p.addLog("#{mod.name} - Removed Successfully")
-    else
-      switch type
-        when "add"
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
-            when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
-        when "delete"
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
-            when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
-    return
-  ).then( ->
-    p.changePhase("done")
-  ).catch( (err) ->
-    p.changePhase("failed")
-    p.nextLog()
-    p.addLog(err)
-  )
+    $("#progress").modal({ keyboard: false, backdrop: "static" })
+    applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
+      $checkbox = $("input[data-path=\"#{mod.name}\"]")
+      if done
+        switch type
+          when "add"
+            $checkbox.addClass("applied")
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 適応完了")
+              when "en" then p.addLog("#{mod.name} - Applied Successfully")
+          when "delete"
+            $checkbox.removeClass("applied")
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 解除完了")
+              when "en" then p.addLog("#{mod.name} - Removed Successfully")
+      else
+        switch type
+          when "add"
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
+              when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
+          when "delete"
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
+              when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
+      return
+    ).then( ->
+      p.changePhase("done")
+    ).catch( (err) ->
+      p.changePhase("failed")
+      p.nextLog()
+      p.addLog(err)
+    )
   return
 )
 

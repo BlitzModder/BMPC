@@ -21,13 +21,15 @@
     .container-fluid
       .row#root
         .col-xs(v-if="loading")
-          %p.ja ローディング中...
-          %p.en Loading...
-          %p.ru загрузка...
+          %p
+            %span.ja ローディング中...
+            %span.en Loading...
+            %span.ru загрузка...
         .col-xs(v-else-if="error")
-          %p.ja エラーが発生しました
-          %p.en Error has happen
-          %p.ru Ошибка имеет произойти
+          %p
+            %span.ja エラーが発生しました
+            %span.en Error has happen
+            %span.ru Ошибка имеет произойти
           %p {{errorMsg}}
         %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
@@ -37,9 +39,10 @@
             %h4.modal-title
           %modal-body(:phase="phase" :log="log")
           .modal-footer
-            %button.btn.btn-primary.modal-close.ja(type="button" data-dismiss="modal" :disable="!finished" @click="reset") 閉じる
-            %button.btn.btn-primary.modal-close.en(type="button" data-dismiss="modal" :disable="!finished" @click="reset") Close
-            %button.btn.btn-primary.modal-close.ru(type="button" data-dismiss="modal" :disable="!finished" @click="reset") Закрыть
+            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal" :disable="!finished" @click="reset")
+              %span.ja 閉じる
+              %span.en Close
+              %span.ru Закрыть
     .modal.fade#detail
       .modal-dialog
         .modal-content
@@ -49,9 +52,10 @@
           .modal-body#outwebview
             %webview(src="about:blank" autosize="on")
           .modal-footer
-            %button.btn.btn-primary.modal-close.ja(type="button" data-dismiss="modal") 閉じる
-            %button.btn.btn-primary.modal-close.en(type="button" data-dismiss="modal") Close
-            %button.btn.btn-primary.modal-close.ru(type="button" data-dismiss="modal") Закрыть
+            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal")
+              %span.ja 閉じる
+              %span.en Close
+              %span.ru Закрыть
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

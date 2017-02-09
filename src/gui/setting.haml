@@ -19,8 +19,10 @@
           .card.card-block
             %h4.card-title.ja リモートリポジトリ一覧
             %h4.card-title.en List of Remote Repository
+            %h4.card-title.ru Список удаленном репозитории
             %p.ja 「ユーザー名/リポジトリ名」の形式でまたはURLを入力してください
             %p.en Enter in the form of "UserName/RepositoryName" or the URL
+            %p.ru Введите в форме "Имя пользователя / Имя вместилище" или URL
             %ul.list-group.with-form
               %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
             %form.form-inline
@@ -28,28 +30,35 @@
                 %input.form-control#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
                 %button.btn.btn-primary.remoteRepoButton.ja(type="button" @click="addRemoteRepo") 追加
                 %button.btn.btn-primary.remoteRepoButton.en(type="button" @click="addRemoteRepo") Add
+                %button.btn.btn-primary.remoteRepoButton.ru(type="button" @click="addRemoteRepo") Добавить
                 .form-control-feedback
                   %p.ja(v-show="remoteRepoAddStrErr") 入力が不正です
                   %p.en(v-show="remoteRepoAddStrErr") Invalid input string
+                  %p.ru(v-show="remoteRepoAddStrErr") Недопустимая строка ввода
         .col-xs
           .card.card-block
             %h4.card-title.ja ローカルリポジトリ一覧
             %h4.card-title.en List of Local Repository
+            %h4.card-title.ru Список локальных репозитария
             %ul.list-group.with-form
               %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
             %button.btn.btn-primary.ja(type="button" @click="addLocalRepo") 追加
             %button.btn.btn-primary.en(type="button" @click="addLocalRepo") Add
+            %button.btn.btn-primary.ru(type="button" @click="addLocalRepo") Добавить
         .col-xs
           .card.card-block
             %h4.card-title.ja デバッグ用リポジトリ
             %h4.card-title.en Debug Repository
+            %h4.card-title.ru Отладка репозитария
             %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
             %button.btn.btn-primary.ja(type="button" @click="setDebugRepo") 設定
             %button.btn.btn-primary.en(type="button" @click="setDebugRepo") Set
+            %button.btn.btn-primary.ru(type="button" @click="setDebugRepo") Задавать
         .col-xs
           .card.card-block
             %h4.card-title.ja Blitzのフォルダ位置
             %h4.card-title.en Path to Blitz
+            %h4.card-title.ru Путь к Blitz
             %form.form-inline
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
@@ -62,15 +71,19 @@
                 Mac(AppStore)
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
-                Other
+                %span.ja その他
+                %span.en Other
+                %span.ru Другие
             %blitz-path(:name="blitzPath")
             %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPath")
               %span.ja 設定
               %span.en Set
+              %span.ru Задавать
         .col-xs
           .card.card-block
             %h4.card-title.ja 適応端末
             %h4.card-title.en Device to apply
+            %h4.card-title.ru Устройство для применения
             %form.form-inline
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="platform" value="w" v-model="platform")
@@ -91,28 +104,38 @@
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="lang" value="ja" v-model="lang")
                 日本語
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="lang" value="ru" v-model="lang")
+                русский
         .col-xs
           .card.card-block
             %h4.card-title.ja キャッシュを削除する
             %h4.card-title.en Clear cache
+            %h4.card-title.ru Очистить кэш
             %button.btn.btn-primary.ja(type="button" @click="clearCache") 削除
             %button.btn.btn-primary.en(type="button" @click="clearCache") Clear
+            %button.btn.btn-primary.ru(type="button" @click="clearCache") Очистить
         .col-xs
           .card.card-block
             %h4.card-title.ja 設定フォルダを開く
             %h4.card-title.en Open config folder
+            %h4.card-title.ru Открыть папку конфигурации
             %button.btn.btn-primary.ja(type="button" @click="openConfigFolder") 開く
             %button.btn.btn-primary.en(type="button" @click="openConfigFolder") Open
+            %button.btn.btn-primary.ru(type="button" @click="openConfigFolder") открыто
         .col-xs
           .card.card-block
             %h4.card-title.ja 設定をリセットする
             %h4.card-title.en Reset all settings
+            %h4.card-title.ru Сбросить все настройки
             %button.btn.btn-primary.ja(type="button" @click="reset") リセット
             %button.btn.btn-primary.en(type="button" @click="reset") Reset
+            %button.btn.btn-primary.ru(type="button" @click="reset") Сброс
         .col-xs
           .card.card-block
             %h4.card-title.ja バージョン情報
             %h4.card-title.en About
+            %h4.card-title.ru Около
             %p
               {{appName}} {{version}}
               %br

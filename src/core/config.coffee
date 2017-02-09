@@ -18,6 +18,7 @@ GENERAL_CONFIG_PATH = path.join(CONFIG_FOLDER_PATH, "general.json")
 LANG_LIST = [
   "ja"
   "en"
+  "ru"
 ]
 PLATFORM_LIST = [
   "w"

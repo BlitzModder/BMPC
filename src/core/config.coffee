@@ -98,6 +98,14 @@ init = ->
     data = Object.assign({}, DEFAULT_DATA)
     if content?
       data = Object.assign(data, content)
+    else
+      machineLang = app.getLocale()
+      if machineLang is "ja"
+        data.lang = "ja"
+      else if machineLang.includes("en")
+        data.lang = "en"
+      else
+        data.lang = "en"
     _update()
   )
 

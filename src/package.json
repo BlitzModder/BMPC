@@ -1,14 +1,14 @@
 {
   "name": "BlitzModder",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "core/core.js",
   "author": "S(29314)",
   "repository": {
     "type": "git",
-    "url": "http://github.com/S--Minecraft/BlitzMooderPC.git"
+    "url": "http://github.com/S--Minecraft/BlitzModderPC.git"
   },
-  "homepage": "http://github.com/S--Minecraft/BlitzMooderPC",
+  "homepage": "http://github.com/S--Minecraft/BlitzModderPC",
   "license": "MIT",
   "dependencies": {
     "bootstrap": "4.0.0-alpha.5",

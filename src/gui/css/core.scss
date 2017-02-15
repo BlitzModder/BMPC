@@ -2,6 +2,13 @@ body {
   padding-top: 5rem;
 }
 
+* {
+  user-select: none;
+}
+.user-select {
+  user-select: text;
+}
+
 webview {
   height: 100%;
 }

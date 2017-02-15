@@ -30,18 +30,17 @@ getFromRemote = (repoName, fileName) ->
  * 詳細のURLを取得します
  * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
  * @param {string} id 取得するmodのid
- * @param {string} lang 言語
  * @return {string}
  ###
-getDetailUrl = (repo, id, lang) ->
+getDetailUrl = (repo, id) ->
   switch repo.type
     when "remote"
       m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
       if m?
-        return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/Detail/#{lang}/#{id}.html"
-      return "#{repo.name}/Detail/#{lang}/#{id}.html"
+        return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/detail/html/#{id}.html"
+      return "#{repo.name}/detail/html/#{id}.html"
     when "local"
-      return "file://" + path.join(repo.name, "Detail", lang, "#{id}.html")
+      return "file://" + path.join(repo.name, "detail/html/#{id}.html")
   return ""
 
 ###
@@ -58,7 +57,23 @@ getLastestVersion = ->
     return
   )
 
+###
+ * ステータスコードを取得します
+ * @param {string} url
+ * @return {Number} ステータスコード
+ ###
+getUrlStatus = (url) ->
+  return new Promise( (resolve, reject) ->
+    fetch.fetchUrl(url, (err, meta, body) ->
+      if err?
+        reject(err)
+      resolve(meta.status)
+      return
+    )
+  )
+
 module.exports =
   getFromRemote: getFromRemote
   getDetailUrl: getDetailUrl
   getLastestVersion: getLastestVersion
+  getUrlStatus: getUrlStatus

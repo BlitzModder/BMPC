@@ -102,8 +102,8 @@ applyMod = (type, mod, callback) ->
   return new Promise( (resolve, reject) ->
     fs.ensureDirSync(outputFolder)
     switch type
-      when "add" then folder = "Install"
-      when "delete" then folder = "Remove"
+      when "add" then folder = "install"
+      when "delete" then folder = "remove"
       else reject("Unknown type")
     if mod.repo.type is "remote"
       _applyFromRemote(folder, mod, outputFolder).then( ->

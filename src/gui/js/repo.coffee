@@ -9,6 +9,15 @@ params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
 repo = {type: params.get("type"), name: path}
 lang = config.get("lang")
+switch lang
+  when "ja"
+    CONFIRM_APPLY_STRING = "本当に適応してよろしいですか？"
+  when "en"
+    CONFIRM_APPLY_STRING = "Really want to apply?"
+  when "ru"
+    CONFIRM_APPLY_STRING = "На самом деле хотите, чтобы подать заявление?"
+  else
+    CONFIRM_APPLY_STRING = "UNLOCALIZED_CONFIRM_APPLY_STRING"
 appliedMods = ->
   return config.get("appliedMods")
 
@@ -35,9 +44,9 @@ Vue.component("small-category",
             <li class="list-group-item">
               <a data-toggle="collapse" :href="id">{{name}}</a>
               <div class="collapse" :id="idName">
-                <ul class="list-group">
-                  <li is="mod" v-for="(v, k) in val" :name="k" :val="v"></li>
-                </ul>
+                <div class="list-group">
+                  <button is="mod" type="button" v-for="(v, k) in val" :name="k" :val="v"></button>
+                </div>
               </div>
             </li>
             """
@@ -48,16 +57,17 @@ Vue.component("small-category",
     idName: ->
       return "category-"+btoa(unescape(encodeURIComponent(@parentname+@name))).replace(/=|\+|\//g, "")
 )
+firstExec = true
 Vue.component("mod",
   template: """
-            <li class="list-group-item">
+            <button type="button" class="list-group-item list-group-item-action" @click="show">
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
+                  {{name}}
                 </label>
-                <a href="#" data-toggle="modal" data-target="#detail" :data-whatever="val">{{name}}</a>
               </div>
-            </li>
+            </button>
             """
   props: ["name", "val"]
   data: ->
@@ -71,6 +81,32 @@ Vue.component("mod",
       checked: applied
       applied: applied
     }
+  computed:
+    link: ->
+      return request.getDetailUrl(repo, @val)
+  methods:
+    show: (e) ->
+      t = e.target.classList
+      return if t.contains("form-check-label")
+      return if t.contains("form-check-input")
+
+      detail = $("#detail")
+      webview = detail.find("webview")[0]
+      request.getUrlStatus(@link).then( (code) =>
+        return if code is 404
+        if firstExec
+          webview.addEventListener("dom-ready",ready = =>
+            webview.removeEventListener("dom-ready", ready)
+            firstExec = false
+            webview.loadURL(@link)
+            return
+          )
+        else
+          webview.loadURL(@link)
+        detail.modal("show")
+        return
+      )
+      return
 )
 r = new Vue(
   el: "#root"
@@ -83,7 +119,7 @@ r = new Vue(
     get: (force = false) ->
       @loading = true
       @error = false
-      plist.get(repo, lang, force).then( (obj) =>
+      plist.getUntilDone(repo, lang, force).then( (obj) =>
         return plist.filter(obj)
       ).then( (obj) =>
         @loading = false
@@ -164,63 +200,46 @@ document.getElementById("reload").addEventListener("click", ->
   return
 )
 document.getElementById("apply").addEventListener("click", ->
-  addMods = []
-  deleteMods = []
-  for $mod in $("input:checked").not(".applied")
-    addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
-  for $mod in $("input.applied").not(":checked")
-    deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+  if confirm(CONFIRM_APPLY_STRING)
+    addMods = []
+    deleteMods = []
+    for $mod in $("input:checked").not(".applied")
+      addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+    for $mod in $("input.applied").not(":checked")
+      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
 
-  $("#progress").modal({ keyboard: false, backdrop: "static" })
-  applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-    $checkbox = $("input[data-path=\"#{mod.name}\"]")
-    if done
-      switch type
-        when "add"
-          $checkbox.addClass("applied")
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 適応完了")
-            when "en" then p.addLog("#{mod.name} - Applied Successfully")
-        when "delete"
-          $checkbox.removeClass("applied")
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 解除完了")
-            when "en" then p.addLog("#{mod.name} - Removed Successfully")
-    else
-      switch type
-        when "add"
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
-            when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
-        when "delete"
-          switch lang
-            when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
-            when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
-    return
-  ).then( ->
-    p.changePhase("done")
-  ).catch( (err) ->
-    p.changePhase("failed")
-    p.nextLog()
-    p.addLog(err)
-  )
-  return
-)
-
-firstExec = true
-$("#detail").on("show.bs.modal", (e) ->
-  button = $(e.relatedTarget)
-  id = button.data("whatever")
-  webview = $(@).find("webview")[0]
-  link = request.getDetailUrl(repo, id, lang)
-  if firstExec
-    webview.addEventListener("dom-ready",ready = ->
-      webview.removeEventListener("dom-ready", ready)
-      firstExec = false
-      webview.loadURL(link)
+    $("#progress").modal({ keyboard: false, backdrop: "static" })
+    applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
+      $checkbox = $("input[data-path=\"#{mod.name}\"]")
+      if done
+        switch type
+          when "add"
+            $checkbox.addClass("applied")
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 適応完了")
+              when "en" then p.addLog("#{mod.name} - Applied Successfully")
+          when "delete"
+            $checkbox.removeClass("applied")
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 解除完了")
+              when "en" then p.addLog("#{mod.name} - Removed Successfully")
+      else
+        switch type
+          when "add"
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
+              when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
+          when "delete"
+            switch lang
+              when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
+              when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
       return
+    ).then( ->
+      p.changePhase("done")
+    ).catch( (err) ->
+      p.changePhase("failed")
+      p.nextLog()
+      p.addLog(err)
     )
-  else
-    webview.loadURL(link)
   return
 )

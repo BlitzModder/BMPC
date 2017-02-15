@@ -17,32 +17,47 @@
       .row#repo
         .col-xs(v-if="remoteRepos.length > 0")
           .card.card-block
-            %h4.card-title.ja リモートリポジトリ
-            %h4.card-title.en Remote Repository
+            %h4.card-title
+              %span.ja リモートリポジトリ
+              %span.en Remote Repository
+              %span.ru удаленном репозитории
             %ul.list-group
               %li(is="repo" v-for="r in remoteRepos" :name="r" repotype="remote")
         .col-xs(v-if="localRepos.length > 0")
           .card.card-block
-            %h4.card-title.ja ローカルリポジトリ
-            %h4.card-title.en Local Repository
+            %h4.card-title
+              %span.ja ローカルリポジトリ
+              %span.en Local Repository
+              %span.ru Локальный репозиторий
             %ul.list-group
               %li(is="repo" v-for="r in localRepos" :name="r" repotype="local")
         .col-xs(v-if="debugRepo !== \"\"")
           .card.card-block
-            %h4.card-title.ja デバッグ用リポジトリ
-            %h4.card-title.en Debug Repository
+            %h4.card-title
+              %span.ja デバッグ用リポジトリ
+              %span.en Debug Repository
+              %span.ru Отладка репозитария
             .card.card-block
               %debug-repo(:name="debugRepo")
       .card.card-block.card-inverse.card-info#update.hidden
-        %h4.card-title.ja アップデート通知
-        %h4.card-title.en Update available
-        %p.ja
-          %span.newVersion
-          へのアップデートが利用可能です
-        %p.en
-          %span.newVersion
-           is available
-        %a.card-link#updateLink(href="#") Open
+        %h4.card-title
+          %span.ja アップデート通知
+          %span.en Update available
+          %span.ru Доступно обновление
+        %p
+          %span.ja
+            %span.newVersion
+            へのアップデートが利用可能です
+          %span.en
+            %span.newVersion
+             is available
+          %span.ru
+            %span.newVersion
+             доступен
+        %a.card-link#updateLink(href="#")
+          %span.ja 開く
+          %span.en Open
+          %span.ru открыто
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

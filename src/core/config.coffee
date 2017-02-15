@@ -18,6 +18,7 @@ GENERAL_CONFIG_PATH = path.join(CONFIG_FOLDER_PATH, "general.json")
 LANG_LIST = [
   "ja"
   "en"
+  "ru"
 ]
 PLATFORM_LIST = [
   "w"
@@ -43,7 +44,7 @@ data = {}
  * @const
  ###
 DEFAULT_DATA =
-  repos: ["https://github.com/BlitzModder/BMRepository/raw/master"]
+  repos: ["http://subdiox.com/repo"]
   localRepos: []
   debugRepo: ""
   appliedMods: []
@@ -97,6 +98,14 @@ init = ->
     data = Object.assign({}, DEFAULT_DATA)
     if content?
       data = Object.assign(data, content)
+    else
+      machineLang = app.getLocale()
+      if machineLang is "ja"
+        data.lang = "ja"
+      else if machineLang.includes("en")
+        data.lang = "en"
+      else
+        data.lang = "en"
     _update()
   )
 

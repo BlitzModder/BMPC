@@ -16,6 +16,9 @@ switch lang
   when "en"
     CONFIRM_DELETE_STRING = "Really want to delete?"
     CONFIRM_RESET_STRING = "Really want to reset?"
+  when "ru"
+    CONFIRM_DELETE_STRING = "Действительно хотите удалить?"
+    CONFIRM_RESET_STRING = "На самом деле хотите сбросить?"
   else
     CONFIRM_DELETE_STRING = "UNLOCALIZED_CONFIRM_DELETE_STRING"
     CONFIRM_RESET_STRING = "UNLOCALIZED_RESET_DELETE_STRING"

@@ -40,7 +40,16 @@ getVersion = ->
       else
         reject("Error: Version Regexp Error (#{text})")
       return
-    , (err) ->
+    ).catch( ->
+      return readFile(path.join(require("./config").get("blitzPath"), "Data/version", "resources.txt"), "utf-8").then( (text) ->
+        reg = /^(\d+\.\d+\.\d+)$/.exec(text)
+        if reg?
+          resolve(reg[1])
+        else
+          reject("Error: Version Regexp Error (#{text})")
+        return
+      )
+    ).catch( (err) ->
       reject(err)
       return
     )

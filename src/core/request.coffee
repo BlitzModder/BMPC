@@ -57,7 +57,23 @@ getLastestVersion = ->
     return
   )
 
+###
+ * ステータスコードを取得します
+ * @param {string} url
+ * @return {Number} ステータスコード
+ ###
+getUrlStatus = (url) ->
+  return new Promise( (resolve, reject) ->
+    fetch.fetchUrl(url, (err, meta, body) ->
+      if err?
+        reject(err)
+      resolve(meta.status)
+      return
+    )
+  )
+
 module.exports =
   getFromRemote: getFromRemote
   getDetailUrl: getDetailUrl
   getLastestVersion: getLastestVersion
+  getUrlStatus: getUrlStatus

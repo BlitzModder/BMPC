@@ -44,9 +44,9 @@ Vue.component("small-category",
             <li class="list-group-item">
               <a data-toggle="collapse" :href="id">{{name}}</a>
               <div class="collapse" :id="idName">
-                <ul class="list-group">
-                  <li is="mod" v-for="(v, k) in val" :name="k" :val="v"></li>
-                </ul>
+                <div class="list-group">
+                  <button is="mod" type="button" v-for="(v, k) in val" :name="k" :val="v"></button>
+                </div>
               </div>
             </li>
             """
@@ -57,16 +57,17 @@ Vue.component("small-category",
     idName: ->
       return "category-"+btoa(unescape(encodeURIComponent(@parentname+@name))).replace(/=|\+|\//g, "")
 )
+firstExec = true
 Vue.component("mod",
   template: """
-            <li class="list-group-item">
+            <button type="button" class="list-group-item list-group-item-action" @click="show">
               <div class="form-check">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
+                  {{name}}
                 </label>
-                <a href="#" data-toggle="modal" data-target="#detail" :data-whatever="val">{{name}}</a>
               </div>
-            </li>
+            </button>
             """
   props: ["name", "val"]
   data: ->
@@ -80,6 +81,32 @@ Vue.component("mod",
       checked: applied
       applied: applied
     }
+  computed:
+    link: ->
+      return request.getDetailUrl(repo, @val)
+  methods:
+    show: (e) ->
+      t = e.target.classList
+      return if t.contains("form-check-label")
+      return if t.contains("form-check-input")
+
+      detail = $("#detail")
+      webview = detail.find("webview")[0]
+      request.getUrlStatus(@link).then( (code) =>
+        return if code is 404
+        if firstExec
+          webview.addEventListener("dom-ready",ready = =>
+            webview.removeEventListener("dom-ready", ready)
+            firstExec = false
+            webview.loadURL(@link)
+            return
+          )
+        else
+          webview.loadURL(@link)
+        detail.modal("show")
+        return
+      )
+      return
 )
 r = new Vue(
   el: "#root"
@@ -214,23 +241,5 @@ document.getElementById("apply").addEventListener("click", ->
       p.nextLog()
       p.addLog(err)
     )
-  return
-)
-
-firstExec = true
-$("#detail").on("show.bs.modal", (e) ->
-  button = $(e.relatedTarget)
-  id = button.data("whatever")
-  webview = $(@).find("webview")[0]
-  link = request.getDetailUrl(repo, id, lang)
-  if firstExec
-    webview.addEventListener("dom-ready",ready = ->
-      webview.removeEventListener("dom-ready", ready)
-      firstExec = false
-      webview.loadURL(link)
-      return
-    )
-  else
-    webview.loadURL(link)
   return
 )

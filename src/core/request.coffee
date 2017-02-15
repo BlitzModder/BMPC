@@ -30,10 +30,9 @@ getFromRemote = (repoName, fileName) ->
  * 詳細のURLを取得します
  * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
  * @param {string} id 取得するmodのid
- * @param {string} lang 言語
  * @return {string}
  ###
-getDetailUrl = (repo, id, lang) ->
+getDetailUrl = (repo, id) ->
   switch repo.type
     when "remote"
       m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)

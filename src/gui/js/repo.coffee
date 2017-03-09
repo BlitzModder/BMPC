@@ -1,5 +1,6 @@
 {remote} = require "electron"
-plist = remote.require("./plist")
+plistList = remote.require("./plistList")
+plistInfo = remote.require("./plistInfo")
 util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
@@ -26,6 +27,18 @@ langList = config.LANG_LIST
 for l in langList when l isnt lang
   $(".#{l}").addClass("hidden")
 
+Vue.component("description",
+  template: """
+            <div class="col-xs">
+              <div class="card card-outline-primary card-block">
+                <h4 class="card-title">{{name}}</h4>
+                <h6 class="card-subtitle text-muted">{{version}}</h4>
+                <p class="card-text">Maintainer: {{maintainer}}</p>
+              </div>
+            </div>
+            """
+  props: ["name", "version", "maintainer"]
+)
 Vue.component("big-category",
   template: """
             <div class="col-xs">
@@ -115,12 +128,22 @@ r = new Vue(
     error: false
     errorMsg: ""
     plist: {}
+    hasinfo: false
+    infoname: ""
+    infoversion: ""
+    infomaintainer: ""
+  created: ->
+    @getPlist().then( ->
+      return r.getPlistWithOutBlackout(true)
+    )
+    @getInfo()
+    return
   methods:
-    get: (force = false) ->
+    getPlist: (force = false) ->
       @loading = true
       @error = false
-      plist.getUntilDone(repo, lang, force).then( (obj) =>
-        return plist.filter(obj)
+      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+        return plistList.filter(obj)
       ).then( (obj) =>
         @loading = false
         @plist = obj
@@ -129,9 +152,30 @@ r = new Vue(
         @error = true
         @errorMsg = err
       )
-      return
+    getPlistWithOutBlackout: (force = false) ->
+      @error = false
+      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+        return plistList.filter(obj)
+      ).then( (obj) =>
+        if JSON.stringify(@plist) isnt JSON.stringify(obj)
+          @plist = obj
+      ).catch( (err) =>
+        @error = true
+        @errorMsg = err
+      )
+    getInfo: (force = false) ->
+      return plistInfo.get(repo, force).then( (obj) =>
+        @hasinfo = true
+        @infoname = obj.name
+        @infoversion = obj.version
+        @infomaintainer = obj.maintainer
+        return
+      ).catch( (err) =>
+        @hasinfo = false
+      )
 )
-r.get()
+
+
 
 Vue.component("modal-body",
   template: """
@@ -196,7 +240,8 @@ p = new Vue(
 )
 
 document.getElementById("reload").addEventListener("click", ->
-  r.get(true)
+  r.getPlist(true)
+  r.getInfo(true)
   return
 )
 document.getElementById("apply").addEventListener("click", ->

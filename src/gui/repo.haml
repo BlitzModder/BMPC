@@ -31,6 +31,7 @@
             %span.en Error has happen
             %span.ru Ошибка имеет произойти
           %p {{errorMsg}}
+        %description(v-if="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer")
         %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog

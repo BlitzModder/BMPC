@@ -115,8 +115,13 @@ r = new Vue(
     error: false
     errorMsg: ""
     plist: {}
+  created: ->
+    @getPlist().then( ->
+      return r.getPlistWithOutBlackout(true)
+    )
+    return
   methods:
-    get: (force = false) ->
+    getPlist: (force = false) ->
       @loading = true
       @error = false
       return plistList.getUntilDone(repo, lang, force).then( (obj) =>
@@ -129,7 +134,7 @@ r = new Vue(
         @error = true
         @errorMsg = err
       )
-    getWithOutBlackout: (force = false) ->
+    getPlistWithOutBlackout: (force = false) ->
       @error = false
       return plistList.getUntilDone(repo, lang, force).then( (obj) =>
         return plistList.filter(obj)
@@ -141,9 +146,7 @@ r = new Vue(
         @errorMsg = err
       )
 )
-r.get().then( ->
-  return r.getWithOutBlackout(true)
-)
+
 
 
 Vue.component("modal-body",
@@ -209,7 +212,7 @@ p = new Vue(
 )
 
 document.getElementById("reload").addEventListener("click", ->
-  r.get(true)
+  r.getPlist(true)
   return
 )
 document.getElementById("apply").addEventListener("click", ->

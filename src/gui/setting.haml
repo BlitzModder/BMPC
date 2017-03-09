@@ -150,6 +150,26 @@
         .col-xs
           .card.card-block
             %h4.card-title
+              %span.ja 適応情報出力
+              %span.en Apply information output
+              %span.ru Применить вывод информации
+            %button.btn.btn-primary(type="button" @click="applyInfo")
+              %span.ja 表示
+              %span.en Show
+              %span.ru Показать
+        .modal.fade#applyInfo
+          .modal-dialog
+            .modal-content
+              .modal-header
+                %button.close(type="button" data-dismiss="modal")
+                  %span &times;
+              .modal-body
+                %textarea
+              .modal-footer
+                %button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+        .col-xs
+          .card.card-block
+            %h4.card-title
               %span.ja バージョン情報
               %span.en About
               %span.ru Около

@@ -4,6 +4,7 @@ config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
 fs = require "fs"
+os = require "os"
 
 lang = config.get("lang")
 langList = config.LANG_LIST
@@ -152,6 +153,20 @@ new Vue(
         @remoteRepoAddStr = ""
         @remoteRepoAddStrErr = false
       return
+    applyInfo: ->
+      $("#applyInfo").find("textarea").val(
+        "---BlitzModderPC ApplyInformation---\n"+
+        "+DeviceInformation\n"+
+        "BlitzModderVersion: #{app.getVersion()}\n"+
+        "OS: #{os.platform()}\n"+
+        "Arch: #{os.arch()}\n"+
+        "UserAgent: #{window.navigator.userAgent}\n"+
+        "ApplyPlatform: #{config.get("platform")}\n"+
+        "+AppliedMods\n"+
+        JSON.stringify(config.get("appliedMods"))
+      )
+      $("#applyInfo").modal()
+      return
   watch:
     remoteRepos: (val) ->
       config.set("repos", val)
@@ -185,4 +200,8 @@ new Vue(
       for l in langList when l isnt lang
         $(".#{l}").addClass("hidden")
       return
+)
+
+$("#applyInfo").find("textarea").on("click", ->
+  @select()
 )

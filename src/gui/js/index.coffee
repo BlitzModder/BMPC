@@ -18,6 +18,9 @@ formatRepoName = (name) ->
   m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
   if m?
     return "#{m[1]}/#{m[2]}"
+  m = /^https?:\/\/(.+?)$/.exec(name)
+  if m?
+    return m[1]
   return name
 
 Vue.component("repo",

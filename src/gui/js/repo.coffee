@@ -1,5 +1,5 @@
 {remote} = require "electron"
-plist = remote.require("./plist")
+plistList = remote.require("./plistList")
 util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
@@ -119,8 +119,8 @@ r = new Vue(
     get: (force = false) ->
       @loading = true
       @error = false
-      plist.getUntilDone(repo, lang, force).then( (obj) =>
-        return plist.filter(obj)
+      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+        return plistList.filter(obj)
       ).then( (obj) =>
         @loading = false
         @plist = obj
@@ -129,9 +129,22 @@ r = new Vue(
         @error = true
         @errorMsg = err
       )
-      return
+    getWithOutBlackout: (force = false) ->
+      @error = false
+      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+        return plistList.filter(obj)
+      ).then( (obj) =>
+        if JSON.stringify(@plist) isnt JSON.stringify(obj)
+          @plist = obj
+      ).catch( (err) =>
+        @error = true
+        @errorMsg = err
+      )
 )
-r.get()
+r.get().then( ->
+  return r.getWithOutBlackout(true)
+)
+
 
 Vue.component("modal-body",
   template: """

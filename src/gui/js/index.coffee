@@ -1,6 +1,7 @@
 {remote, shell} = require "electron"
 {app} = remote
 semver = remote.require("semver")
+plistInfo = remote.require("./plistInfo")
 config = remote.require("./config")
 request = remote.require("./request")
 util = remote.require("./util")
@@ -20,13 +21,32 @@ formatRepoName = (name) ->
   return name
 
 Vue.component("repo",
-  template: "<li class=\"list-group-item\"><a :href=\"url\">{{formatedName}}</a></li>"
-  props: ["name", "repotype"]
+  template: """
+            <li class=\"list-group-item\">
+              <a :href=\"url\">
+                <span v-if="hasinfo">{{infoname}} <sub><small>{{infomaintainer}}</small></sub> ({{formatedName}})</span>
+                <span v-else>{{formatedName}}</span>
+              </a>
+            </li>
+            """
+  props: ["name", "repotype", "hasinfo", "infoname", "infomaintainer"]
   computed:
     formatedName: ->
       return formatRepoName(@name)
     url: ->
       return "./repo.html?type=#{@repotype}&path=#{encodeURIComponent(@name)}"
+  created: ->
+    @getInfo()
+    return
+  methods:
+    getInfo: ->
+      return plistInfo.get(type: @repotype, name: @name).then( (obj) =>
+        @hasinfo = true
+        @infoname = obj.name
+        @infomaintainer = obj.maintainer
+      ).catch( =>
+        @hasinfo = false
+      )
 )
 Vue.component("debug-repo",
   template: "<a href=\"./debug_repo.html\">{{formatedName}}</a>"

@@ -1,5 +1,6 @@
 {remote} = require "electron"
 plistList = remote.require("./plistList")
+plistInfo = remote.require("./plistInfo")
 util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
@@ -26,6 +27,18 @@ langList = config.LANG_LIST
 for l in langList when l isnt lang
   $(".#{l}").addClass("hidden")
 
+Vue.component("description",
+  template: """
+            <div class="col-xs">
+              <div class="card card-outline-primary card-block">
+                <h4 class="card-title">{{name}}</h4>
+                <h6 class="card-subtitle text-muted">{{version}}</h4>
+                <p class="card-text">Maintainer: {{maintainer}}</p>
+              </div>
+            </div>
+            """
+  props: ["name", "version", "maintainer"]
+)
 Vue.component("big-category",
   template: """
             <div class="col-xs">
@@ -115,10 +128,15 @@ r = new Vue(
     error: false
     errorMsg: ""
     plist: {}
+    hasinfo: false
+    infoname: ""
+    infoversion: ""
+    infomaintainer: ""
   created: ->
     @getPlist().then( ->
       return r.getPlistWithOutBlackout(true)
     )
+    @getInfo()
     return
   methods:
     getPlist: (force = false) ->
@@ -144,6 +162,16 @@ r = new Vue(
       ).catch( (err) =>
         @error = true
         @errorMsg = err
+      )
+    getInfo: (force = false) ->
+      return plistInfo.get(repo, force).then( (obj) =>
+        @hasinfo = true
+        @infoname = obj.name
+        @infoversion = obj.version
+        @infomaintainer = obj.maintainer
+        return
+      ).catch( (err) =>
+        @hasinfo = false
       )
 )
 
@@ -213,6 +241,7 @@ p = new Vue(
 
 document.getElementById("reload").addEventListener("click", ->
   r.getPlist(true)
+  r.getInfo(true)
   return
 )
 document.getElementById("apply").addEventListener("click", ->

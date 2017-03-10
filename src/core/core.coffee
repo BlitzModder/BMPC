@@ -6,7 +6,6 @@
 path = require "path"
 config = require "./config"
 cache = require "./cache"
-plist = require "./plist"
 
 mainWindow = null
 

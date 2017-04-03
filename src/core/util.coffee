@@ -38,7 +38,16 @@ getVersion = ->
       if reg?
         resolve(reg[1])
       else
-        reject("Error: Version Regexp Error (#{text})")
+        reg = /^(\d+\.\d+)\.(\d+)\.(\d+)_/.exec(text)
+        if reg?
+          if reg[2] < 10
+            resolve(reg[1]+"."+reg[2])
+          else if reg[3] < 10
+            resolve(reg[1]+"."+reg[3])
+          else
+            resolve(reg[1]+".0")
+        else
+          reject("Error: Version Regexp Error (#{text})")
       return
     ).catch( ->
       return readFile(path.join(require("./config").get("blitzPath"), "Data/version", "resources.txt"), "utf-8").then( (text) ->

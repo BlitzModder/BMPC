@@ -289,7 +289,7 @@ document.getElementById("apply").addEventListener("click", ->
               when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
       return
     ).then( ->
-      if errored
+      if !errored
         p.changePhase("done")
       else
         p.changePhase("failed")

@@ -200,14 +200,17 @@ Vue.component("modal-body",
           switch lang
             when "ja" then return "適用中..."
             when "en" then return "Applying..."
+            when "ru" then return "Применение..."
         when "done"
           switch lang
             when "ja" then return "適用完了"
             when "en" then return "Applied Successfully"
+            when "ru" then return "Применено успешно"
         when "failed"
           switch lang
             when "ja" then return "適用失敗"
             when "en" then return "Failed to Apply"
+            when "ru" then return "Не удалось применить"
 )
 p = new Vue(
   el: "#progress"
@@ -263,21 +266,25 @@ document.getElementById("apply").addEventListener("click", ->
             switch lang
               when "ja" then p.addLog("#{mod.name} - 適用完了")
               when "en" then p.addLog("#{mod.name} - Applied Successfully")
+              when "ru" then p.addLog("#{mod.name} - Применено успешно")
           when "delete"
             $checkbox.removeClass("applied")
             switch lang
               when "ja" then p.addLog("#{mod.name} - 解除完了")
               when "en" then p.addLog("#{mod.name} - Removed Successfully")
+              when "ru" then p.addLog("#{mod.name} - Удалено успешно")
       else
         switch type
           when "add"
             switch lang
               when "ja" then p.addLog("#{mod.name} - 適用失敗(#{err})")
               when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
+              when "ru" then p.addLog("#{mod.name} - Не удалось применить(#{err})")
           when "delete"
             switch lang
               when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
               when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
+              when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
       return
     ).then( ->
       p.changePhase("done")

@@ -9,6 +9,13 @@ body {
   user-select: text;
 }
 
+button.applied::after {
+  content: "インストール済";
+  color: blue;
+}
+.form-check {
+  margin-bottom: 0;
+}
 webview {
   height: 100%;
 }

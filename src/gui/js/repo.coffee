@@ -73,10 +73,10 @@ Vue.component("small-category",
 firstExec = true
 Vue.component("mod",
   template: """
-            <button type="button" class="list-group-item list-group-item-action" @click="show">
+            <button type="button" class="list-group-item list-group-item-action" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check">
                 <label class="form-check-label">
-                  <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
+                  <input type="checkbox" class="form-check-input" :data-path="val" v-model="checked">
                   {{name}}
                 </label>
               </div>
@@ -251,25 +251,25 @@ document.getElementById("apply").addEventListener("click", ->
   if confirm(CONFIRM_APPLY_STRING)
     addMods = []
     deleteMods = []
-    for $mod in $("input:checked").not(".applied")
+    for $mod in $("button:not(.applied) input:checked")
       addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
-    for $mod in $("input.applied").not(":checked")
+    for $mod in $("button.applied input:not(:checked)")
       deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
 
     $("#progress").modal({ keyboard: false, backdrop: "static" })
     errored = false
     applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-      $checkbox = $("input[data-path=\"#{mod.name}\"]")
+      $button = $("button[data-path=\"#{mod.name}\"]")
       if done
         switch type
           when "add"
-            $checkbox.addClass("applied")
+            $button.addClass("applied")
             switch lang
               when "ja" then p.addLog("#{mod.name} - 適用完了")
               when "en" then p.addLog("#{mod.name} - Applied Successfully")
               when "ru" then p.addLog("#{mod.name} - Применено успешно")
           when "delete"
-            $checkbox.removeClass("applied")
+            $button.removeClass("applied")
             switch lang
               when "ja" then p.addLog("#{mod.name} - 解除完了")
               when "en" then p.addLog("#{mod.name} - Removed Successfully")

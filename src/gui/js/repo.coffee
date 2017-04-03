@@ -12,7 +12,7 @@ repo = {type: params.get("type"), name: path}
 lang = config.get("lang")
 switch lang
   when "ja"
-    CONFIRM_APPLY_STRING = "本当に適応してよろしいですか？"
+    CONFIRM_APPLY_STRING = "本当に適用してよろしいですか？"
   when "en"
     CONFIRM_APPLY_STRING = "Really want to apply?"
   when "ru"
@@ -198,15 +198,15 @@ Vue.component("modal-body",
       switch @phase
         when "standby", "doing"
           switch lang
-            when "ja" then return "適応中..."
+            when "ja" then return "適用中..."
             when "en" then return "Applying..."
         when "done"
           switch lang
-            when "ja" then return "適応完了"
+            when "ja" then return "適用完了"
             when "en" then return "Applied Successfully"
         when "failed"
           switch lang
-            when "ja" then return "適応失敗"
+            when "ja" then return "適用失敗"
             when "en" then return "Failed to Apply"
 )
 p = new Vue(
@@ -261,7 +261,7 @@ document.getElementById("apply").addEventListener("click", ->
           when "add"
             $checkbox.addClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適応完了")
+              when "ja" then p.addLog("#{mod.name} - 適用完了")
               when "en" then p.addLog("#{mod.name} - Applied Successfully")
           when "delete"
             $checkbox.removeClass("applied")
@@ -272,7 +272,7 @@ document.getElementById("apply").addEventListener("click", ->
         switch type
           when "add"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
+              when "ja" then p.addLog("#{mod.name} - 適用失敗(#{err})")
               when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
           when "delete"
             switch lang

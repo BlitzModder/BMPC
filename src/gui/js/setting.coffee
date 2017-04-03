@@ -5,6 +5,7 @@ cache = remote.require("./cache")
 util = remote.require("./util")
 fs = require "fs"
 os = require "os"
+path = remote.require("path")
 
 lang = config.get("lang")
 langList = config.LANG_LIST
@@ -133,6 +134,10 @@ new Vue(
       return
     setBlitzPath: ->
       getFolderByWindow( (dir) =>
+        toBlitz = dir.split(path.sep)
+        if toBlitz[toBlitz.length-1] is "Data"
+          toBlitz.pop()
+          dir = toBlitz.join(path.sep)
         @blitzPath = dir
         return
       )

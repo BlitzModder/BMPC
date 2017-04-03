@@ -257,6 +257,7 @@ document.getElementById("apply").addEventListener("click", ->
       deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
 
     $("#progress").modal({ keyboard: false, backdrop: "static" })
+    errored = false
     applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
       $checkbox = $("input[data-path=\"#{mod.name}\"]")
       if done
@@ -274,6 +275,7 @@ document.getElementById("apply").addEventListener("click", ->
               when "en" then p.addLog("#{mod.name} - Removed Successfully")
               when "ru" then p.addLog("#{mod.name} - Удалено успешно")
       else
+        errored = true
         switch type
           when "add"
             switch lang
@@ -287,11 +289,11 @@ document.getElementById("apply").addEventListener("click", ->
               when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
       return
     ).then( ->
-      p.changePhase("done")
-    ).catch( (err) ->
-      p.changePhase("failed")
-      p.nextLog()
-      p.addLog(err)
+      if errored
+        p.changePhase("done")
+      else
+        p.changePhase("failed")
+      return
     )
   return
 )

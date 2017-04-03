@@ -3,9 +3,9 @@
 config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
-fs = require "fs"
-os = require "os"
+fs = remote.require("fs")
 path = remote.require("path")
+os = remote.require("os")
 
 lang = config.get("lang")
 langList = config.LANG_LIST

@@ -73,8 +73,28 @@ getPlatform = ->
   return "m" if os.type().includes("Darwin")
   return "w"
 
+###*
+ * ディレクトリか判断します
+ ###
+isDirectory = (topath) ->
+  try
+    return fs.statSync(topath).isDirectory()
+  catch
+    return false
+
+###*
+ * ファイルか判断します
+ ###
+isFile = (topath) ->
+  try
+    return fs.statSync(topath).isFile()
+  catch
+    return false
+
 module.exports =
   escape: escape
   openBlitz: openBlitz
   getVersion: getVersion
   getPlatform: getPlatform
+  isDirectory: isDirectory
+  isFile: isFile

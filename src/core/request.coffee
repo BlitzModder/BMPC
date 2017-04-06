@@ -2,7 +2,7 @@
  * @fileoverview ファイルを取得するメソッド群
  ###
 
-fetch = require "fetch"
+request = require "request"
 path = require "path"
 Promise = require "promise"
 
@@ -18,8 +18,8 @@ getFromRemote = (repoName, fileName) ->
     if names.length < 3
       reject()
       return
-    fetch.fetchUrl("#{repoName}/#{fileName}", (err, meta, body) ->
-      if err? or meta.status is 404
+    request("#{repoName}/#{fileName}", (err, res, body) ->
+      if err? or (res? and res.statusCode is 404)
         reject(err)
       resolve(body)
     )
@@ -49,8 +49,8 @@ getDetailUrl = (repo, id) ->
  ###
 getLastestVersion = ->
   return new Promise( (resolve, reject) ->
-    fetch.fetchUrl("https://api.github.com/repos/BlitzModder/BMPC/releases/latest", (err, meta, body) ->
-      if err? or meta.status is 404
+    request("https://api.github.com/repos/BlitzModder/BMPC/releases/latest", (err, res, body) ->
+      if err? or (res? and res.statusCode is 404)
         reject(err)
       resolve(JSON.parse(body).name)
     )
@@ -64,10 +64,11 @@ getLastestVersion = ->
  ###
 getUrlStatus = (url) ->
   return new Promise( (resolve, reject) ->
-    fetch.fetchUrl(url, (err, meta, body) ->
-      if err?
+    request(url, (err, res, body) ->
+      if err? and res?
         reject(err)
-      resolve(meta.status)
+      else
+        resolve(res.status)
       return
     )
   )

@@ -4,91 +4,46 @@
 
 path = require "path"
 fs = require "fs-extra"
-fetch = require "fetch"
+fstream = require "fstream"
+readdirp = require "readdirp"
+stream = require "stream"
+request = require "request"
 unzip = require "unzipper"
 config = require "./config"
+util = require "./util"
 
 ###*
- * リモートからのMODを適応します
+ * リモートからとってくる
  ###
-_applyFromRemote = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    extractor = unzip.Extract(path: outputFolder)
-    extractor.on("error", (err) ->
-      reject(err)
-      return
-    )
-    extractor.on("close", ->
-      resolve()
-      return
-    )
-    new fetch.FetchStream("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
-      .pipe(extractor)
-    return
-  )
+_getFromRemote = (folder, mod) ->
+  return request("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
+    .pipe(unzip.Parse())
 
 ###*
- * ローカルからのMODを適応します
+ * ローカルからとってくる
  ###
-_applyFromLocal = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.stat(path.join(mod.repo.name, folder, mod.name), (err, stats) ->
-      if !err? and stats.isDirectory()
-        _applyFromLocalFolder(folder, mod, outputFolder).then( ->
-          resolve()
-          return
-        ).catch( (err) ->
-          reject(err)
-          return
-        )
-        return
-      else
-        fs.stat(path.join(mod.repo.name, folder, mod.name + ".zip"), (err, stats) ->
-          if !err? and stats.isFile()
-            _applyFromLocalZip(folder, mod, outputFolder).then( ->
-              resolve()
-              return
-            ).catch( (err) ->
-              reject(err)
-              return
-            )
-          else
-            reject()
-          return
-        )
-      return
-    )
-    return
-  )
+_getFromLocal = (folder, mod) ->
+  dirpath = path.join(mod.repo.name, folder, mod.name)
+  zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
+  if util.isDirectory(dirpath)
+    return readdirp(root: dirpath)
+  else if util.isFile(zippath)
+    return fs.createReadStream(zippath).pipe(unzip.Parse())
+  return
 
 ###*
- * ローカルのMOD(フォルダになっているもの)を適応します
- ###
-_applyFromLocalFolder = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.copy(path.join(mod.repo.name, folder, mod.name), outputFolder, clobber: true, (err) ->
-      if err? then reject(err) else resolve()
-      return
-    )
-    return
-  )
+ * dataイベントから適応する
+ *###
+_applyFromData = (outputFolder, entry) ->
+  fstream.Writer(path: path.join(outputFolder, entry.path)).end()
+  return
 
 ###*
- * ローカルのMOD(zipになっているもの)を適応します
- ###
-_applyFromLocalZip = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.createReadStream(path.join(mod.repo.name, folder, mod.name + ".zip"))
-      .pipe(unzip.Extract(path: outputFolder))
-      .on("error", (err) ->
-        reject(err)
-        return
-      )
-      .on("close", ->
-        resolve()
-        return
-      )
-  )
+ * entryイベントから適応する
+ *###
+_applyFromEntry = (outputFolder, entry) ->
+  entry.pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+  return
 
 ###*
  * MODを適応します
@@ -106,25 +61,38 @@ applyMod = (type, mod, callback) ->
       when "delete" then folder = "remove"
       else reject("Unknown type")
     if mod.repo.type is "remote"
-      _applyFromRemote(folder, mod, outputFolder).then( ->
-        resolve()
-        return
-      ).catch( (err) ->
-        reject(err)
-        return
-      )
-      return
+      stream = _getFromRemote(folder, mod)
     else if mod.repo.type is "local"
-      _applyFromLocal(folder, mod, outputFolder).then( ->
-        resolve()
-        return
-      ).catch( (err) ->
-        reject(err)
-        return
-      )
-      return
+      stream = _getFromLocal(folder, mod)
+      unless stream? then reject("No Folder and Zip in Path")
     else
       reject("Unknown RepoType")
+
+    stream
+      .on("data", (entry) ->
+        return if entry.stat.isDirectory()
+        _applyFromData(outputFolder, entry)
+        return
+      )
+      .on("entry", (entry) ->
+        console.log entry
+        return if entry.type is "Directory"
+        _applyFromEntry(outputFolder, entry)
+        return
+      )
+      .on("error", (err) ->
+        reject(err)
+        return
+      )
+      .on("end", ->
+        resolve()
+        return
+      )
+      .on("close", ->
+        resolve()
+        return
+      )
+    return
   ).then( ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})

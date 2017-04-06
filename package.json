@@ -19,7 +19,7 @@
     "type": "git",
     "url": "http://github.com/BlitzModder/BMPC.git"
   },
-  "homepage": "http://github.com/BlitzModder/BMPC",
+  "homepage": "https://github.com/BlitzModder/BMPC/wiki",
   "license": "MIT",
   "dependencies": {
     "bootstrap": "4.0.0-alpha.5",

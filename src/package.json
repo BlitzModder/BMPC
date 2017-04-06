@@ -6,9 +6,9 @@
   "author": "S(29314)",
   "repository": {
     "type": "git",
-    "url": "http://github.com/S--Minecraft/BlitzModderPC.git"
+    "url": "http://github.com/BlitzModder/BMPC.git"
   },
-  "homepage": "http://github.com/S--Minecraft/BlitzModderPC",
+  "homepage": "https://github.com/BlitzModder/BMPC/wiki",
   "license": "MIT",
   "dependencies": {
     "bootstrap": "4.0.0-alpha.5",

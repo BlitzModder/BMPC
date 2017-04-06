@@ -2,7 +2,7 @@
  * @fileoverview メイン
  ###
 
-{app, BrowserWindow} = require "electron"
+{app, session, BrowserWindow} = require "electron"
 path = require "path"
 config = require "./config"
 cache = require "./cache"
@@ -26,6 +26,8 @@ createWindow = ->
   )
   mainWindow.loadURL("file://#{app.getAppPath()}/gui/index.html")
   mainWindow.on("closed", ->
+    # キャッシュ削除
+    session.defaultSession.clearCache()
     # guiの終了
     mainWindow = null
     return

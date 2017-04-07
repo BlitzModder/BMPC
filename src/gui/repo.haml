@@ -29,7 +29,7 @@
             %span.en Error has happen
             %span.ru Ошибка имеет произойти
           %p {{errorMsg}}
-        %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
+        %big-category(v-else=true v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog
         .modal-content

@@ -3,7 +3,7 @@
 BlitzModder for Steam(Windows/Mac), MacAppStore Versions, and other.  
 
 # Download and How to use
-See the [Wiki][wikien] [Japanese ver][wikijp].  
+See the [Wiki][wikien]([Japanese ver][wikijp]).  
 
 # Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md).  

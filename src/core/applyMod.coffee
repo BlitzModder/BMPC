@@ -6,7 +6,6 @@ path = require "path"
 fs = require "fs-extra"
 fstream = require "fstream"
 readdirp = require "readdirp"
-stream = require "stream"
 request = require "request"
 unzip = require "unzipper"
 config = require "./config"
@@ -35,7 +34,9 @@ _getFromLocal = (folder, mod) ->
  * dataイベントから適応する
  *###
 _applyFromData = (outputFolder, entry) ->
-  fstream.Writer(path: path.join(outputFolder, entry.path)).end()
+  fstream
+    .Reader(entry.fullPath)
+    .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
   return
 
 ###*
@@ -75,7 +76,6 @@ applyMod = (type, mod, callback) ->
         return
       )
       .on("entry", (entry) ->
-        console.log entry
         return if entry.type is "Directory"
         _applyFromEntry(outputFolder, entry)
         return

@@ -3,6 +3,7 @@ fs = require "fs-extra"
 shell = require("electron").shell
 os = require "os"
 Promise = require "promise"
+config = require "./config"
 
 readFile = Promise.denodeify(fs.readFile)
 
@@ -33,6 +34,9 @@ openBlitz = ->
  ###
 getVersion = ->
   return new Promise( (resolve, reject) ->
+    if config.get("blitzPathType") is "file"
+      reject()
+      return
     readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
       reg = /_(\d+\.\d+\.\d+)_/.exec(text)
       if reg?

@@ -2,14 +2,21 @@
  * @fileoverview MODを適応/解除するメソッド群
  ###
 
+{app} = require "electron"
 path = require "path"
+Promise = require "Promise"
 fs = require "fs-extra"
 fstream = require "fstream"
+jszip = require "jszip"
 readdirp = require "readdirp"
 request = require "request"
 unzip = require "unzipper"
 config = require "./config"
 util = require "./util"
+
+readFile = Promise.denodeify(fs.readFile)
+
+TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 
 ###*
  * リモートからとってくる
@@ -54,7 +61,11 @@ _applyFromEntry = (outputFolder, entry) ->
  * @return {Promise}
  ###
 applyMod = (type, mod, callback) ->
-  outputFolder = path.normalize(config.get("blitzPath"))
+  pathType = config.get("blitzPathType")
+  if pathType is "folder"
+    outputFolder = path.normalize(config.get("blitzPath"))
+  else
+    outputFolder = TEMP_FOLDER
   return new Promise( (resolve, reject) ->
     fs.ensureDirSync(outputFolder)
     switch type
@@ -71,7 +82,6 @@ applyMod = (type, mod, callback) ->
 
     stream
       .on("data", (entry) ->
-        return if entry.stat.isDirectory()
         _applyFromData(outputFolder, entry)
         return
       )
@@ -94,12 +104,47 @@ applyMod = (type, mod, callback) ->
       )
     return
   ).then( ->
+    return new Promise( (resolve, reject) ->
+      if pathType is "file"
+        blitzPath = path.normalize(config.get("blitzPath"))
+        switch config.get("platform")
+          when "a" then prefix = "assets"
+          when "i" then prefix = "Payload/wotblitz.app"
+          else prefix = ""
+        return readFile(blitzPath).then( (data) ->
+          return jszip.loadAsync(data)
+        ).then( (zip) ->
+          readdirp(root: outputFolder)
+            .on("data", (entry) ->
+              zip.file(path.join(prefix, entry.path), fs.readFileSync(entry.fullPath))
+              return
+            )
+            .on("end", ->
+              zip
+                .generateNodeStream(streamFiles: true)
+                .pipe(fs.createWriteStream(blitzPath))
+                .on("finish", ->
+                  resolve()
+                  return
+                )
+              return
+            )
+        ).catch((err) ->
+          reject(err)
+        )
+      else
+        resolve()
+      return
+    )
+  ).then( ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
+    fs.remove(TEMP_FOLDER)
     callback(true, type, mod)
     return
   ).catch( (err) ->
+    fs.remove(TEMP_FOLDER)
     callback(false, type, mod, err)
     return
   )

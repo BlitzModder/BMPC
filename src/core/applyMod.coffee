@@ -2,93 +2,56 @@
  * @fileoverview MODを適応/解除するメソッド群
  ###
 
+{app} = require "electron"
 path = require "path"
+Promise = require "Promise"
 fs = require "fs-extra"
-fetch = require "fetch"
+fstream = require "fstream"
+jszip = require "jszip"
+readdirp = require "readdirp"
+request = require "request"
 unzip = require "unzipper"
 config = require "./config"
+util = require "./util"
+
+readFile = Promise.denodeify(fs.readFile)
+
+TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 
 ###*
- * リモートからのMODを適応します
+ * リモートからとってくる
  ###
-_applyFromRemote = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    extractor = unzip.Extract(path: outputFolder)
-    extractor.on("error", (err) ->
-      reject(err)
-      return
-    )
-    extractor.on("close", ->
-      resolve()
-      return
-    )
-    new fetch.FetchStream("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
-      .pipe(extractor)
-    return
-  )
+_getFromRemote = (folder, mod) ->
+  return request("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
+    .pipe(unzip.Parse())
 
 ###*
- * ローカルからのMODを適応します
+ * ローカルからとってくる
  ###
-_applyFromLocal = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.stat(path.join(mod.repo.name, folder, mod.name), (err, stats) ->
-      if !err? and stats.isDirectory()
-        _applyFromLocalFolder(folder, mod, outputFolder).then( ->
-          resolve()
-          return
-        ).catch( (err) ->
-          reject(err)
-          return
-        )
-        return
-      else
-        fs.stat(path.join(mod.repo.name, folder, mod.name + ".zip"), (err, stats) ->
-          if !err? and stats.isFile()
-            _applyFromLocalZip(folder, mod, outputFolder).then( ->
-              resolve()
-              return
-            ).catch( (err) ->
-              reject(err)
-              return
-            )
-          else
-            reject()
-          return
-        )
-      return
-    )
-    return
-  )
+_getFromLocal = (folder, mod) ->
+  dirpath = path.join(mod.repo.name, folder, mod.name)
+  zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
+  if util.isDirectory(dirpath)
+    return readdirp(root: dirpath)
+  else if util.isFile(zippath)
+    return fs.createReadStream(zippath).pipe(unzip.Parse())
+  return
 
 ###*
- * ローカルのMOD(フォルダになっているもの)を適応します
- ###
-_applyFromLocalFolder = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.copy(path.join(mod.repo.name, folder, mod.name), outputFolder, clobber: true, (err) ->
-      if err? then reject(err) else resolve()
-      return
-    )
-    return
-  )
+ * dataイベントから適応する
+ *###
+_applyFromData = (outputFolder, entry) ->
+  fstream
+    .Reader(entry.fullPath)
+    .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
+  return
 
 ###*
- * ローカルのMOD(zipになっているもの)を適応します
- ###
-_applyFromLocalZip = (folder, mod, outputFolder) ->
-  return new Promise( (resolve, reject) ->
-    fs.createReadStream(path.join(mod.repo.name, folder, mod.name + ".zip"))
-      .pipe(unzip.Extract(path: outputFolder))
-      .on("error", (err) ->
-        reject(err)
-        return
-      )
-      .on("close", ->
-        resolve()
-        return
-      )
-  )
+ * entryイベントから適応する
+ *###
+_applyFromEntry = (outputFolder, entry) ->
+  entry.pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+  return
 
 ###*
  * MODを適応します
@@ -98,7 +61,11 @@ _applyFromLocalZip = (folder, mod, outputFolder) ->
  * @return {Promise}
  ###
 applyMod = (type, mod, callback) ->
-  outputFolder = path.normalize(config.get("blitzPath"))
+  pathType = config.get("blitzPathType")
+  if pathType is "folder"
+    outputFolder = path.normalize(config.get("blitzPath"))
+  else
+    outputFolder = TEMP_FOLDER
   return new Promise( (resolve, reject) ->
     fs.ensureDirSync(outputFolder)
     switch type
@@ -106,32 +73,78 @@ applyMod = (type, mod, callback) ->
       when "delete" then folder = "remove"
       else reject("Unknown type")
     if mod.repo.type is "remote"
-      _applyFromRemote(folder, mod, outputFolder).then( ->
-        resolve()
-        return
-      ).catch( (err) ->
-        reject(err)
-        return
-      )
-      return
+      stream = _getFromRemote(folder, mod)
     else if mod.repo.type is "local"
-      _applyFromLocal(folder, mod, outputFolder).then( ->
-        resolve()
-        return
-      ).catch( (err) ->
-        reject(err)
-        return
-      )
-      return
+      stream = _getFromLocal(folder, mod)
+      unless stream? then reject("No Folder and Zip in Path")
     else
       reject("Unknown RepoType")
+
+    stream
+      .on("data", (entry) ->
+        _applyFromData(outputFolder, entry)
+        return
+      )
+      .on("entry", (entry) ->
+        return if entry.type is "Directory"
+        _applyFromEntry(outputFolder, entry)
+        return
+      )
+      .on("error", (err) ->
+        reject(err)
+        return
+      )
+      .on("end", ->
+        resolve()
+        return
+      )
+      .on("close", ->
+        resolve()
+        return
+      )
+    return
+  ).then( ->
+    return new Promise( (resolve, reject) ->
+      if pathType is "file"
+        blitzPath = path.normalize(config.get("blitzPath"))
+        switch config.get("platform")
+          when "a" then prefix = "assets"
+          when "i" then prefix = "Payload/wotblitz.app"
+          else prefix = ""
+        return readFile(blitzPath).then( (data) ->
+          return jszip.loadAsync(data)
+        ).then( (zip) ->
+          readdirp(root: outputFolder)
+            .on("data", (entry) ->
+              zip.file(path.join(prefix, entry.path), fs.readFileSync(entry.fullPath))
+              return
+            )
+            .on("end", ->
+              zip
+                .generateNodeStream(streamFiles: true)
+                .pipe(fs.createWriteStream(blitzPath))
+                .on("finish", ->
+                  resolve()
+                  return
+                )
+              return
+            )
+        ).catch((err) ->
+          reject(err)
+        )
+      else
+        resolve()
+      return
+    )
   ).then( ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
+    fs.remove(TEMP_FOLDER)
     callback(true, type, mod)
     return
   ).catch( (err) ->
+    fs.remove(TEMP_FOLDER)
     callback(false, type, mod, err)
     return
   )

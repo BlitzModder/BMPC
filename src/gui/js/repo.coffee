@@ -12,7 +12,7 @@ repo = {type: params.get("type"), name: path}
 lang = config.get("lang")
 switch lang
   when "ja"
-    CONFIRM_APPLY_STRING = "本当に適応してよろしいですか？"
+    CONFIRM_APPLY_STRING = "本当に適用してよろしいですか？"
   when "en"
     CONFIRM_APPLY_STRING = "Really want to apply?"
   when "ru"
@@ -73,10 +73,10 @@ Vue.component("small-category",
 firstExec = true
 Vue.component("mod",
   template: """
-            <button type="button" class="list-group-item list-group-item-action" @click="show">
+            <button type="button" class="list-group-item list-group-item-action" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check">
                 <label class="form-check-label">
-                  <input type="checkbox" class="form-check-input" :class="{applied: applied}" :data-path="val" v-model="checked">
+                  <input type="checkbox" class="form-check-input" :data-path="val" v-model="checked">
                   {{name}}
                 </label>
               </div>
@@ -198,16 +198,19 @@ Vue.component("modal-body",
       switch @phase
         when "standby", "doing"
           switch lang
-            when "ja" then return "適応中..."
+            when "ja" then return "適用中..."
             when "en" then return "Applying..."
+            when "ru" then return "Применение..."
         when "done"
           switch lang
-            when "ja" then return "適応完了"
+            when "ja" then return "適用完了"
             when "en" then return "Applied Successfully"
+            when "ru" then return "Применено успешно"
         when "failed"
           switch lang
-            when "ja" then return "適応失敗"
+            when "ja" then return "適用失敗"
             when "en" then return "Failed to Apply"
+            when "ru" then return "Не удалось применить"
 )
 p = new Vue(
   el: "#progress"
@@ -248,43 +251,49 @@ document.getElementById("apply").addEventListener("click", ->
   if confirm(CONFIRM_APPLY_STRING)
     addMods = []
     deleteMods = []
-    for $mod in $("input:checked").not(".applied")
+    for $mod in $("button:not(.applied) input:checked")
       addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
-    for $mod in $("input.applied").not(":checked")
+    for $mod in $("button.applied input:not(:checked)")
       deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
 
     $("#progress").modal({ keyboard: false, backdrop: "static" })
+    errored = false
     applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-      $checkbox = $("input[data-path=\"#{mod.name}\"]")
+      $button = $("button[data-path=\"#{mod.name}\"]")
       if done
         switch type
           when "add"
-            $checkbox.addClass("applied")
+            $button.addClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適応完了")
+              when "ja" then p.addLog("#{mod.name} - 適用完了")
               when "en" then p.addLog("#{mod.name} - Applied Successfully")
+              when "ru" then p.addLog("#{mod.name} - Применено успешно")
           when "delete"
-            $checkbox.removeClass("applied")
+            $button.removeClass("applied")
             switch lang
               when "ja" then p.addLog("#{mod.name} - 解除完了")
               when "en" then p.addLog("#{mod.name} - Removed Successfully")
+              when "ru" then p.addLog("#{mod.name} - Удалено успешно")
       else
+        errored = true
         switch type
           when "add"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適応失敗(#{err})")
+              when "ja" then p.addLog("#{mod.name} - 適用失敗(#{err})")
               when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
+              when "ru" then p.addLog("#{mod.name} - Не удалось применить(#{err})")
           when "delete"
             switch lang
               when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
               when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
+              when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
       return
     ).then( ->
-      p.changePhase("done")
-    ).catch( (err) ->
-      p.changePhase("failed")
-      p.nextLog()
-      p.addLog(err)
+      if !errored
+        p.changePhase("done")
+      else
+        p.changePhase("failed")
+      return
     )
   return
 )

@@ -18,16 +18,18 @@ install:
   - npm install -g npm
   - npm install --build-from-source --msvs_version=2013
   - npm run pack:win
+  - ren dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win32.zip
+  - ren dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win.zip dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win64.zip
 
 artifacts:
-  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip
-  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win32.zip
+  - path: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win64.zip
 
 deploy:
   - provider: GitHub
     auth_token:
       secure: TA6/JQT5hBqM+wyKht9skPyNN1mR/qigXl/0Lcvoi6YkJsF0+I1TuqCU/6fTw0jW
-    artifact: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-ia32-win.zip,dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win.zip
+    artifact: dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win32.zip,dist\BlitzModder-$(APPVEYOR_REPO_TAG_NAME)-win64.zip
     draft: false
     prerelease: false
     force_update: true

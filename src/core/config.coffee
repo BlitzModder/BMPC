@@ -49,6 +49,7 @@ DEFAULT_DATA =
   debugRepo: ""
   appliedMods: []
   lang: "ja"
+  blitzPathType: "folder"
 
 do ->
   DEFAULT_DATA.platform = util.getPlatform()

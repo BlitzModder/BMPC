@@ -9,6 +9,13 @@ body {
   user-select: text;
 }
 
+button.applied::after {
+  content: "インストール済";
+  color: blue;
+}
+.form-check {
+  margin-bottom: 0;
+}
 webview {
   height: 100%;
 }
@@ -46,4 +53,19 @@ li {
 
 .hidden {
   display: none;
+}
+
+.text-center {
+  text-align: center;
+}
+.center {
+  margin: 0 auto;
+}
+
+.spin {
+  animation: spin 1s ease 0s infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

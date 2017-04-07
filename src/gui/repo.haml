@@ -20,19 +20,16 @@
             %img(src="./img/checkmark2.svg" height="30px" width="30px")
     .container-fluid
       .row#root
-        .col-xs(v-if="loading")
-          %p
-            %span.ja ローディング中...
-            %span.en Loading...
-            %span.ru загрузка...
+        %description(v-if="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer")
+        .col-xs.text-center(v-if="loading")
+          %img.spin(src="./img/spinner2.svg" height="40px" width="40px")
         .col-xs(v-else-if="error")
           %p
             %span.ja エラーが発生しました
             %span.en Error has happen
             %span.ru Ошибка имеет произойти
           %p {{errorMsg}}
-        %description(v-if="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer")
-        %big-category(v-else v-for="(v, k) in plist" :name="k" :val="v")
+        %big-category(v-else=true v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress(:phase="phase" :log="log")
       .modal-dialog
         .modal-content

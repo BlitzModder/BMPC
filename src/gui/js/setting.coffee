@@ -3,8 +3,9 @@
 config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
-fs = require "fs"
-os = require "os"
+fs = remote.require("fs")
+path = remote.require("path")
+os = remote.require("os")
 
 lang = config.get("lang")
 langList = config.LANG_LIST
@@ -30,6 +31,22 @@ getFolderByWindow = (func) ->
     if directory?
       directory = directory[0] if Array.isArray(directory)
       func(directory)
+  )
+  return
+getFileByWindow = (func) ->
+  focusedWindow = BrowserWindow.getFocusedWindow()
+  dialog.showOpenDialog(focusedWindow,{
+    filters: [
+      {name: "App Files", extensions: ["ipa", "apk", "zip"] }
+      {name: "iOS App Files", extensions: ["ipa"] }
+      {name: "Android App Files", extensions: ["apk"] }
+      {name: "All Files", extensions: ["*"] }
+    ]
+    properties: ["openFile"]
+  }, (file) ->
+    if file?
+      file = file[0] if Array.isArray(file)
+      func(file)
   )
   return
 
@@ -88,6 +105,7 @@ new Vue(
     debugRepo: config.get("debugRepo")
     blitzPath: config.get("blitzPath")
     blitzPathRadio: config.get("blitzPathRadio")
+    blitzPathType: config.get("blitzPathType")
     platform: config.get("platform")
     lang: config.get("lang")
     remoteRepoAddStr: ""
@@ -131,9 +149,21 @@ new Vue(
         return
       )
       return
-    setBlitzPath: ->
+    setBlitzPathFolder: ->
       getFolderByWindow( (dir) =>
+        toBlitz = dir.split(path.sep)
+        if toBlitz[toBlitz.length-1] is "Data"
+          toBlitz.pop()
+          dir = toBlitz.join(path.sep)
         @blitzPath = dir
+        @blitzPathType = "folder"
+        return
+      )
+      return
+    setBlitzPathFile: ->
+      getFileByWindow( (file) =>
+        @blitzPath = file
+        @blitzPathType = "file"
         return
       )
       return
@@ -150,6 +180,7 @@ new Vue(
         @localRepos = config.get("localRepos")
         @debugRepo = config.get("debugRepo")
         @blitzPath = config.get("blitzPath")
+        @blitzPathType = config.get("blitzPathType")
         @remoteRepoAddStr = ""
         @remoteRepoAddStrErr = false
       return
@@ -179,6 +210,9 @@ new Vue(
       return
     blitzPath: (val) ->
       config.set("blitzPath", val)
+      return
+    blitzPathType: (val) ->
+      config.set("blitzPathType", val)
       return
     blitzPathRadio: (val) ->
       config.set("blitzPathRadio", val)

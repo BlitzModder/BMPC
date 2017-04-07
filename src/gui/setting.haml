@@ -84,10 +84,14 @@
                 %span.en Other
                 %span.ru Другие
             %blitz-path(:name="blitzPath")
-            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPath")
-              %span.ja 設定
-              %span.en Set
-              %span.ru Задавать
+            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
+              %span.ja フォルダに設定
+              %span.en Set folder
+              %span.ru Установить папку
+            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
+              %span.ja \.ipa/.apkに設定
+              %span.en Set .ipa/.apk
+              %span.ru Установить .ipa / .apk
         .col-xs
           .card.card-block
             %h4.card-title
@@ -104,6 +108,9 @@
               %label.form-check-inline
                 %input.form-check-input(type="radio" name="platform" value="a" v-model="platform")
                 Android
+              %label.form-check-inline
+                %input.form-check-input(type="radio" name="platform" value="i" v-model="platform")
+                iOS
         .col-xs
           .card.card-block
             %h4.card-title#langHeader 言語(Language)
@@ -150,7 +157,7 @@
         .col-xs
           .card.card-block
             %h4.card-title
-              %span.ja 適応情報出力
+              %span.ja 適用情報出力
               %span.en Apply information output
               %span.ru Применить вывод информации
             %button.btn.btn-primary(type="button" @click="applyInfo")

@@ -26,7 +26,7 @@ escape = (str) ->
  * Blitzを実行します
  ###
 openBlitz = ->
-  shell.openItem(path.join(config.get("blitzPath"), "wotblitz.exe"))
+  shell.openItem(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
   return
 
 ###*
@@ -34,7 +34,7 @@ openBlitz = ->
  ###
 getVersion = ->
   return new Promise( (resolve, reject) ->
-    if config.get("blitzPathType") is "file"
+    if require("./config").get("blitzPathType") is "file"
       reject()
       return
     readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->

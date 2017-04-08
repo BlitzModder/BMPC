@@ -26,15 +26,25 @@ escape = (str) ->
  * Blitzを実行します
  ###
 openBlitz = ->
-  shell.openItem(path.join(config.get("blitzPath"), "wotblitz.exe"))
+  shell.openItem(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
   return
+
+###*
+ * Blitzが存在するか判定します
+ ###
+blitzExists = ->
+  try
+    fs.statSync(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
+    return true
+  catch
+    return false
 
 ###*
  * Blitzのバージョンを取得します
  ###
 getVersion = ->
   return new Promise( (resolve, reject) ->
-    if config.get("blitzPathType") is "file"
+    if require("./config").get("blitzPathType") is "file"
       reject()
       return
     readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
@@ -98,6 +108,7 @@ isFile = (topath) ->
 module.exports =
   escape: escape
   openBlitz: openBlitz
+  blitzExists: blitzExists
   getVersion: getVersion
   getPlatform: getPlatform
   isDirectory: isDirectory

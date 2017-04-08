@@ -77,3 +77,11 @@ $("#updateLink").on("click", ->
   shell.openExternal("https://github.com/BlitzModder/BMPC/releases")
   return
 )
+
+if config.get("blitzPathType") is "file" or !util.blitzExists()
+  $("#play").remove()
+else
+  document.getElementById("play").addEventListener("click", ->
+    util.openBlitz()
+    return
+  )

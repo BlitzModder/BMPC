@@ -30,6 +30,16 @@ openBlitz = ->
   return
 
 ###*
+ * Blitzが存在するか判定します
+ ###
+blitzExists = ->
+  try
+    fs.statSync(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
+    return true
+  catch
+    return false
+
+###*
  * Blitzのバージョンを取得します
  ###
 getVersion = ->
@@ -98,6 +108,7 @@ isFile = (topath) ->
 module.exports =
   escape: escape
   openBlitz: openBlitz
+  blitzExists: blitzExists
   getVersion: getVersion
   getPlatform: getPlatform
   isDirectory: isDirectory

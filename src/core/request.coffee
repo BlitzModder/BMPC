@@ -49,10 +49,18 @@ getDetailUrl = (repo, id) ->
  ###
 getLastestVersion = ->
   return new Promise( (resolve, reject) ->
-    request("https://api.github.com/repos/BlitzModder/BMPC/releases/latest", (err, res, body) ->
+    request(
+      url: "https://api.github.com/repos/BlitzModder/BMPC/releases/latest"
+      headers:
+        "User-Agent": "request"
+    , (err, res, body) ->
       if err? or (res? and res.statusCode is 404)
         reject(err)
-      resolve(JSON.parse(body).name)
+      try
+        response = JSON.parse(body)
+        resolve(response.name)
+      catch
+        reject("Failed to parse JSON")
     )
     return
   )

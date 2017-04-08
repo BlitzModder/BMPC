@@ -4,7 +4,7 @@
 
 {app} = require "electron"
 path = require "path"
-Promise = require "Promise"
+Promise = require "promise"
 fs = require "fs-extra"
 fstream = require "fstream"
 jszip = require "jszip"

@@ -1,6 +1,6 @@
 {
   "name": "BlitzModder",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "bin/core/core.js",
   "scripts": {

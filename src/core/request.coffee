@@ -76,7 +76,7 @@ getUrlStatus = (url) ->
       if err? and res?
         reject(err)
       else
-        resolve(res.status)
+        resolve(res.statusCode)
       return
     )
   )

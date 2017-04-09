@@ -1,4 +1,4 @@
-{remote} = require "electron"
+{remote, shell} = require "electron"
 plistList = remote.require("./plistList")
 plistInfo = remote.require("./plistInfo")
 util = remote.require("./util")
@@ -296,4 +296,13 @@ document.getElementById("apply").addEventListener("click", ->
       return
     )
   return
+)
+
+webview = document.getElementById("detailweb")
+webview.addEventListener("new-window", (e) ->
+  shell.openExternal(e.url)
+)
+webview.addEventListener("will-navigate", (e) ->
+  shell.openExternal(e.url)
+  webview.stop()
 )

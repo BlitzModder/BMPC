@@ -26,8 +26,6 @@ createWindow = ->
   )
   mainWindow.loadURL("file://#{app.getAppPath()}/gui/index.html")
   mainWindow.on("closed", ->
-    # キャッシュ削除
-    session.defaultSession.clearCache()
     # guiの終了
     mainWindow = null
     return
@@ -47,6 +45,8 @@ app.on("ready", ->
 )
 
 app.on("window-all-closed", ->
+  # キャッシュ削除
+  session.defaultSession.clearCache(->)
   # アプリ終了
   app.quit()
   return

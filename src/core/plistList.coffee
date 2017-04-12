@@ -116,7 +116,7 @@ _is_needed = (ok, ver, plat, obj) ->
   ov = obj.version
   op = obj.platform
   if (
-    (!ok or ov is "" or semver.gt(ov, ver)) and
+    (!ok or ov is "" or semver.gte(ov, ver)) and
     (op is "" or op.includes(plat))
   )
     return true

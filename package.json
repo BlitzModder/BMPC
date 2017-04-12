@@ -8,7 +8,7 @@
     "start": "npm run start:win64",
     "start:win32": "build -w --ia32 --dir && .\\dist\\win-ia32-unpacked\\BlitzModder",
     "start:win64": "build -w --x64 --dir && .\\dist\\win-unpacked\\BlitzModder",
-    "start:mac": "build -m --dir",
+    "start:mac": "build -m --dir && ./dist/mac/BlitzModder",
     "build": "gulp",
     "pack": "npm run pack:win && npm run pack:mac",
     "pack:win": "npm run build && build -w --ia32 --x64",

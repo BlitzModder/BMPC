@@ -1,6 +1,6 @@
 {
   "name": "BlitzModder",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "bin/core/core.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "start": "npm run start:win64",
     "start:win32": "build -w --ia32 --dir && .\\dist\\win-ia32-unpacked\\BlitzModder",
     "start:win64": "build -w --x64 --dir && .\\dist\\win-unpacked\\BlitzModder",
-    "start:mac": "build -m --dir",
+    "start:mac": "build -m --dir && ./dist/mac/BlitzModder",
     "build": "gulp",
     "pack": "npm run pack:win && npm run pack:mac",
     "pack:win": "npm run build && build -w --ia32 --x64",
@@ -22,8 +22,8 @@
   "homepage": "https://github.com/BlitzModder/BMPC/wiki",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "4.0.0-alpha.5",
-    "fs-extra": "^0.30.0",
+    "bootstrap": "^4.0.0-alpha.6",
+    "fs-extra": "^2.1.2",
     "fstream": "^1.0.11",
     "jszip": "^3.1.3",
     "plist": "^2.0.1",

@@ -1,5 +1,6 @@
 path = require "path"
 fs = require "fs-extra"
+jszip = require "jszip"
 shell = require("electron").shell
 os = require "os"
 Promise = require "promise"
@@ -39,34 +40,76 @@ blitzExists = ->
   catch
     return false
 
+_parseVersion = (str) ->
+  reg = /_(\d+\.\d+\.\d+)_/.exec(str)
+  if reg?
+    return reg[1]
+  else
+    reg = /^(\d+\.\d+)\.(\d+)\.(\d+)_/.exec(str)
+    if reg?
+      if reg[2] < 10
+        return reg[1]+"."+reg[2]
+      else if reg[3] < 10
+        return reg[1]+"."+reg[3]
+      else
+        return reg[1]+".0"
+    else
+      reg = /^\d+\.\d+/.exec(str)
+      if reg?
+        return reg[0]+".0"
+  return ""
+
+_version = ""
 ###*
  * Blitzのバージョンを取得します
  ###
-getVersion = ->
+getVersion = (useCache = false) ->
   return new Promise( (resolve, reject) ->
-    if require("./config").get("blitzPathType") is "file"
-      reject()
-      return
-    readFile(path.join(require("./config").get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
-      reg = /_(\d+\.\d+\.\d+)_/.exec(text)
-      if reg?
-        resolve(reg[1])
-      else
-        reg = /^(\d+\.\d+)\.(\d+)\.(\d+)_/.exec(text)
-        if reg?
-          if reg[2] < 10
-            resolve(reg[1]+"."+reg[2])
-          else if reg[3] < 10
-            resolve(reg[1]+"."+reg[3])
-          else
-            resolve(reg[1]+".0")
+    if useCache and _version isnt ""
+      return _version
+    config = require("./config")
+    if config.get("blitzPathType") is "file"
+      zip = new jszip()
+      readFile(config.get("blitzPath")).then( (data) ->
+        return zip.loadAsync(data)
+      ).then( ->
+        switch config.get("platform")
+          when "a" then prefix = "assets"
+          when "i" then prefix = "Payload/wotblitz.app"
+          else prefix = ""
+        file = zip.file("#{prefix}/Data/version.txt")
+        if file?
+          return file.async("string")
         else
-          reject("Error: Version Regexp Error (#{text})")
+          reject("Error: Version File Not Found Error")
+          return
+      ).then( (str) ->
+        ver = _parseVersion(str)
+        if ver is ""
+          reject("Error: Version Regexp Error")
+        else
+          _version = ver
+          resolve(ver)
+        return
+      ).catch( (err) ->
+        console.log err
+        reject(err)
+        return
+      )
+      return
+    readFile(path.join(config.get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
+      ver = _parseVersion(text)
+      if ver is ""
+        reject("Error: Version Regexp Error (#{text})")
+      else
+        _version = ver
+        resolve(ver)
       return
     ).catch( ->
-      return readFile(path.join(require("./config").get("blitzPath"), "Data/version", "resources.txt"), "utf-8").then( (text) ->
+      return readFile(path.join(config.get("blitzPath"), "Data/version", "resources.txt"), "utf-8").then( (text) ->
         reg = /^(\d+\.\d+\.\d+)$/.exec(text)
         if reg?
+          _version = ver
           resolve(reg[1])
         else
           reject("Error: Version Regexp Error (#{text})")

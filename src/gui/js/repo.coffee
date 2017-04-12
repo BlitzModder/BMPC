@@ -75,8 +75,8 @@ Vue.component("mod",
   template: """
             <button type="button" class="list-group-item list-group-item-action" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check">
-                <label class="form-check-label">
-                  <input type="checkbox" class="form-check-input" :data-path="val" v-model="checked">
+                <label class="form-check-label checkbox_text">
+                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" v-model="checked">
                   {{name}}
                 </label>
               </div>
@@ -155,7 +155,7 @@ r = new Vue(
     getPlistWithOutBlackout: (force = false) ->
       @error = false
       return plistList.getUntilDone(repo, lang, force).then( (obj) =>
-        return plistList.filter(obj)
+        return plistList.filter(obj, true)
       ).then( (obj) =>
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
           @plist = obj

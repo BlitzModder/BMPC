@@ -75,8 +75,8 @@ Vue.component("mod",
   template: """
             <button type="button" class="list-group-item list-group-item-action" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check">
-                <label class="form-check-label">
-                  <input type="checkbox" class="form-check-input" :data-path="val" v-model="checked">
+                <label class="form-check-label checkbox_text">
+                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" v-model="checked">
                   {{name}}
                 </label>
               </div>

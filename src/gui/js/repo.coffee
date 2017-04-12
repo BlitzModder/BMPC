@@ -155,7 +155,7 @@ r = new Vue(
     getPlistWithOutBlackout: (force = false) ->
       @error = false
       return plistList.getUntilDone(repo, lang, force).then( (obj) =>
-        return plistList.filter(obj)
+        return plistList.filter(obj, true)
       ).then( (obj) =>
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
           @plist = obj

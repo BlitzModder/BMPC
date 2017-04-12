@@ -127,9 +127,9 @@ _is_needed = (ok, ver, plat, obj) ->
  * @param {Object} parse()で変換したもの
  * @return {Object}
  ###
-filter = (parsedObj) ->
+filter = (parsedObj, useCache = false) ->
   return new Promise( (resolve, reject) ->
-    util.getVersion().then( (ver) ->
+    util.getVersion(useCache).then( (ver) ->
       return {ok: true, ver}
     , (err) ->
       return {ok: false}

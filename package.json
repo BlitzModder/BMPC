@@ -22,7 +22,7 @@
   "homepage": "https://github.com/BlitzModder/BMPC/wiki",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^4.0.0-alpha.6",
+    "bootstrap": "^4.0.0-alpha.5",
     "fs-extra": "^2.1.2",
     "fstream": "^1.0.11",
     "jszip": "^3.1.3",

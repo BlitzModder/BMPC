@@ -7,15 +7,13 @@
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
     %link(rel="stylesheet" type="text/css" href="./css/core.css")
   %body
-    .pos-f-t
-      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
-        %form.form-inline.float-xs-left
-          %a(href="./index.html")
-            %button.btn(type="button")
-              %img(src="./img/circle-left.svg" height="30px" width="30px")
+    %nav.navbar.navbar-toggleable-sm.navbar-dark.sticky-top.bg-faded.mb-4
+      %a(href="./index.html")
+        %button.btn(type="button")
+          %img(src="./img/circle-left.svg" height="30px" width="30px")
     .container-fluid
       .row#setting
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja リモートリポジトリ一覧
@@ -25,12 +23,12 @@
               %span.ja 「ユーザー名/リポジトリ名」の形式でまたはURLを入力してください
               %span.en Enter in the form of "UserName/RepositoryName" or the URL
               %span.ru Введите в форме "Имя пользователя / Имя вместилище" или URL
-            %ul.list-group.with-form
+            %ul.list-group.mb-1
               %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
             %form.form-inline
               .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
-                %input.form-control#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
-                %button.btn.btn-primary.remoteRepoButton(type="button" @click="addRemoteRepo")
+                %input.form-control.mr-1.mt-1#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
+                %button.btn.btn-primary.mt-1.remoteRepoButton(type="button" @click="addRemoteRepo")
                   %span.ja 追加
                   %span.en Add
                   %span.ru Добавить
@@ -39,19 +37,19 @@
                     %span.ja 入力が不正です
                     %span.en Invalid input string
                     %span.ru Недопустимая строка ввода
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja ローカルリポジトリ一覧
               %span.en List of Local Repository
               %span.ru Список локальных репозитария
-            %ul.list-group.with-form
+            %ul.list-group.mb-1
               %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
             %button.btn.btn-primary(type="button" @click="addLocalRepo")
               %span.ja 追加
               %span.en Add
               %span.ru Добавить
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja デバッグ用リポジトリ
@@ -62,69 +60,70 @@
               %span.ja 設定
               %span.en Set
               %span.ru Задавать
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja Blitzのフォルダ位置
               %span.en Path to Blitz
               %span.ru Путь к Blitz
             %form.form-inline
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
+              %label.radio_text
+                %input.radio(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
                 Windows(Steam)
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="blitzPathRadio" value="macsteam" v-model="blitzPathRadio")
+              %label.radio_text
+                %input.radio(type="radio" name="blitzPathRadio" value="macsteam" v-model="blitzPathRadio")
                 Mac(Steam)
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="blitzPathRadio" value="macapp" v-model="blitzPathRadio")
+              %label.radio_text
+                %input.radio(type="radio" name="blitzPathRadio" value="macapp" v-model="blitzPathRadio")
                 Mac(AppStore)
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
+              %label.radio_text
+                %input.radio(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
                 %span.ja その他
                 %span.en Other
                 %span.ru Другие
             %blitz-path(:name="blitzPath")
-            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
-              %span.ja フォルダに設定
-              %span.en Set folder
-              %span.ru Установить папку
-            %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
-              %span.ja \.ipa/.apkに設定
-              %span.en Set .ipa/.apk
-              %span.ru Установить .ipa / .apk
-        .col-xs
+            .btn-group
+              %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
+                %span.ja フォルダに設定
+                %span.en Set folder
+                %span.ru Установить папку
+              %button.btn(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
+                %span.ja \.ipa/.apkに設定
+                %span.en Set .ipa/.apk
+                %span.ru Установить .ipa / .apk
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja 適応端末
               %span.en Device to apply
               %span.ru Устройство для применения
             %form.form-inline
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="platform" value="w" v-model="platform")
+              %label.radio_text
+                %input.radio(type="radio" name="platform" value="w" v-model="platform")
                 Windows
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="platform" value="m" v-model="platform")
+              %label.radio_text
+                %input.radio(type="radio" name="platform" value="m" v-model="platform")
                 Mac
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="platform" value="a" v-model="platform")
+              %label.radio_text
+                %input.radio(type="radio" name="platform" value="a" v-model="platform")
                 Android
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="platform" value="i" v-model="platform")
+              %label.radio_text
+                %input.radio(type="radio" name="platform" value="i" v-model="platform")
                 iOS
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title#langHeader 言語(Language)
             %form.form-inline
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="lang" value="en" v-model="lang")
+              %label.radio_text
+                %input.radio(type="radio" name="lang" value="en" v-model="lang")
                 English
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="lang" value="ja" v-model="lang")
+              %label.radio_text
+                %input.radio(type="radio" name="lang" value="ja" v-model="lang")
                 日本語
-              %label.form-check-inline
-                %input.form-check-input(type="radio" name="lang" value="ru" v-model="lang")
+              %label.radio_text
+                %input.radio(type="radio" name="lang" value="ru" v-model="lang")
                 русский
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja キャッシュを削除する
@@ -134,7 +133,7 @@
               %span.ja 削除
               %span.en Clear
               %span.ru Очистить
-        .col-xs
+        .col-md-6
           .card.card-block
             %h4.card-title
               %span.ja 設定フォルダを開く
@@ -144,7 +143,7 @@
               %span.ja 開く
               %span.en Open
               %span.ru открыто
-        .col-xs
+        .col-md-12
           .card.card-block
             %h4.card-title
               %span.ja 設定をリセットする
@@ -154,7 +153,7 @@
               %span.ja リセット
               %span.en Reset
               %span.ru Сброс
-        .col-xs
+        .col-md-12
           .card.card-block
             %h4.card-title
               %span.ja 適用情報出力
@@ -174,7 +173,7 @@
                 %textarea
               .modal-footer
                 %button.btn.btn-secondary(type="button" data-dismiss="modal") Close
-        .col-xs
+        .col-md-12
           .card.card-block
             %h4.card-title
               %span.ja バージョン情報

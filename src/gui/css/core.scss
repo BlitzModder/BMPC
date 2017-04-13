@@ -1,45 +1,30 @@
-body {
-  padding-top: 5rem;
-}
-
 * {
   user-select: none;
 }
 .user-select {
   user-select: text;
 }
+.navbar {
+  flex-direction: row;
+}
+.card-block {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 
+.category {
+  width: 100%;
+}
 button.applied::after {
   content: "インストール済";
   color: blue;
-}
-.form-check {
-  margin-bottom: 0;
+  margin-left: 20px;
 }
 webview {
   height: 100%;
 }
 #outwebview {
   height: 450px;
-}
-
-.with-form {
-  margin-bottom: 10px;
-}
-
-#remoteRepoInput {
-  margin-top: 5px;
-  margin-right: 5px;
-}
-.remoteRepoButton {
-  margin-top: 5px;
-}
-#debugRepo, #blitzFolder {
-  padding: 10px;
-}
-
-.remove {
-  float: right;
 }
 
 #applyInfo textarea {
@@ -98,7 +83,7 @@ li {
   transform: rotate(45deg);
   border-right: 3px solid #0275d8;
   border-bottom: 3px solid #0275d8;
-  top: calc(50% - (35px/12));
+  top: (35px/6);
   display: block;
   margin-top: (-35px/6);
   width: (35px/6);
@@ -182,6 +167,7 @@ label {
       @include bacontent();
       @include rc();
       border-radius: 100%;
+      top: 3px;
       left: 0px;
       z-index: 3;
     }

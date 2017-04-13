@@ -29,7 +29,7 @@ for l in langList when l isnt lang
 
 Vue.component("description",
   template: """
-            <div class="col-xs">
+            <div class="col-12">
               <div class="card card-outline-primary card-block">
                 <h4 class="card-title">{{name}}</h4>
                 <h6 class="card-subtitle text-muted">{{version}}</h4>
@@ -41,7 +41,7 @@ Vue.component("description",
 )
 Vue.component("big-category",
   template: """
-            <div class="col-xs">
+            <div class="col-md-6">
               <div class="card card-block">
                 <h4 class="card-title">{{name}}</h4>
                 <ul class="list-group">
@@ -54,9 +54,9 @@ Vue.component("big-category",
 )
 Vue.component("small-category",
   template: """
-            <li class="list-group-item">
+            <li class="list-group-item flex-column align-items-start">
               <a data-toggle="collapse" :href="id">{{name}}</a>
-              <div class="collapse" :id="idName">
+              <div class="category collapse" :id="idName">
                 <div class="list-group">
                   <button is="mod" type="button" v-for="(v, k) in val" :name="k" :val="v"></button>
                 </div>
@@ -73,8 +73,8 @@ Vue.component("small-category",
 firstExec = true
 Vue.component("mod",
   template: """
-            <button type="button" class="list-group-item list-group-item-action" :class="{applied: applied}" :data-path="val" @click="show">
-              <div class="form-check">
+            <button type="button" class="list-group-item list-group-item-action flex-column align-items-start" :class="{applied: applied}" :data-path="val" @click="show">
+              <div class="form-check mb-0">
                 <label class="form-check-label checkbox_text">
                   <input type="checkbox" class="form-check-input checkbox" :data-path="val" v-model="checked">
                   {{name}}

@@ -7,18 +7,16 @@
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
     %link(rel="stylesheet" type="text/css" href="css/core.css")
   %body
-    .pos-f-t
-      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
-        %form.form-inline.float-xs-left
-          %a(href="./setting.html")
-            %button.btn(type="button")
-              %img(src="./img/cogs.svg" height="30px" width="30px")
-        %form.form-inline.float-xs-right
-          %button.btn#play(type="button")
-            %img(src="./img/play3.svg" height="30px" width="30px")
+    %nav.navbar.navbar-dark.sticky-top.bg-faded.mb-4
+      .mr-auto
+        %a(href="./setting.html")
+          %button.btn(type="button")
+            %img(src="./img/cogs.svg" height="30px" width="30px")
+      %button.btn#play(type="button")
+        %img(src="./img/play3.svg" height="30px" width="30px")
     .container-fluid
       .row#repo
-        .col-xs(v-if="remoteRepos.length > 0")
+        .col-md-6(v-if="remoteRepos.length > 0")
           .card.card-block
             %h4.card-title
               %span.ja リモートリポジトリ
@@ -26,7 +24,7 @@
               %span.ru удаленном репозитории
             %ul.list-group
               %li(is="repo" v-for="r in remoteRepos" :name="r" repotype="remote")
-        .col-xs(v-if="localRepos.length > 0")
+        .col-md-6(v-if="localRepos.length > 0")
           .card.card-block
             %h4.card-title
               %span.ja ローカルリポジトリ
@@ -34,7 +32,7 @@
               %span.ru Локальный репозиторий
             %ul.list-group
               %li(is="repo" v-for="r in localRepos" :name="r" repotype="local")
-        .col-xs(v-if="debugRepo !== \"\"")
+        .col-md-6(v-if="debugRepo !== \"\"")
           .card.card-block
             %h4.card-title
               %span.ja デバッグ用リポジトリ

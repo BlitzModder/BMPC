@@ -1,6 +1,6 @@
 {
   "name": "BlitzModder",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "core/core.js",
   "author": "S(29314)",
@@ -11,7 +11,7 @@
   "homepage": "https://github.com/BlitzModder/BMPC/wiki",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "4.0.0-alpha.5",
+    "bootstrap": "^4.0.0-alpha.6",
     "fs-extra": "^2.1.2",
     "fstream": "^1.0.11",
     "jszip": "^3.1.3",

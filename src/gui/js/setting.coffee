@@ -63,7 +63,7 @@ formatRepoName = (name) ->
   return name
 
 Vue.component("repo",
-  template: "<li class=\"list-group-item\">{{formatedName}}<removeRepoButton @remove=\"removeRepo\"></li>"
+  template: "<li class=\"list-group-item\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"removeRepo\"></li>"
   props: ["name", "num", "repos"]
   computed:
     formatedName: ->
@@ -75,7 +75,7 @@ Vue.component("repo",
       return
 )
 Vue.component("debug-repo",
-  template: "<div class=\"card card-block\" id=\"debugRepo\">{{formatedName}}<removeRepoButton @remove=\"remove\"></div>"
+  template: "<div class=\"card card-block p-1\" id=\"debugRepo\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"remove\"></div>"
   props: ["name"]
   computed:
     formatedName: ->
@@ -88,14 +88,14 @@ Vue.component("debug-repo",
       return
 )
 Vue.component("blitz-path",
-  template: "<div class=\"card card-block\" id=\"blitzFolder\">{{formatedName}}</div>"
+  template: "<div class=\"card card-block p-1\" id=\"blitzFolder\">{{formatedName}}</div>"
   props: ["name"]
   computed:
     formatedName: ->
       return formatRepoName(@name)
 )
 Vue.component("removeRepoButton",
-  template: "<button type=\"button\" class=\"remove close\" @click=\"$emit('remove')\"><span>&times;</span></button>"
+  template: "<button type=\"button\" class=\"close\" @click=\"$emit('remove')\"><span>&times;</span></button>"
 )
 new Vue(
   el: "#setting"

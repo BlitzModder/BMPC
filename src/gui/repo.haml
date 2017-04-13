@@ -7,23 +7,21 @@
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
     %link(rel="stylesheet" type="text/css" href="css/core.css")
   %body
-    .pos-f-t
-      %nav.navbar.navbar-dark.navbar-static-top.bg-faded
-        %form.form-inline.float-xs-left
-          %a(href="./index.html")
-            %button.btn(type="button")
-              %img(src="./img/circle-left.svg" height="30px" width="30px")
-        %form.form-inline.float-xs-right
-          %button.btn#reload(type="button")
-            %img(src="./img/loop2.svg" height="30px" width="30px")
-          %button.btn#apply(type="button")
-            %img(src="./img/checkmark2.svg" height="30px" width="30px")
+    %nav.navbar.navbar-dark.sticky-top.bg-faded.mb-4
+      .mr-auto
+        %a(href="./index.html")
+          %button.btn(type="button")
+            %img(src="./img/circle-left.svg" height="30px" width="30px")
+      %button.btn#reload(type="button")
+        %img(src="./img/loop2.svg" height="30px" width="30px")
+      %button.btn#apply(type="button")
+        %img(src="./img/checkmark2.svg" height="30px" width="30px")
     .container-fluid
       .row#root
         %description(v-if="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer")
-        .col-xs.text-center(v-if="loading")
+        .col-12.text-center(v-if="loading")
           %img.spin(src="./img/spinner2.svg" height="40px" width="40px")
-        .col-xs(v-else-if="error")
+        .col-12(v-else-if="error")
           %p
             %span.ja エラーが発生しました
             %span.en Error has happen

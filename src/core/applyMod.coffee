@@ -131,8 +131,6 @@ applyMod = (type, mod, callback) ->
         return
       )
     return
-  ).catch( (err) ->
-    console.log err
     return
   ).then( ->
     return new Promise( (resolve, reject) ->

@@ -40,18 +40,46 @@ _getFromLocal = (folder, mod) ->
 ###*
  * dataイベントから適応する
  *###
-_applyFromData = (outputFolder, entry) ->
+_applyFromData = (outputFolder, entry, pathList, cb) ->
+  pathList.add(entry.path)
   fstream
     .Reader(entry.fullPath)
     .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
+    .on("err", (err) ->
+      cb(false, err)
+    )
+    .on("close", ->
+      cb(true, entry.path)
+      return
+    )
   return
 
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, entry) ->
-  entry.pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+_applyFromEntry = (outputFolder, entry, pathList, cb) ->
+  pathList.add(entry.path)
+  entry
+    .pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+    .on("err", (err) ->
+      cb(false, err)
+    )
+    .on("close", ->
+      cb(true, entry.path)
+      return
+    )
   return
+
+###*
+ * 終了確認
+ *###
+_isEnd = (resolve, reject, pathList) ->
+  return (ok, data) ->
+    reject(data) unless ok
+    pathList.delete(data)
+    if pathList.size is 0
+      resolve()
+    return
 
 ###*
  * MODを適応します
@@ -67,6 +95,7 @@ applyMod = (type, mod, callback) ->
   else
     outputFolder = TEMP_FOLDER
   return new Promise( (resolve, reject) ->
+    pathList = new Set()
     fs.ensureDirSync(outputFolder)
     switch type
       when "add" then folder = "install"
@@ -80,14 +109,17 @@ applyMod = (type, mod, callback) ->
     else
       reject("Unknown RepoType")
 
+    hasFile = false
     stream
       .on("data", (entry) ->
-        _applyFromData(outputFolder, entry)
+        hasFile = true
+        _applyFromData(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
         return
       )
       .on("entry", (entry) ->
         return if entry.type is "Directory"
-        _applyFromEntry(outputFolder, entry)
+        hasFile = true
+        _applyFromEntry(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
         return
       )
       .on("error", (err) ->
@@ -95,13 +127,12 @@ applyMod = (type, mod, callback) ->
         return
       )
       .on("end", ->
-        resolve()
+        resolve() unless hasFile
         return
       )
-      .on("close", ->
-        resolve()
-        return
-      )
+    return
+  ).catch( (err) ->
+    console.log err
     return
   ).then( ->
     return new Promise( (resolve, reject) ->

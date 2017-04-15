@@ -76,7 +76,7 @@ Vue.component("mod",
             <button type="button" class="list-group-item list-group-item-action flex-column align-items-start" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check mb-0">
                 <label class="form-check-label checkbox_text">
-                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" v-model="checked">
+                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" :data-name="name" v-model="checked">
                   {{name}}
                 </label>
               </div>
@@ -252,41 +252,42 @@ document.getElementById("apply").addEventListener("click", ->
     addMods = []
     deleteMods = []
     for $mod in $("button:not(.applied) input:checked")
-      addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+      addMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
     for $mod in $("button.applied input:not(:checked)")
-      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
 
     $("#progress").modal({ keyboard: false, backdrop: "static" })
     errored = false
-    applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-      $button = $("button[data-path=\"#{mod.name}\"]")
-      if done
+    applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
+      if phase is "done"
+        $button = $("button[data-path=\"#{mod.name}\"]")
         switch type
           when "add"
             $button.addClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適用完了")
-              when "en" then p.addLog("#{mod.name} - Applied Successfully")
-              when "ru" then p.addLog("#{mod.name} - Применено успешно")
+              when "ja" then p.addLog("#{mod.showname} - 適用完了")
+              when "en" then p.addLog("#{mod.showname} - Applied Successfully")
+              when "ru" then p.addLog("#{mod.showname} - Применено успешно")
           when "delete"
             $button.removeClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 解除完了")
-              when "en" then p.addLog("#{mod.name} - Removed Successfully")
-              when "ru" then p.addLog("#{mod.name} - Удалено успешно")
-      else
+              when "ja" then p.addLog("#{mod.showname} - 解除完了")
+              when "en" then p.addLog("#{mod.showname} - Removed Successfully")
+              when "ru" then p.addLog("#{mod.showname} - Удалено успешно")
+      else if phase is "fail"
+        $button = $("button[data-path=\"#{mod.name}\"]")
         errored = true
         switch type
           when "add"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適用失敗(#{err})")
-              when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
-              when "ru" then p.addLog("#{mod.name} - Не удалось применить(#{err})")
+              when "ja" then p.addLog("#{mod.showname} - 適用失敗(#{err})")
+              when "en" then p.addLog("#{mod.showname} - Failed to Apply(#{err})")
+              when "ru" then p.addLog("#{mod.showname} - Не удалось применить(#{err})")
           when "delete"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
-              when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
-              when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
+              when "ja" then p.addLog("#{mod.showname} - 解除失敗(#{err})")
+              when "en" then p.addLog("#{mod.showname} - Failed to Remove(#{err})")
+              when "ru" then p.addLog("#{mod.showname} - Не удалось удалить(#{err})")
       return
     ).then( ->
       if !errored

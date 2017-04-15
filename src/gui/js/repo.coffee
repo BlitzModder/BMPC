@@ -76,7 +76,7 @@ Vue.component("mod",
             <button type="button" class="list-group-item list-group-item-action flex-column align-items-start" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check mb-0">
                 <label class="form-check-label checkbox_text">
-                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" v-model="checked">
+                  <input type="checkbox" class="form-check-input checkbox" :data-path="val" :data-name="name" v-model="checked">
                   {{name}}
                 </label>
               </div>
@@ -221,11 +221,11 @@ p = new Vue(
     finished: ->
       return @phase is "done" or @phase is "failed"
   methods:
-    addLog: (s) ->
+    addLog: (m, d) ->
       if @log is ""
-        @log = util.escape(s)
+        @log = "<b>#{util.escape(m)}</b> - #{util.escape(d)}"
       else
-        @log += "<br>#{util.escape(s)}"
+        @log += "<br><b>#{util.escape(m)}</b> - #{util.escape(d)}"
       return
     nextLog: ->
       @log += "<br>"
@@ -252,41 +252,86 @@ document.getElementById("apply").addEventListener("click", ->
     addMods = []
     deleteMods = []
     for $mod in $("button:not(.applied) input:checked")
-      addMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+      addMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
     for $mod in $("button.applied input:not(:checked)")
-      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path")})
+      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
 
     $("#progress").modal({ keyboard: false, backdrop: "static" })
     errored = false
-    applyMod.applyMods(addMods, deleteMods, (done, type, mod, err) ->
-      $button = $("button[data-path=\"#{mod.name}\"]")
-      if done
+    applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
+      if phase is "done"
+        $button = $("button[data-path=\"#{mod.name}\"]")
         switch type
           when "add"
             $button.addClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適用完了")
-              when "en" then p.addLog("#{mod.name} - Applied Successfully")
-              when "ru" then p.addLog("#{mod.name} - Применено успешно")
+              when "ja" then p.addLog(mod.showname, "適用完了")
+              when "en" then p.addLog(mod.showname, "Applied Successfully")
+              when "ru" then p.addLog(mod.showname, "Применено успешно")
           when "delete"
             $button.removeClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 解除完了")
-              when "en" then p.addLog("#{mod.name} - Removed Successfully")
-              when "ru" then p.addLog("#{mod.name} - Удалено успешно")
-      else
+              when "ja" then p.addLog(mod.showname, "解除完了")
+              when "en" then p.addLog(mod.showname, "Removed Successfully")
+              when "ru" then p.addLog(mod.showname, "Удалено успешно")
+      else if phase is "fail"
+        $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
         errored = true
         switch type
           when "add"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 適用失敗(#{err})")
-              when "en" then p.addLog("#{mod.name} - Failed to Apply(#{err})")
-              when "ru" then p.addLog("#{mod.name} - Не удалось применить(#{err})")
+              when "ja" then p.addLog(mod.showname, "適用失敗(#{err})")
+              when "en" then p.addLog(mod.showname, "Failed to Apply(#{err})")
+              when "ru" then p.addLog(mod.showname, "Не удалось применить(#{err})")
+            $checkbox.prop("checked", false)
           when "delete"
             switch lang
-              when "ja" then p.addLog("#{mod.name} - 解除失敗(#{err})")
-              when "en" then p.addLog("#{mod.name} - Failed to Remove(#{err})")
-              when "ru" then p.addLog("#{mod.name} - Не удалось удалить(#{err})")
+              when "ja" then p.addLog(mod.showname, "解除失敗(#{err})")
+              when "en" then p.addLog(mod.showname, "Failed to Remove(#{err})")
+              when "ru" then p.addLog(mod.showname, "Не удалось удалить(#{err})")
+            $checkbox.prop("checked", true)
+      else
+        switch phase
+          when "download"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "ダウンロード開始")
+              when "en" then p.addLog(mod.showname, "Started Downloading")
+              when "ru" then p.addLog(mod.showname, "Начато скачивание")
+          when "downloaded"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "ダウンロード終了")
+              when "en" then p.addLog(mod.showname, "Finished Downloading")
+              when "ru" then p.addLog(mod.showname, "Законченная загрузка")
+          when "copydir"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "コピー開始")
+              when "en" then p.addLog(mod.showname, "Started Copying")
+              when "ru" then p.addLog(mod.showname, "Начатое копирование")
+          when "zipextract"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "解凍開始")
+              when "en" then p.addLog(mod.showname, "Started Extracting")
+              when "ru" then p.addLog(mod.showname, "Начато извлечение")
+          when "zipextracted"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "解凍終了")
+              when "en" then p.addLog(mod.showname, "Finished Extracting")
+              when "ru" then p.addLog(mod.showname, "Готовое извлечение")
+          when "tempdone"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "適用データ構築終了")
+              when "en" then p.addLog(mod.showname, "Finished building apply data")
+              when "ru" then p.addLog(mod.showname, "Готовое здание использовать данные")
+          when "zipcompress"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "圧縮開始")
+              when "en" then p.addLog(mod.showname, "Started Compressing")
+              when "ru" then p.addLog(mod.showname, "Начато сжатие")
+          when "zipcompressed"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "圧縮終了")
+              when "en" then p.addLog(mod.showname, "Finished Compressing")
+              when "ru" then p.addLog(mod.showname, "Готовое сжатие")
       return
     ).then( ->
       if !errored

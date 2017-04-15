@@ -21,37 +21,77 @@ TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 ###*
  * リモートからとってくる
  ###
-_getFromRemote = (folder, mod) ->
+_getFromRemote = (folder, mod, log) ->
+  log("download")
   return request("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
-    .pipe(unzip.Parse())
+    .on("response", ->
+      log("downloaded")
+      log("zipextract")
+    )
+    .pipe(
+      unzip.Parse()
+        .on("end", ->
+          log("zipextracted")
+        )
+    )
 
 ###*
  * ローカルからとってくる
  ###
-_getFromLocal = (folder, mod) ->
+_getFromLocal = (folder, mod, log) ->
   dirpath = path.join(mod.repo.name, folder, mod.name)
   zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
   if util.isDirectory(dirpath)
+    log("copydir")
     return readdirp(root: dirpath)
   else if util.isFile(zippath)
+    log("zipextract")
     return fs.createReadStream(zippath).pipe(unzip.Parse())
   return
 
 ###*
  * dataイベントから適応する
  *###
-_applyFromData = (outputFolder, entry) ->
+_applyFromData = (outputFolder, entry, pathList, cb) ->
+  pathList.add(entry.path)
   fstream
     .Reader(entry.fullPath)
     .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
+    .on("err", (err) ->
+      cb(false, err)
+    )
+    .on("close", ->
+      cb(true, entry.path)
+      return
+    )
   return
 
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, entry) ->
-  entry.pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+_applyFromEntry = (outputFolder, entry, pathList, cb) ->
+  pathList.add(entry.path)
+  entry
+    .pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
+    .on("err", (err) ->
+      cb(false, err)
+    )
+    .on("close", ->
+      cb(true, entry.path)
+      return
+    )
   return
+
+###*
+ * 終了確認
+ *###
+_isEnd = (resolve, reject, pathList) ->
+  return (ok, data) ->
+    reject(data) unless ok
+    pathList.delete(data)
+    if pathList.size is 0
+      resolve()
+    return
 
 ###*
  * MODを適応します
@@ -67,27 +107,35 @@ applyMod = (type, mod, callback) ->
   else
     outputFolder = TEMP_FOLDER
   return new Promise( (resolve, reject) ->
+    pathList = new Set()
     fs.ensureDirSync(outputFolder)
     switch type
       when "add" then folder = "install"
       when "delete" then folder = "remove"
       else reject("Unknown type")
+
+    log = (phase) ->
+      return callback(phase, type, mod)
+
     if mod.repo.type is "remote"
-      stream = _getFromRemote(folder, mod)
+      stream = _getFromRemote(folder, mod, log)
     else if mod.repo.type is "local"
       stream = _getFromLocal(folder, mod)
       unless stream? then reject("No Folder and Zip in Path")
     else
       reject("Unknown RepoType")
 
+    hasFile = false
     stream
       .on("data", (entry) ->
-        _applyFromData(outputFolder, entry)
+        hasFile = true
+        _applyFromData(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
         return
       )
       .on("entry", (entry) ->
         return if entry.type is "Directory"
-        _applyFromEntry(outputFolder, entry)
+        hasFile = true
+        _applyFromEntry(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
         return
       )
       .on("error", (err) ->
@@ -95,17 +143,15 @@ applyMod = (type, mod, callback) ->
         return
       )
       .on("end", ->
-        resolve()
-        return
-      )
-      .on("close", ->
-        resolve()
+        resolve() unless hasFile
         return
       )
     return
   ).then( ->
     return new Promise( (resolve, reject) ->
       if pathType is "file"
+        callback("tempdone", type, mod)
+        callback("zipcompress", type, mod)
         blitzPath = path.normalize(config.get("blitzPath"))
         switch config.get("platform")
           when "a" then prefix = "assets"
@@ -124,6 +170,7 @@ applyMod = (type, mod, callback) ->
                 .generateNodeStream(streamFiles: true)
                 .pipe(fs.createWriteStream(blitzPath))
                 .on("finish", ->
+                  callback("zipcompressed", type, mod)
                   resolve()
                   return
                 )
@@ -140,12 +187,12 @@ applyMod = (type, mod, callback) ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
+    callback("done", type, mod)
     fs.remove(TEMP_FOLDER)
-    callback(true, type, mod)
     return
   ).catch( (err) ->
     fs.remove(TEMP_FOLDER)
-    callback(false, type, mod, err)
+    callback("fail", type, mod, err)
     return
   )
 
@@ -159,21 +206,26 @@ applyMod = (type, mod, callback) ->
  * @return {Promise}
  ###
 applyMods = (addMods, deleteMods, callback) ->
+  dLen = deleteMods.length
+  aLen = addMods.length
+
   deleteDeferArray = []
   for dmod in deleteMods
     deleteDeferArray.push(applyMod("delete", dmod, callback))
-  addDeferArray = []
-  for amod in addMods
-    addDeferArray.push(applyMod("add", amod, callback))
-  dLen = deleteDeferArray.length
-  aLen = addDeferArray.length
-  if dLen > 0 and aLen > 0
-    return Promise.all(deleteDeferArray).then( ->
-      return Promise.all(addDeferArray)
-    )
-  else if dLen > 0
-    return Promise.all(deleteDeferArray)
+  if dLen > 0
+    if aLen > 0
+      return Promise.all(deleteDeferArray).then( ->
+        addDeferArray = []
+        for amod in addMods
+          addDeferArray.push(applyMod("add", amod, callback))
+        return Promise.all(addDeferArray)
+      )
+    else
+      return Promise.all(deleteDeferArray)
   else if aLen > 0
+    addDeferArray = []
+    for amod in addMods
+      addDeferArray.push(applyMod("add", amod, callback))
     return Promise.all(addDeferArray)
   else
     return Promise.resolve()

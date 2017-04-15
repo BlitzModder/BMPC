@@ -159,21 +159,26 @@ applyMod = (type, mod, callback) ->
  * @return {Promise}
  ###
 applyMods = (addMods, deleteMods, callback) ->
+  dLen = deleteMods.length
+  aLen = addMods.length
+
   deleteDeferArray = []
   for dmod in deleteMods
     deleteDeferArray.push(applyMod("delete", dmod, callback))
-  addDeferArray = []
-  for amod in addMods
-    addDeferArray.push(applyMod("add", amod, callback))
-  dLen = deleteDeferArray.length
-  aLen = addDeferArray.length
-  if dLen > 0 and aLen > 0
-    return Promise.all(deleteDeferArray).then( ->
-      return Promise.all(addDeferArray)
-    )
-  else if dLen > 0
-    return Promise.all(deleteDeferArray)
+  if dLen > 0
+    if aLen > 0
+      return Promise.all(deleteDeferArray).then( ->
+        addDeferArray = []
+        for amod in addMods
+          addDeferArray.push(applyMod("add", amod, callback))
+        return Promise.all(addDeferArray)
+      )
+    else
+      return Promise.all(deleteDeferArray)
   else if aLen > 0
+    addDeferArray = []
+    for amod in addMods
+      addDeferArray.push(applyMod("add", amod, callback))
     return Promise.all(addDeferArray)
   else
     return Promise.resolve()

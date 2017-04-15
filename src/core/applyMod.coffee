@@ -21,19 +21,31 @@ TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 ###*
  * リモートからとってくる
  ###
-_getFromRemote = (folder, mod) ->
+_getFromRemote = (folder, mod, log) ->
+  log("download")
   return request("#{mod.repo.name}/#{folder}/#{mod.name}.zip")
-    .pipe(unzip.Parse())
+    .on("response", ->
+      log("downloaded")
+      log("zipextract")
+    )
+    .pipe(
+      unzip.Parse()
+        .on("end", ->
+          log("zipextracted")
+        )
+    )
 
 ###*
  * ローカルからとってくる
  ###
-_getFromLocal = (folder, mod) ->
+_getFromLocal = (folder, mod, log) ->
   dirpath = path.join(mod.repo.name, folder, mod.name)
   zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
   if util.isDirectory(dirpath)
+    log("copydir")
     return readdirp(root: dirpath)
   else if util.isFile(zippath)
+    log("zipextract")
     return fs.createReadStream(zippath).pipe(unzip.Parse())
   return
 
@@ -101,8 +113,12 @@ applyMod = (type, mod, callback) ->
       when "add" then folder = "install"
       when "delete" then folder = "remove"
       else reject("Unknown type")
+
+    log = (phase) ->
+      return callback(phase, type, mod)
+
     if mod.repo.type is "remote"
-      stream = _getFromRemote(folder, mod)
+      stream = _getFromRemote(folder, mod, log)
     else if mod.repo.type is "local"
       stream = _getFromLocal(folder, mod)
       unless stream? then reject("No Folder and Zip in Path")
@@ -131,10 +147,11 @@ applyMod = (type, mod, callback) ->
         return
       )
     return
-    return
   ).then( ->
     return new Promise( (resolve, reject) ->
       if pathType is "file"
+        callback("tempdone", type, mod)
+        callback("zipcompress", type, mod)
         blitzPath = path.normalize(config.get("blitzPath"))
         switch config.get("platform")
           when "a" then prefix = "assets"
@@ -153,6 +170,7 @@ applyMod = (type, mod, callback) ->
                 .generateNodeStream(streamFiles: true)
                 .pipe(fs.createWriteStream(blitzPath))
                 .on("finish", ->
+                  callback("zipcompressed", type, mod)
                   resolve()
                   return
                 )
@@ -169,12 +187,12 @@ applyMod = (type, mod, callback) ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
+    callback("done", type, mod)
     fs.remove(TEMP_FOLDER)
-    callback(true, type, mod)
     return
   ).catch( (err) ->
     fs.remove(TEMP_FOLDER)
-    callback(false, type, mod, err)
+    callback("fail", type, mod, err)
     return
   )
 

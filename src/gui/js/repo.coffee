@@ -221,11 +221,11 @@ p = new Vue(
     finished: ->
       return @phase is "done" or @phase is "failed"
   methods:
-    addLog: (s) ->
+    addLog: (m, d) ->
       if @log is ""
-        @log = util.escape(s)
+        @log = "<b>#{util.escape(m)}</b> - #{util.escape(d)}"
       else
-        @log += "<br>#{util.escape(s)}"
+        @log += "<br><b>#{util.escape(m)}</b> - #{util.escape(d)}"
       return
     nextLog: ->
       @log += "<br>"
@@ -265,29 +265,71 @@ document.getElementById("apply").addEventListener("click", ->
           when "add"
             $button.addClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.showname} - 適用完了")
-              when "en" then p.addLog("#{mod.showname} - Applied Successfully")
-              when "ru" then p.addLog("#{mod.showname} - Применено успешно")
+              when "ja" then p.addLog(mod.showname, "適用完了")
+              when "en" then p.addLog(mod.showname, "Applied Successfully")
+              when "ru" then p.addLog(mod.showname, "Применено успешно")
           when "delete"
             $button.removeClass("applied")
             switch lang
-              when "ja" then p.addLog("#{mod.showname} - 解除完了")
-              when "en" then p.addLog("#{mod.showname} - Removed Successfully")
-              when "ru" then p.addLog("#{mod.showname} - Удалено успешно")
+              when "ja" then p.addLog(mod.showname, "解除完了")
+              when "en" then p.addLog(mod.showname, "Removed Successfully")
+              when "ru" then p.addLog(mod.showname, "Удалено успешно")
       else if phase is "fail"
         $button = $("button[data-path=\"#{mod.name}\"]")
         errored = true
         switch type
           when "add"
             switch lang
-              when "ja" then p.addLog("#{mod.showname} - 適用失敗(#{err})")
-              when "en" then p.addLog("#{mod.showname} - Failed to Apply(#{err})")
-              when "ru" then p.addLog("#{mod.showname} - Не удалось применить(#{err})")
+              when "ja" then p.addLog(mod.showname, "適用失敗(#{err})")
+              when "en" then p.addLog(mod.showname, "Failed to Apply(#{err})")
+              when "ru" then p.addLog(mod.showname, "Не удалось применить(#{err})")
           when "delete"
             switch lang
-              when "ja" then p.addLog("#{mod.showname} - 解除失敗(#{err})")
-              when "en" then p.addLog("#{mod.showname} - Failed to Remove(#{err})")
-              when "ru" then p.addLog("#{mod.showname} - Не удалось удалить(#{err})")
+              when "ja" then p.addLog(mod.showname, "解除失敗(#{err})")
+              when "en" then p.addLog(mod.showname, "Failed to Remove(#{err})")
+              when "ru" then p.addLog(mod.showname, "Не удалось удалить(#{err})")
+      else
+        switch phase
+          when "download"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "ダウンロード開始")
+              when "en" then p.addLog(mod.showname, "Started Downloading")
+              when "ru" then p.addLog(mod.showname, "Начато скачивание")
+          when "downloaded"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "ダウンロード終了")
+              when "en" then p.addLog(mod.showname, "Finished Downloading")
+              when "ru" then p.addLog(mod.showname, "Законченная загрузка")
+          when "copydir"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "コピー開始")
+              when "en" then p.addLog(mod.showname, "Started Copying")
+              when "ru" then p.addLog(mod.showname, "Начатое копирование")
+          when "zipextract"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "解凍開始")
+              when "en" then p.addLog(mod.showname, "Started Extracting")
+              when "ru" then p.addLog(mod.showname, "Начато извлечение")
+          when "zipextracted"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "解凍終了")
+              when "en" then p.addLog(mod.showname, "Finished Extracting")
+              when "ru" then p.addLog(mod.showname, "Готовое извлечение")
+          when "tempdone"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "適用データ構築終了")
+              when "en" then p.addLog(mod.showname, "Finished building apply data")
+              when "ru" then p.addLog(mod.showname, "Готовое здание использовать данные")
+          when "zipcompress"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "圧縮開始")
+              when "en" then p.addLog(mod.showname, "Started Compressing")
+              when "ru" then p.addLog(mod.showname, "Начато сжатие")
+          when "zipcompressed"
+            switch lang
+              when "ja" then p.addLog(mod.showname, "圧縮終了")
+              when "en" then p.addLog(mod.showname, "Finished Compressing")
+              when "ru" then p.addLog(mod.showname, "Готовое сжатие")
       return
     ).then( ->
       if !errored

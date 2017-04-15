@@ -275,7 +275,7 @@ document.getElementById("apply").addEventListener("click", ->
               when "en" then p.addLog(mod.showname, "Removed Successfully")
               when "ru" then p.addLog(mod.showname, "Удалено успешно")
       else if phase is "fail"
-        $button = $("button[data-path=\"#{mod.name}\"]")
+        $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
         errored = true
         switch type
           when "add"
@@ -283,11 +283,13 @@ document.getElementById("apply").addEventListener("click", ->
               when "ja" then p.addLog(mod.showname, "適用失敗(#{err})")
               when "en" then p.addLog(mod.showname, "Failed to Apply(#{err})")
               when "ru" then p.addLog(mod.showname, "Не удалось применить(#{err})")
+            $checkbox.prop("checked", false)
           when "delete"
             switch lang
               when "ja" then p.addLog(mod.showname, "解除失敗(#{err})")
               when "en" then p.addLog(mod.showname, "Failed to Remove(#{err})")
               when "ru" then p.addLog(mod.showname, "Не удалось удалить(#{err})")
+            $checkbox.prop("checked", true)
       else
         switch phase
           when "download"

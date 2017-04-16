@@ -28,14 +28,14 @@
             %span.ru Ошибка имеет произойти
           %p {{errorMsg}}
         %big-category(v-else=true v-for="(v, k) in plist" :name="k" :val="v")
-    .modal.fade#progress(:phase="phase" :log="log")
+    .modal.fade#progress
       .modal-dialog
         .modal-content
           .modal-header
             %h4.modal-title
-          %modal-body(:phase="phase" :log="log")
+          %modal-body(:phase="phase" :log="log" :finished="finished")
           .modal-footer
-            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal" :disable="!finished" @click="reset")
+            %button.btn.btn-primary(type="button" :disabled="!finished" @click="reset")
               %span.ja 閉じる
               %span.en Close
               %span.ru Закрыть
@@ -48,7 +48,7 @@
           .modal-body#outwebview
             %webview#detailweb(src="about:blank" autosize="on")
           .modal-footer
-            %button.btn.btn-primary.modal-close(type="button" data-dismiss="modal")
+            %button.btn.btn-primary(type="button" data-dismiss="modal")
               %span.ja 閉じる
               %span.en Close
               %span.ru Закрыть

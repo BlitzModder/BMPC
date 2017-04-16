@@ -191,10 +191,8 @@ Vue.component("modal-body",
             </div>
             </div>
             """
-  props: ["phase", "log"]
+  props: ["phase", "log", "finished"]
   computed:
-    finished: ->
-      return @phase is "done" or @phase is "failed"
     message: ->
       switch @phase
         when "standby", "doing"
@@ -238,6 +236,7 @@ p = new Vue(
       @phase = s
       return
     reset: ->
+      $("#progress").modal("hide")
       @phase = "standby"
       @log = ""
       return
@@ -257,7 +256,7 @@ document.getElementById("apply").addEventListener("click", ->
     for $mod in $("button.applied input:not(:checked)")
       deleteMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
 
-    $("#progress").modal({ keyboard: false, backdrop: "static" })
+    $("#progress").modal({ keyboard: false, focus: true, backdrop: "static" })
     errored = false
     applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
       if phase is "done"

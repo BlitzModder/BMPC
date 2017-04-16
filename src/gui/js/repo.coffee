@@ -247,8 +247,21 @@ document.getElementById("reload").addEventListener("click", ->
   r.getInfo(true)
   return
 )
+
+onBeforeClose = (e) ->
+  switch lang
+    when "ja" then text = "適応している途中で閉じるとWoT Blitzのデータが破損する可能性があります。本当に閉じますか？"
+    when "en" then text = "Closing during applying may break data of 'WoT Blitz'. Really want to close?"
+    when "ru" then text = "Закрытие во время подачи заявки может привести к поломке данных «WoT Blitz». На самом деле хотите закрыть?"
+  if !confirm(text)
+    e.returnValue = false
+  return
+
 document.getElementById("apply").addEventListener("click", ->
   if confirm(CONFIRM_APPLY_STRING)
+    # 閉じる防止
+    window.addEventListener("beforeunload", onBeforeClose)
+
     addMods = []
     deleteMods = []
     for $mod in $("button:not(.applied) input:checked")
@@ -338,6 +351,8 @@ document.getElementById("apply").addEventListener("click", ->
         p.changePhase("done")
       else
         p.changePhase("failed")
+      # 閉じる防止解除
+      window.removeEventListener("beforeunload", onBeforeClose)
       return
     )
   return

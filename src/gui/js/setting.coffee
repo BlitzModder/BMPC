@@ -1,12 +1,12 @@
 {remote} = require "electron"
 {app, dialog, BrowserWindow, shell} = remote
+fs = remote.require("fs")
+path = remote.require("path")
+os = remote.require("os")
 config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
 lang = remote.require("./lang")
-fs = remote.require("fs")
-path = remote.require("path")
-os = remote.require("os")
 
 setLang = ->
   langTable = lang.get()

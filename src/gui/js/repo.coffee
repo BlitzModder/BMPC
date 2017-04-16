@@ -1,4 +1,5 @@
-{remote, shell} = require "electron"
+{remote} = require "electron"
+{shell} = remote
 plistList = remote.require("./plistList")
 plistInfo = remote.require("./plistInfo")
 util = remote.require("./util")

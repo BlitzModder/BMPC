@@ -45,7 +45,8 @@
     "gulp-haml": "^0.1.6",
     "gulp-notify": "^2.2.0",
     "gulp-plumber": "^1.1.0",
-    "gulp-sass": "^2.3.2"
+    "gulp-sass": "^2.3.2",
+    "gulp-yaml": "^1.0.1"
   },
   "resolutions": {
     "fs-extra": "0.30.0",

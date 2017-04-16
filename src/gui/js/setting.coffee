@@ -3,27 +3,17 @@
 config = remote.require("./config")
 cache = remote.require("./cache")
 util = remote.require("./util")
+lang = remote.require("./lang")
 fs = remote.require("fs")
 path = remote.require("path")
 os = remote.require("os")
 
-lang = config.get("lang")
-langList = config.LANG_LIST
-for l in langList when l isnt lang
-  $(".#{l}").addClass("hidden")
-switch lang
-  when "ja"
-    CONFIRM_DELETE_STRING = "本当に削除してよろしいですか？"
-    CONFIRM_RESET_STRING = "本当にリセットしてよろしいですか？"
-  when "en"
-    CONFIRM_DELETE_STRING = "Really want to delete?"
-    CONFIRM_RESET_STRING = "Really want to reset?"
-  when "ru"
-    CONFIRM_DELETE_STRING = "Действительно хотите удалить?"
-    CONFIRM_RESET_STRING = "На самом деле хотите сбросить?"
-  else
-    CONFIRM_DELETE_STRING = "UNLOCALIZED_CONFIRM_DELETE_STRING"
-    CONFIRM_RESET_STRING = "UNLOCALIZED_RESET_DELETE_STRING"
+setLang = ->
+  langTable = lang.get()
+  transEle = document.getElementsByClassName("translate")
+  for te in transEle
+    te.textContent = langTable[te.dataset.key]
+setLang()
 
 getFolderByWindow = (func) ->
   focusedWindow = BrowserWindow.getFocusedWindow()
@@ -70,7 +60,7 @@ Vue.component("repo",
       return formatRepoName(@name)
   methods:
     removeRepo: ->
-      if confirm(CONFIRM_DELETE_STRING)
+      if confirm(langTable.CONFIRM_DELETE_STRING)
         @repos.splice(@num, 1)
       return
 )
@@ -82,7 +72,7 @@ Vue.component("debug-repo",
       return formatRepoName(@name)
   methods:
     remove: ->
-      if confirm(CONFIRM_DELETE_STRING)
+      if confirm(langTable.CONFIRM_DELETE_STRING)
         @name = ""
         config.set("debugRepo", "")
       return
@@ -174,7 +164,7 @@ new Vue(
       shell.showItemInFolder(config.GENERAL_CONFIG_PATH)
       return
     reset: ->
-      if confirm(CONFIRM_RESET_STRING)
+      if confirm(langTable.CONFIRM_RESET_STRING)
         config.reset()
         @remoteRepos = config.get("repos")
         @localRepos = config.get("localRepos")
@@ -229,10 +219,7 @@ new Vue(
       return
     lang: (val) ->
       config.set("lang", val)
-      lang = val
-      $(".#{lang}").removeClass("hidden")
-      for l in langList when l isnt lang
-        $(".#{l}").addClass("hidden")
+      setLang()
       return
 )
 

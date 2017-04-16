@@ -4,12 +4,13 @@ semver = remote.require("semver")
 plistInfo = remote.require("./plistInfo")
 config = remote.require("./config")
 request = remote.require("./request")
+lang = remote.require("./lang")
 util = remote.require("./util")
 
-lang = config.get("lang")
-langList = config.LANG_LIST
-for l in langList when l isnt lang
-  $(".#{l}").addClass("hidden")
+langTable = lang.get()
+transEle = document.getElementsByClassName("translate")
+for te in transEle
+  te.textContent = langTable[te.dataset.key]
 
 formatRepoName = (name) ->
   m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)

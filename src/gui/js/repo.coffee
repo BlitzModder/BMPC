@@ -6,27 +6,20 @@ util = remote.require("./util")
 config = remote.require("./config")
 applyMod = remote.require("./applyMod")
 request = remote.require("./request")
+lang = remote.require("./lang")
 
 params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
 repo = {type: params.get("type"), name: path}
-lang = config.get("lang")
-switch lang
-  when "ja"
-    CONFIRM_APPLY_STRING = "本当に適用してよろしいですか？"
-  when "en"
-    CONFIRM_APPLY_STRING = "Really want to apply?"
-  when "ru"
-    CONFIRM_APPLY_STRING = "На самом деле хотите, чтобы подать заявление?"
-  else
-    CONFIRM_APPLY_STRING = "UNLOCALIZED_CONFIRM_APPLY_STRING"
+langName = config.get("lang")
+
+langTable = lang.get()
+transEle = document.getElementsByClassName("translate")
+for te in transEle
+  te.textContent = langTable[te.dataset.key]
+
 appliedMods = ->
   return config.get("appliedMods")
-
-lang = config.get("lang")
-langList = config.LANG_LIST
-for l in langList when l isnt lang
-  $(".#{l}").addClass("hidden")
 
 Vue.component("description",
   template: """
@@ -143,7 +136,7 @@ r = new Vue(
     getPlist: (force = false) ->
       @loading = true
       @error = false
-      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
         return plistList.filter(obj)
       ).then( (obj) =>
         @loading = false
@@ -155,7 +148,7 @@ r = new Vue(
       )
     getPlistWithOutBlackout: (force = false) ->
       @error = false
-      return plistList.getUntilDone(repo, lang, force).then( (obj) =>
+      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
         return plistList.filter(obj, true)
       ).then( (obj) =>
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
@@ -196,20 +189,11 @@ Vue.component("modal-body",
     message: ->
       switch @phase
         when "standby", "doing"
-          switch lang
-            when "ja" then return "適用中..."
-            when "en" then return "Applying..."
-            when "ru" then return "Применение..."
+          return langTable.MODAL_TITLE_APPLYING
         when "done"
-          switch lang
-            when "ja" then return "適用完了"
-            when "en" then return "Applied Successfully"
-            when "ru" then return "Применено успешно"
+          return langTable.MODAL_TITLE_APPLIED
         when "failed"
-          switch lang
-            when "ja" then return "適用失敗"
-            when "en" then return "Failed to Apply"
-            when "ru" then return "Не удалось применить"
+          return langTable.MODAL_TITLE_FAILED
 )
 p = new Vue(
   el: "#progress"
@@ -249,16 +233,12 @@ document.getElementById("reload").addEventListener("click", ->
 )
 
 onBeforeClose = (e) ->
-  switch lang
-    when "ja" then text = "適応している途中で閉じるとWoT Blitzのデータが破損する可能性があります。本当に閉じますか？"
-    when "en" then text = "Closing during applying may break data of 'WoT Blitz'. Really want to close?"
-    when "ru" then text = "Закрытие во время подачи заявки может привести к поломке данных «WoT Blitz». На самом деле хотите закрыть?"
-  if !confirm(text)
+  if !confirm(langTable.CONFIRM_APPLY_CLOSE_STRING)
     e.returnValue = false
   return
 
 document.getElementById("apply").addEventListener("click", ->
-  if confirm(CONFIRM_APPLY_STRING)
+  if confirm(langTable.CONFIRM_APPLY_STRING)
     # 閉じる防止
     window.addEventListener("beforeunload", onBeforeClose)
 
@@ -277,74 +257,38 @@ document.getElementById("apply").addEventListener("click", ->
         switch type
           when "add"
             $button.addClass("applied")
-            switch lang
-              when "ja" then p.addLog(mod.showname, "適用完了")
-              when "en" then p.addLog(mod.showname, "Applied Successfully")
-              when "ru" then p.addLog(mod.showname, "Применено успешно")
+            p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
           when "delete"
             $button.removeClass("applied")
-            switch lang
-              when "ja" then p.addLog(mod.showname, "解除完了")
-              when "en" then p.addLog(mod.showname, "Removed Successfully")
-              when "ru" then p.addLog(mod.showname, "Удалено успешно")
+            p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
       else if phase is "fail"
         $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
         errored = true
         switch type
           when "add"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "適用失敗(#{err})")
-              when "en" then p.addLog(mod.showname, "Failed to Apply(#{err})")
-              when "ru" then p.addLog(mod.showname, "Не удалось применить(#{err})")
+            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
             $checkbox.prop("checked", false)
           when "delete"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "解除失敗(#{err})")
-              when "en" then p.addLog(mod.showname, "Failed to Remove(#{err})")
-              when "ru" then p.addLog(mod.showname, "Не удалось удалить(#{err})")
+            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
             $checkbox.prop("checked", true)
       else
         switch phase
           when "download"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "ダウンロード開始")
-              when "en" then p.addLog(mod.showname, "Started Downloading")
-              when "ru" then p.addLog(mod.showname, "Начато скачивание")
+            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
           when "downloaded"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "ダウンロード終了")
-              when "en" then p.addLog(mod.showname, "Finished Downloading")
-              when "ru" then p.addLog(mod.showname, "Законченная загрузка")
+            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
           when "copydir"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "コピー開始")
-              when "en" then p.addLog(mod.showname, "Started Copying")
-              when "ru" then p.addLog(mod.showname, "Начатое копирование")
+            p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
           when "zipextract"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "解凍開始")
-              when "en" then p.addLog(mod.showname, "Started Extracting")
-              when "ru" then p.addLog(mod.showname, "Начато извлечение")
+            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
           when "zipextracted"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "解凍終了")
-              when "en" then p.addLog(mod.showname, "Finished Extracting")
-              when "ru" then p.addLog(mod.showname, "Готовое извлечение")
+            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
           when "tempdone"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "適用データ構築終了")
-              when "en" then p.addLog(mod.showname, "Finished building apply data")
-              when "ru" then p.addLog(mod.showname, "Готовое здание использовать данные")
+            p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
           when "zipcompress"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "圧縮開始")
-              when "en" then p.addLog(mod.showname, "Started Compressing")
-              when "ru" then p.addLog(mod.showname, "Начато сжатие")
+            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
           when "zipcompressed"
-            switch lang
-              when "ja" then p.addLog(mod.showname, "圧縮終了")
-              when "en" then p.addLog(mod.showname, "Finished Compressing")
-              when "ru" then p.addLog(mod.showname, "Готовое сжатие")
+            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
       return
     ).then( ->
       if !errored

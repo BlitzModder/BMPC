@@ -16,56 +16,38 @@
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja リモートリポジトリ一覧
-              %span.en List of Remote Repository
-              %span.ru Список удаленном репозитории
+              %span.translate(data-key="REMOTE_REPOSITORY_LIST")
             %p
-              %span.ja 「ユーザー名/リポジトリ名」の形式でまたはURLを入力してください
-              %span.en Enter in the form of "UserName/RepositoryName" or the URL
-              %span.ru Введите в форме "Имя пользователя / Имя вместилище" или URL
+              %span.translate(data-key="REMOTE_REPOSITORY_TEXT")
             %ul.list-group.mb-1
               %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
             %form.form-inline
               .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
                 %input.form-control.mr-1.mt-1#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
                 %button.btn.btn-primary.mt-1.remoteRepoButton(type="button" @click="addRemoteRepo")
-                  %span.ja 追加
-                  %span.en Add
-                  %span.ru Добавить
+                  %span.translate(data-key="BUTTON_ADD")
                 .form-control-feedback
                   %p(v-show="remoteRepoAddStrErr")
-                    %span.ja 入力が不正です
-                    %span.en Invalid input string
-                    %span.ru Недопустимая строка ввода
+                    %span.translate(data-key="ERROR_INVALID_INPUT")
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja ローカルリポジトリ一覧
-              %span.en List of Local Repository
-              %span.ru Список локальных репозитария
+              %span.translate(data-key="LOCAL_REPOSITORY_LIST")
             %ul.list-group.mb-1
               %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
             %button.btn.btn-primary(type="button" @click="addLocalRepo")
-              %span.ja 追加
-              %span.en Add
-              %span.ru Добавить
+              %span.translate(data-key="BUTTON_ADD")
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja デバッグ用リポジトリ
-              %span.en Debug Repository
-              %span.ru Отладка репозитария
+              %span.translate(data-key="DEBUG_REPOSITORY_NAME")
             %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
             %button.btn.btn-primary(type="button" @click="setDebugRepo")
-              %span.ja 設定
-              %span.en Set
-              %span.ru Задавать
+              %span.translate(data-key="BUTTON_SET")
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja Blitzのフォルダ位置
-              %span.en Path to Blitz
-              %span.ru Путь к Blitz
+              %span.translate(data-key="PATH_TO_BLITZ")
             %form.form-inline
               %label.radio_text
                 %input.radio(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
@@ -78,25 +60,17 @@
                 Mac(AppStore)
               %label.radio_text
                 %input.radio(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
-                %span.ja その他
-                %span.en Other
-                %span.ru Другие
+                %span.translate(data-key="OTHER")
             %blitz-path(:name="blitzPath")
             .btn-group
               %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
-                %span.ja フォルダに設定
-                %span.en Set folder
-                %span.ru Установить папку
+                %span.translate(data-key="SET_TO_FOLDER")
               %button.btn(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
-                %span.ja \.ipa/.apkに設定
-                %span.en Set .ipa/.apk
-                %span.ru Установить .ipa / .apk
+                %span.translate(data-key="SET_TO_FILE")
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja 適応端末
-              %span.en Device to apply
-              %span.ru Устройство для применения
+              %span.translate(data-key="APPLY_DEVICE")
             %form.form-inline
               %label.radio_text
                 %input.radio(type="radio" name="platform" value="w" v-model="platform")
@@ -126,43 +100,27 @@
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja キャッシュを削除する
-              %span.en Clear cache
-              %span.ru Очистить кэш
+              %span.translate(data-key="CLEAR_CACHE")
             %button.btn.btn-primary(type="button" @click="clearCache")
-              %span.ja 削除
-              %span.en Clear
-              %span.ru Очистить
+              %span.translate(data-key="BUTTON_CLEAR")
         .col-md-6
           .card.card-block
             %h4.card-title
-              %span.ja 設定フォルダを開く
-              %span.en Open config folder
-              %span.ru Открыть папку конфигурации
+              %span.translate(data-key="OPEN_CONFIG")
             %button.btn.btn-primary(type="button" @click="openConfigFolder")
-              %span.ja 開く
-              %span.en Open
-              %span.ru открыто
+              %span.translate(data-key="BUTTON_OPEN")
         .col-md-12
           .card.card-block
             %h4.card-title
-              %span.ja 設定をリセットする
-              %span.en Reset all settings
-              %span.ru Сбросить все настройки
+              %span.translate(data-key="RESET_SETTING")
             %button.btn.btn-primary(type="button" @click="reset")
-              %span.ja リセット
-              %span.en Reset
-              %span.ru Сброс
+              %span.translate(data-key="BUTTON_RESET")
         .col-md-12
           .card.card-block
             %h4.card-title
-              %span.ja 適用情報出力
-              %span.en Apply information output
-              %span.ru Применить вывод информации
+              %span.translate(data-key="APPLY_INFO_OUTPUT")
             %button.btn.btn-primary(type="button" @click="applyInfo")
-              %span.ja 表示
-              %span.en Show
-              %span.ru Показать
+              %span.translate(data-key="BUTTON_SHOW")
         .modal.fade#applyInfo
           .modal-dialog
             .modal-content
@@ -172,13 +130,12 @@
               .modal-body
                 %textarea
               .modal-footer
-                %button.btn.btn-secondary(type="button" data-dismiss="modal") Close
+                %button.btn.btn-secondary(type="button" data-dismiss="modal")
+                  %span.translate(data-key="BUTTON_CLOSE")
         .col-md-12
           .card.card-block
             %h4.card-title
-              %span.ja バージョン情報
-              %span.en About
-              %span.ru Около
+              %span.translate(data-key="VERSION_INFO")
             %p.user-select
               {{appName}} {{version}}
               %br

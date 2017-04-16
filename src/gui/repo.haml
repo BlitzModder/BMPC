@@ -23,9 +23,7 @@
           %img.spin(src="./img/spinner2.svg" height="40px" width="40px")
         .col-12(v-else-if="error")
           %p
-            %span.ja エラーが発生しました
-            %span.en Error has happen
-            %span.ru Ошибка имеет произойти
+            %span.translate(data-key="ERROR_HAPPEN")
           %p {{errorMsg}}
         %big-category(v-else=true v-for="(v, k) in plist" :name="k" :val="v")
     .modal.fade#progress
@@ -36,9 +34,7 @@
           %modal-body(:phase="phase" :log="log" :finished="finished")
           .modal-footer
             %button.btn.btn-primary(type="button" :disabled="!finished" @click="reset")
-              %span.ja 閉じる
-              %span.en Close
-              %span.ru Закрыть
+              %span.translate(data-key="BUTTON_CLOSE")
     .modal.fade#detail
       .modal-dialog
         .modal-content
@@ -49,9 +45,7 @@
             %webview#detailweb(src="about:blank" autosize="on")
           .modal-footer
             %button.btn.btn-primary(type="button" data-dismiss="modal")
-              %span.ja 閉じる
-              %span.en Close
-              %span.ru Закрыть
+              %span.translate(data-key="BUTTON_CLOSE")
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
     %script(src="../node_modules/tether/dist/js/tether.min.js")

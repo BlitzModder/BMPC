@@ -39,8 +39,10 @@ app.on("ready", ->
   # 設定とキャッシュの準備待ち
   Promise.all([config.init(), cache.init()]).then( ->
     createWindow()
+    return
   ).catch((err) ->
     console.error err
+    return
   )
 )
 
@@ -50,8 +52,4 @@ app.on("window-all-closed", ->
   # アプリ終了
   app.quit()
   return
-)
-
-app.on("activate", (e, hasVisibleWindows) ->
-  createWindow() if !hasVisibleWindows
 )

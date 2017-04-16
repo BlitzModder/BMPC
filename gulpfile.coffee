@@ -5,6 +5,7 @@ changed = require "gulp-changed"
 coffee = require "gulp-coffee"
 sass = require "gulp-sass"
 haml = require "gulp-haml"
+yaml = require "gulp-yaml"
 del = require "del"
 
 path =
@@ -16,10 +17,12 @@ path =
   scssBin: "bin/gui/css"
   imgSrc: "src/gui/img/**"
   imgBin: "bin/gui/img"
+  yamlSrc: "src/lang/**"
+  yamlBin: "bin/lang"
   packageJsonSrc: "src/package.json"
   packageJsonBin: "bin"
 
-gulp.task "default", ["coffee", "haml", "scss", "img", "package.json"]
+gulp.task "default", ["coffee", "haml", "scss", "img", "yaml", "package.json"]
 
 gulp.task "coffee", ->
   return gulp.src(path.coffeeSrc)
@@ -47,6 +50,13 @@ gulp.task "img", ->
     .pipe(plumber({errorHandler: notify.onError("Error: <%= error.toString() %>")}))
     .pipe(changed(path.imgBin))
     .pipe(gulp.dest(path.imgBin))
+
+gulp.task "yaml", ->
+  return gulp.src(path.yamlSrc)
+    .pipe(plumber({errorHandler: notify.onError("Error: <%= error.toString() %>")}))
+    .pipe(changed(path.yamlBin))
+    .pipe(yaml())
+    .pipe(gulp.dest(path.yamlBin))
 
 gulp.task "package.json", ->
   return gulp.src(path.packageJsonSrc)

@@ -1,7 +1,7 @@
 path = require "path"
 fs = require "fs-extra"
 jszip = require "jszip"
-shell = require("electron").shell
+{shell} = require("electron")
 os = require "os"
 Promise = require "promise"
 config = require "./config"

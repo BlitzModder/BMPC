@@ -38,7 +38,7 @@
   "devDependencies": {
     "coffee-script": "^1.11.1",
     "del": "^2.2.2",
-    "electron": "^1.4.10",
+    "electron": "^1.6.2",
     "electron-builder": "^10.4.1",
     "gulp": "^3.9.1",
     "gulp-changed": "^1.3.2",
@@ -52,6 +52,7 @@
   "build": {
     "appId": "xyz.4na.29314.BlitzModderPC",
     "copyright": "(C) S(29314) 2016",
+    "electronVersion": "1.6.2",
     "mac": {
       "category": "public.app-category.games"
     },

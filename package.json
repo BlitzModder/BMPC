@@ -14,7 +14,7 @@
     "pack:win": "npm run build && build -w --ia32 --x64",
     "pack:mac": "npm run build && build -m"
   },
-  "author": "S(29314)",
+  "author": "S(FV293b)",
   "repository": {
     "type": "git",
     "url": "http://github.com/BlitzModder/BMPC.git"

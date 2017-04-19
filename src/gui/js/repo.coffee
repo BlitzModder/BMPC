@@ -102,7 +102,7 @@ Vue.component("mod",
       request.getUrlStatus(@link).then( (code) =>
         return if code is 404
         if firstExec
-          webview.addEventListener("dom-ready",ready = =>
+          webview.addEventListener("dom-ready", ready = =>
             webview.removeEventListener("dom-ready", ready)
             firstExec = false
             webview.loadURL(@link)

@@ -58,7 +58,10 @@ getLastestVersion = ->
         reject(err)
       try
         response = JSON.parse(body)
-        resolve(response.name)
+        ver = response.name
+        if ver is ""
+          ver = response.tag_name
+        resolve(ver)
       catch
         reject("Failed to parse JSON")
     )

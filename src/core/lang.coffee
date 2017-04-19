@@ -2,8 +2,6 @@
  * @fileoverview 翻訳関連
  ###
 {app} = require "electron"
-fs = require "fs-extra"
-path = require "path"
 yaml = require "js-yaml"
 config = require "./config"
 

@@ -4,6 +4,7 @@
 
 request = require "request"
 path = require "path"
+fs = require "fs-extra"
 Promise = require "promise"
 
 ###*
@@ -42,6 +43,37 @@ getDetailUrl = (repo, id) ->
     when "local"
       return "file://" + path.join(repo.name, "detail/html/#{id}.html")
   return ""
+
+###
+ * changelogを取得します
+ * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
+ * @return {string}
+ ###
+getChangelog = (repo) ->
+  return new Promise( (resolve, reject) ->
+    switch repo.type
+      when "remote"
+        m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
+        if m?
+          url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
+        else
+          url = "#{repo.name}/changelog.txt"
+        request(url, (err, res, body) ->
+          if err? or (res? and res.statusCode is 404)
+            resolve("")
+          resolve(body)
+          return
+        )
+      when "local"
+        fs.readFile(path.join(repo.name, "changelog.txt"), "utf8", (err, data) ->
+          if err? then resolve("")
+          resolve(data)
+          return
+        )
+      else
+        resolve("")
+    return
+  )
 
 ###
  * 最終リリースバージョンを取得します
@@ -86,6 +118,7 @@ getUrlStatus = (url) ->
 
 module.exports =
   getFromRemote: getFromRemote
+  getChangelog: getChangelog
   getDetailUrl: getDetailUrl
   getLastestVersion: getLastestVersion
   getUrlStatus: getUrlStatus

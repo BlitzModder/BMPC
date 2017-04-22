@@ -18,7 +18,7 @@
         %img(src="./img/checkmark2.svg" height="30px" width="30px")
     .container-fluid
       .row#root
-        %description(v-if="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer")
+        %description(:hasinfo="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer" :changelog="changelog")
         .col-12.text-center(v-if="loading")
           %img.spin(src="./img/spinner2.svg" height="40px" width="40px")
         .col-12(v-else-if="error")

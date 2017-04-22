@@ -51,7 +51,7 @@
   },
   "build": {
     "appId": "xyz.4na.29314.BlitzModderPC",
-    "copyright": "(C) S(29314) 2016",
+    "copyright": "(C) S(FV293b) 2016",
     "electronVersion": "1.6.2",
     "mac": {
       "category": "public.app-category.games"

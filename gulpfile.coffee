@@ -22,7 +22,7 @@ path =
   packageJsonSrc: "src/package.json"
   packageJsonBin: "bin"
 
-gulp.task "default", ["coffee", "haml", "scss", "img", "yaml"]
+gulp.task "default", ["coffee", "haml", "scss", "img", "yaml", "package.json"]
 
 gulp.task "coffee", ->
   return gulp.src(path.coffeeSrc)
@@ -57,6 +57,12 @@ gulp.task "yaml", ->
     .pipe(changed(path.yamlBin))
     .pipe(yaml())
     .pipe(gulp.dest(path.yamlBin))
+
+gulp.task "package.json", ->
+  return gulp.src(path.packageJsonSrc)
+    .pipe(plumber({errorHandler: notify.onError("Error: <%= error.toString() %>")}))
+    .pipe(changed(path.packageJsonBin))
+    .pipe(gulp.dest(path.packageJsonBin))
 
 gulp.task "clean", (cb) ->
   return del ["./bin"], cb

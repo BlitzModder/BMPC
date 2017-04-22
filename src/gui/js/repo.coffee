@@ -25,13 +25,22 @@ Vue.component("description",
   template: """
             <div class="col-12">
               <div class="card card-outline-primary card-block">
-                <h4 class="card-title">{{name}}</h4>
-                <h6 class="card-subtitle text-muted">{{version}}</h4>
-                <p class="card-text">Maintainer: {{maintainer}}</p>
+                <h4 class="card-title" v-if="hasinfo">{{name}}</h4>
+                <h6 class="card-subtitle text-muted" v-if="hasinfo">{{version}}</h6>
+                <p class="card-text" v-if="hasinfo">#{langTable.REPO_MAINTAINER}: {{maintainer}}</p>
+                <button type="button" class="btn btn-info" v-if="hasChangelog" data-toggle="collapse" data-target="#changelog">#{langTable.REPO_CHANGELOG}</button>
+                <div class="collapse" id="changelog">
+                  <div class="card card-block" v-html="changelogHtml"></div>
+                </div>
               </div>
             </div>
             """
-  props: ["name", "version", "maintainer"]
+  props: ["hasinfo", "name", "version", "maintainer", "changelog"]
+  computed:
+    hasChangelog: ->
+      return (@changelog isnt "")
+    changelogHtml: ->
+      return @changelog.replace(/\n/g, "<br>")
 )
 Vue.component("big-category",
   template: """
@@ -126,11 +135,13 @@ r = new Vue(
     infoname: ""
     infoversion: ""
     infomaintainer: ""
+    changelog: ""
   created: ->
     @getPlist().then( ->
       return r.getPlistWithOutBlackout(true)
     )
     @getInfo()
+    @getChangelog()
     return
   methods:
     getPlist: (force = false) ->
@@ -166,6 +177,11 @@ r = new Vue(
         return
       ).catch( (err) =>
         @hasinfo = false
+      )
+    getChangelog: ->
+      return request.getChangelog(repo).then( (text) =>
+        @changelog = text
+        return
       )
 )
 
@@ -229,6 +245,7 @@ p = new Vue(
 document.getElementById("reload").addEventListener("click", ->
   r.getPlist(true)
   r.getInfo(true)
+  r.getChangelog()
   return
 )
 

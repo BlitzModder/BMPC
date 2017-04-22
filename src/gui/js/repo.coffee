@@ -27,7 +27,7 @@ Vue.component("description",
               <div class="card card-outline-primary card-block">
                 <h4 class="card-title">{{name}}</h4>
                 <h6 class="card-subtitle text-muted">{{version}}</h4>
-                <p class="card-text">Maintainer: {{maintainer}}</p>
+                <p class="card-text">#{langTable.REPO_MAINTAINER}: {{maintainer}}</p>
               </div>
             </div>
             """

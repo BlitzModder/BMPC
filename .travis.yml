@@ -20,6 +20,7 @@ deploy:
     secure: PoVCHVrLqbaT0UVOQdtf1ZYDyd3n/Cr/2hcO7ptba082a7hKKjQHS9DFYO03W0vzNEDbElcBWmSzF8V1053vlHuuHfbIzG501sWtw2Gl0YQKinovJUngFY6CBLpkohVbdY+WUJ+K0ZHrAWWOEeE7ucaAwEklhuBhNRgSGTqC3MXTzVKyU660OJ75TemRtByW1k0sHpLU4lyZLb2m+x7M68afNrMAwc3YxJW5FiVgSH5Zu/JbrwNUpE+Py7Q8KCxk0uAIHED+eSiTuoBJuNYGtB2xrr2SpigbNB9+/6UK3ZzviOEvF581kfiV3pYrKDvu1y2+g5/48f67diD6DV8Zp8NYtk+uUeSH1VBzU7D8z/jHQ87ZSdDE+Zri7UcnzL8IWi1JGe5Jrib28YSt5xMwVOnYaFzpuIlC7iBHvRK7RudmlNLpUn8fAOOfEEeEM5rIISFa8hiPeScUBvDQhvYpsQBVrwgGH7LODn+/4UxHKLMsO477AUDAKV2+EOdrPbeTsZyJghTsmrveR+xm/FCeZU2cgaqhXlSTGyyug+069VVPDZggNP2/xIaS7DHaC1+UM3yzmLAw3b3hqmkpkAqpo5U7dvZk/CDHXtYiBkwXpFdCd2b3TEIcYLWqJZq9dkA+5XtB/Ijkdz51Rris8dZRX5s5TJ/wL+xbBr0/uNgeO10=
   file:
     - dist/mac/BlitzModder-$TRAVIS_TAG-mac.zip
+    - dist/mac/BlitzModder-$TRAVIS_TAG-mac.dmg
   skip_cleanup: true
   on:
     repo: BlitzModder/BMPC

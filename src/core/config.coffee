@@ -19,6 +19,7 @@ LANG_LIST = [
   "ja"
   "en"
   "ru"
+  "zh_TW"
 ]
 PLATFORM_LIST = [
   "w"

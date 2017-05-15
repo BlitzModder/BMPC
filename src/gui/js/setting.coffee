@@ -8,6 +8,7 @@ cache = remote.require("./cache")
 util = remote.require("./util")
 lang = remote.require("./lang")
 
+langTable = lang.get()
 setLang = ->
   langTable = lang.get()
   transEle = document.getElementsByClassName("translate")

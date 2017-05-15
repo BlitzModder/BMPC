@@ -1,6 +1,6 @@
 {
   "name": "BlitzModder",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Mod manager for World of Tanks Blitz(PC)",
   "main": "bin/core/core.js",
   "scripts": {
@@ -11,8 +11,8 @@
     "start:mac": "build -m --dir && ./dist/mac/BlitzModder",
     "build": "gulp",
     "pack": "npm run pack:win && npm run pack:mac",
-    "pack:win": "npm run build && build -w --ia32 --x64",
-    "pack:mac": "npm run build && build -m"
+    "pack:win": "npm run build && build -w --ia32 --x64 -p never",
+    "pack:mac": "npm run build && build -m -p never"
   },
   "author": "S(FV293b)",
   "repository": {
@@ -53,7 +53,6 @@
     "appId": "xyz.4na.29314.BlitzModderPC",
     "copyright": "(C) S(FV293b) 2016",
     "electronVersion": "1.6.2",
-    "publish": "never",
     "mac": {
       "category": "public.app-category.games",
       "target": [

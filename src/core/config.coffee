@@ -20,6 +20,7 @@ LANG_LIST = [
   "en"
   "ru"
   "zh_TW"
+  "zh_CN"
 ]
 PLATFORM_LIST = [
   "w"

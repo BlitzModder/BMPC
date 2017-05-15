@@ -54,7 +54,11 @@
     "copyright": "(C) S(FV293b) 2016",
     "electronVersion": "1.6.2",
     "mac": {
-      "category": "public.app-category.games"
+      "category": "public.app-category.games",
+      "target": [
+        "zip",
+        "dmg"
+      ]
     },
     "win": {
       "target": "zip"

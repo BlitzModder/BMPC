@@ -4,7 +4,7 @@
 
 {app} = require "electron"
 path = require "path"
-Promise = require "promise"
+denodeify = require "denodeify"
 fs = require "fs-extra"
 fstream = require "fstream"
 jszip = require "jszip"
@@ -14,7 +14,7 @@ unzip = require "unzipper"
 config = require "./config"
 util = require "./util"
 
-readFile = Promise.denodeify(fs.readFile)
+readFile = denodeify(fs.readFile)
 
 TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 
@@ -206,29 +206,9 @@ applyMod = (type, mod, callback) ->
  * @return {Promise}
  ###
 applyMods = (addMods, deleteMods, callback) ->
-  dLen = deleteMods.length
-  aLen = addMods.length
-
-  deleteDeferArray = []
-  for dmod in deleteMods
-    deleteDeferArray.push(applyMod("delete", dmod, callback))
-  if dLen > 0
-    if aLen > 0
-      return Promise.all(deleteDeferArray).then( ->
-        addDeferArray = []
-        for amod in addMods
-          addDeferArray.push(applyMod("add", amod, callback))
-        return Promise.all(addDeferArray)
-      )
-    else
-      return Promise.all(deleteDeferArray)
-  else if aLen > 0
-    addDeferArray = []
-    for amod in addMods
-      addDeferArray.push(applyMod("add", amod, callback))
-    return Promise.all(addDeferArray)
-  else
-    return Promise.resolve()
+  return Promise.all(applyMod("delete", dmod, callback) for dmod in deleteMods).then( ->
+    return Promise.all(applyMod("add", amod, callback) for amod in addMods)
+  )
 
 module.exports =
   applyMod: applyMod

@@ -3,10 +3,10 @@ fs = require "fs-extra"
 jszip = require "jszip"
 {shell} = require("electron")
 os = require "os"
-Promise = require "promise"
+denodeify = require "denodeify"
 config = require "./config"
 
-readFile = Promise.denodeify(fs.readFile)
+readFile = denodeify(fs.readFile)
 
 ###*
  * HTMLエスケープ
@@ -92,7 +92,6 @@ getVersion = (useCache = false) ->
           resolve(ver)
         return
       ).catch( (err) ->
-        console.log err
         reject(err)
         return
       )

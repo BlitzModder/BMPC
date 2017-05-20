@@ -1,14 +1,17 @@
+###*
+ * @fileoverview info.plistの読み込み
+ ###
 fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
-Promise = require "promise"
+denodeify = require "denodeify"
 semver = require "semver"
 request = require "./request"
 cache = require "./cache"
 config = require "./config"
 util = require "./util"
 
-readFile = Promise.denodeify(fs.readFile)
+readFile = denodeify(fs.readFile)
 
 ###*
  * データ
@@ -35,34 +38,23 @@ get = ({type: repoType, name: repoName}, force = false) ->
     if data[repoName]? and !force
       resolve(data[repoName])
       return
-    cache.getStringFile(repoName, "info.plist", force).then( (content) ->
-      data[repoName] = plist.parse(content)
-      resolve(data[repoName])
-      return
-    , (err) ->
+    isCatched = false
+    cache.getStringFile(repoName, "info.plist", force).catch( ->
+      isCatched = true
       if repoType is "remote"
-        request.getFromRemote(repoName, "info.plist").then( (content) ->
-          string = content.toString()
-          cache.setStringFile(repoName, "info.plist", string)
-          data[repoName] = plist.parse(string)
-          resolve(data[repoName])
-          return
-        , (err) ->
-          reject(err)
-          return
+        return request.getFromRemote(repoName, "info.plist").then( (content) ->
+          return content.toString()
         )
       else if repoType is "local"
-        readFile(path.join(repoName, "info.plist"), "utf8").then( (res) ->
-          cache.setStringFile(repoName, "info.plist", res)
-          data[repoName] = plist.parse(res)
-          resolve(data[repoName])
-          return
-        , (err) ->
-          reject(err)
-          return
-        )
-      else
-        reject()
+        return readFile(path.join(repoName, "info.plist"), "utf8")
+      return Promise.reject()
+    ).then( (res) ->
+      cache.setStringFile(repoName, "info.plist", res) if isCatched
+      data[repoName] = plist.parse(res)
+      resolve(data[repoName])
+      return
+    ).catch( (err) ->
+      reject(err)
       return
     )
   )

@@ -5,7 +5,7 @@
 fs = require "fs-extra"
 path = require "path"
 {app} = require "electron"
-Promise = require "promise"
+denodeify = require "denodeify"
 util = require "./util"
 os = require "os"
 
@@ -34,8 +34,8 @@ BLITZ_PATH =
   MACSTEAM: path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
   MACSTORE: "/Applications/World of Tanks Blitz.app/Contents/Resources/"
 
-ensureFile = Promise.denodeify(fs.ensureFile)
-readJson = Promise.denodeify(fs.readJson)
+ensureFile = denodeify(fs.ensureFile)
+readJson = denodeify(fs.readJson)
 
 ###
  * 設定のデータ
@@ -103,12 +103,14 @@ init = ->
       data = Object.assign(data, content)
     else
       machineLang = app.getLocale()
-      if machineLang is "ja"
-        data.lang = "ja"
-      else if machineLang.includes("en")
-        data.lang = "en"
-      else
-        data.lang = "en"
+      switch true
+        when machineLang is "ja" then data.lang = "ja"
+        when machineLang is "ru" then data.lang = "ru"
+        when machineLang is "zh-TW" then data.lang = "zh_TW"
+        when machineLang is "zh-CN" then data.lang = "zh_CN"
+        when machineLang.includes("en") then data.lang = "en"
+        when machineLang.includes("zh") then data.lang = "zh_CN"
+        else data.lang = "en"
     _update()
   )
 

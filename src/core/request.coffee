@@ -5,7 +5,6 @@
 request = require "request"
 path = require "path"
 fs = require "fs-extra"
-Promise = require "promise"
 
 ###*
  * リモートからファイルを取得します

@@ -2,7 +2,6 @@
  * @fileoverview 翻訳関連
  ###
 {app} = require "electron"
-yaml = require "js-yaml"
 config = require "./config"
 
 _langname = ""

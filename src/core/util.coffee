@@ -92,7 +92,6 @@ getVersion = (useCache = false) ->
           resolve(ver)
         return
       ).catch( (err) ->
-        console.log err
         reject(err)
         return
       )

@@ -1,3 +1,6 @@
+###*
+ * @fileoverview 言語.plistの読み込み
+ ###
 fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
@@ -81,37 +84,24 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
     if data[repoName]?[lang]? and !force
       resolve(data[repoName][lang])
       return
-    cache.getStringFile(repoName, "plist/#{lang}.plist", force).then( (content) ->
-      data[repoName] = {} if !data[repoName]?
-      data[repoName][lang] = parse(plist.parse(content))
-      resolve(data[repoName][lang])
-      return
-    , (err) ->
+    isCatched = false
+    cache.getStringFile(repoName, "plist/#{lang}.plist", force).catch( ->
+      isCatched = true
       if repoType is "remote"
-        request.getFromRemote(repoName, "plist/#{lang}.plist").then( (content) ->
-          string = content.toString()
-          cache.setStringFile(repoName, "plist/#{lang}.plist", string)
-          data[repoName] = {} if !data[repoName]?
-          data[repoName][lang] = parse(plist.parse(string))
-          resolve(data[repoName][lang])
-          return
-        , (err) ->
-          reject(err)
-          return
+        return request.getFromRemote(repoName, "plist/#{lang}.plist").then( (content) ->
+          return content.toString()
         )
       else if repoType is "local"
-        readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8").then( (res) ->
-          cache.setStringFile(repoName, "plist/#{lang}.plist", res)
-          data[repoName] = {} if !data[repoName]?
-          data[repoName][lang] = parse(plist.parse(res))
-          resolve(data[repoName][lang])
-          return
-        , (err) ->
-          reject(err)
-          return
-        )
-      else
-        reject()
+        return readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8")
+      return Promise.reject()
+    ).then( (res) ->
+      cache.setStringFile(repoName, "plist/#{lang}.plist", res) if isCatched
+      data[repoName] = {} if !data[repoName]?
+      data[repoName][lang] = parse(plist.parse(res))
+      resolve(data[repoName][lang])
+      return
+    ).catch( (err) ->
+      reject(err)
       return
     )
   )
@@ -160,4 +150,3 @@ module.exports =
   getUntilDone: getUntilDone
   get: get
   filter: filter
-

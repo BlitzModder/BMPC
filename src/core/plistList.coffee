@@ -56,7 +56,11 @@ parse = (plistObj) ->
  * @return {Object} plistのオブジェクト
  ###
 getUntilDone = (repo, lang, force = false) ->
-  return get(repo, lang, force).catch( ->
+  return get(repo, lang, force).catch(->
+    if lang.includes("_")
+      return get(repo, lang.split("_")[0], force)
+    return Promise.reject()
+  ).catch( ->
     return get(repo, "en", force)
   ).catch( ->
     return get(repo, "ja", force)

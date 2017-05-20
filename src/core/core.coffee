@@ -18,10 +18,11 @@ createWindow = ->
     height: 600,
     title: "BlitzModderPC",
     icon: path.join(app.getAppPath(), "gui/img/image.jpg"),
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    show: false
   )
   mainWindow.once("ready-to-show", ->
-    win.show()
+    mainWindow.show()
     return
   )
   mainWindow.loadURL("file://#{app.getAppPath()}/gui/index.html")

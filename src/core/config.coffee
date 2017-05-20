@@ -5,7 +5,7 @@
 fs = require "fs-extra"
 path = require "path"
 {app} = require "electron"
-Promise = require "promise"
+denodeify = require "denodeify"
 util = require "./util"
 os = require "os"
 
@@ -34,8 +34,8 @@ BLITZ_PATH =
   MACSTEAM: path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
   MACSTORE: "/Applications/World of Tanks Blitz.app/Contents/Resources/"
 
-ensureFile = Promise.denodeify(fs.ensureFile)
-readJson = Promise.denodeify(fs.readJson)
+ensureFile = denodeify(fs.ensureFile)
+readJson = denodeify(fs.readJson)
 
 ###
  * 設定のデータ

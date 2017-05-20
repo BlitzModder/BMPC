@@ -4,7 +4,7 @@
 
 {app} = require "electron"
 path = require "path"
-Promise = require "promise"
+denodeify = require "denodeify"
 fs = require "fs-extra"
 fstream = require "fstream"
 jszip = require "jszip"
@@ -14,7 +14,7 @@ unzip = require "unzipper"
 config = require "./config"
 util = require "./util"
 
-readFile = Promise.denodeify(fs.readFile)
+readFile = denodeify(fs.readFile)
 
 TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 

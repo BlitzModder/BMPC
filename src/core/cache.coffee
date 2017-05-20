@@ -5,7 +5,7 @@
 fs = require "fs-extra"
 path = require "path"
 {app} = require "electron"
-Promise = require "promise"
+denodeify = require "denodeify"
 
 ###*
  * キャッシュをおくフォルダ
@@ -13,9 +13,9 @@ Promise = require "promise"
  ###
 CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "plistCache")
 
-ensureFile = Promise.denodeify(fs.ensureFile)
-readJson = Promise.denodeify(fs.readJson)
-remove = Promise.denodeify(fs.remove)
+ensureFile = denodeify(fs.ensureFile)
+readJson = denodeify(fs.readJson)
+remove = denodeify(fs.remove)
 
 ###
  * キャッシュファイルと実際のファイルのテーブル

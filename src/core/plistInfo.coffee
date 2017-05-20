@@ -4,14 +4,14 @@
 fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
-Promise = require "promise"
+denodeify = require "denodeify"
 semver = require "semver"
 request = require "./request"
 cache = require "./cache"
 config = require "./config"
 util = require "./util"
 
-readFile = Promise.denodeify(fs.readFile)
+readFile = denodeify(fs.readFile)
 
 ###*
  * データ

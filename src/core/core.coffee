@@ -49,8 +49,9 @@ app.on("ready", ->
 
 app.on("window-all-closed", ->
   # キャッシュ削除
-  session.defaultSession.clearCache(->)
-  # アプリ終了
-  app.quit()
+  session.defaultSession.clearCache( ->
+    # アプリ終了
+    app.quit()
+  )
   return
 )

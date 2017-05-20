@@ -11,7 +11,7 @@ Promise = require "promise"
  * キャッシュをおくフォルダ
  * @const
  ###
-CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "cache")
+CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "plistCache")
 
 ensureFile = Promise.denodeify(fs.ensureFile)
 readJson = Promise.denodeify(fs.readJson)

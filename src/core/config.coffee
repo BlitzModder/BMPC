@@ -5,7 +5,6 @@
 fs = require "fs-extra"
 path = require "path"
 {app} = require "electron"
-denodeify = require "denodeify"
 util = require "./util"
 os = require "os"
 
@@ -33,9 +32,6 @@ BLITZ_PATH =
   WIN32: "C:\\Program Files\\Steam\\steamapps\\common\\World of Tanks Blitz"
   MACSTEAM: path.join(os.homedir(), "Library/Application Support/Steam/SteamApps/common/World of Tanks Blitz/World of Tanks Blitz.app/Contents/Resources/")
   MACSTORE: "/Applications/World of Tanks Blitz.app/Contents/Resources/"
-
-ensureFile = denodeify(fs.ensureFile)
-readJson = denodeify(fs.readJson)
 
 ###
  * 設定のデータ
@@ -95,24 +91,23 @@ _update = ->
  * @constructor
  ###
 init = ->
-  return ensureFile(GENERAL_CONFIG_PATH).then( ->
-    return readJson(GENERAL_CONFIG_PATH, throws: false)
-  ).then( (content) ->
-    data = Object.assign({}, DEFAULT_DATA)
-    if content?
-      data = Object.assign(data, content)
-    else
-      machineLang = app.getLocale()
-      switch true
-        when machineLang is "ja" then data.lang = "ja"
-        when machineLang is "ru" then data.lang = "ru"
-        when machineLang is "zh-TW" then data.lang = "zh_TW"
-        when machineLang is "zh-CN" then data.lang = "zh_CN"
-        when machineLang.includes("en") then data.lang = "en"
-        when machineLang.includes("zh") then data.lang = "zh_CN"
-        else data.lang = "en"
-    _update()
-  )
+  await fs.ensureFile(GENERAL_CONFIG_PATH)
+  content = await fs.readJson(GENERAL_CONFIG_PATH, throws: false)
+  data = Object.assign({}, DEFAULT_DATA)
+  if content?
+    data = Object.assign(data, content)
+  else
+    machineLang = app.getLocale()
+    switch true
+      when machineLang is "ja" then data.lang = "ja"
+      when machineLang is "ru" then data.lang = "ru"
+      when machineLang is "zh-TW" then data.lang = "zh_TW"
+      when machineLang is "zh-CN" then data.lang = "zh_CN"
+      when machineLang.includes("en") then data.lang = "en"
+      when machineLang.includes("zh") then data.lang = "zh_CN"
+      else data.lang = "en"
+  _update()
+  return
 
 get = (a) ->
   return data[a]

@@ -108,20 +108,18 @@ Vue.component("mod",
 
       detail = $("#detail")
       webview = detail.find("webview")[0]
-      request.getUrlStatus(@link).then( (code) =>
-        return if code is 404
-        if firstExec
-          webview.addEventListener("dom-ready", ready = =>
-            webview.removeEventListener("dom-ready", ready)
-            firstExec = false
-            webview.loadURL(@link)
-            return
-          )
-        else
+      code = await request.getUrlStatus(@link)
+      return if code is 404
+      if firstExec
+        webview.addEventListener("dom-ready", ready = =>
+          webview.removeEventListener("dom-ready", ready)
+          firstExec = false
           webview.loadURL(@link)
-        detail.modal("show")
-        return
-      )
+          return
+        )
+      else
+        webview.loadURL(@link)
+      detail.modal("show")
       return
 )
 r = new Vue(
@@ -137,9 +135,10 @@ r = new Vue(
     infomaintainer: ""
     changelog: ""
   created: ->
-    @getPlist().then( ->
-      return r.getPlistWithOutBlackout(true)
-    )
+    do =>
+      await @getPlist()
+      await r.getPlistWithOutBlackout(true)
+      return
     @getInfo()
     @getChangelog()
     return
@@ -147,42 +146,41 @@ r = new Vue(
     getPlist: (force = false) ->
       @loading = true
       @error = false
-      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
-        return plistList.filter(obj)
-      ).then( (obj) =>
+      try
+        obj = await plistList.getUntilDone(repo, langName, force)
+        obj = await plistList.filter(obj)
         @loading = false
         @plist = obj
-      ).catch( (err) =>
+      catch err
         @loading = false
         @error = true
         @errorMsg = err
-      )
+      return
     getPlistWithOutBlackout: (force = false) ->
       @error = false
-      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
-        return plistList.filter(obj, true)
-      ).then( (obj) =>
+      try
+        obj = await plistList.getUntilDone(repo, langName, force)
+        obj = await plistList.filter(obj, true)
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
           @plist = obj
-      ).catch( (err) =>
+      catch err
         @error = true
         @errorMsg = err
-      )
+      return
     getInfo: (force = false) ->
-      return plistInfo.get(repo, force).then( (obj) =>
+      try
+        obj = await plistInfo.get(repo, force)
         @hasinfo = true
         @infoname = obj.name
         @infoversion = obj.version
         @infomaintainer = obj.maintainer
-        return
-      ).catch( (err) =>
+      catch err
         @hasinfo = false
-      )
+      return
     getChangelog: ->
-      return request.getChangelog(repo).then( (text) =>
-        @changelog = text
-        return
-      )
+      text = await request.getChangelog(repo)
+      @changelog = text
+      return
 )
 
 

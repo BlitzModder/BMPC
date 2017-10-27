@@ -4,14 +4,11 @@
 fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
-denodeify = require "denodeify"
 semver = require "semver"
 request = require "./request"
 cache = require "./cache"
 config = require "./config"
 util = require "./util"
-
-readFile = denodeify(fs.readFile)
 
 ###*
  * データ
@@ -34,30 +31,23 @@ _outputError = (err) ->
  * @return {Object} plistのオブジェクト
  ###
 get = ({type: repoType, name: repoName}, force = false) ->
-  return new Promise( (resolve, reject) ->
-    if data[repoName]? and !force
-      resolve(data[repoName])
-      return
-    isCatched = false
-    cache.getStringFile(repoName, "info.plist", force).catch( ->
-      isCatched = true
-      if repoType is "remote"
-        return request.getFromRemote(repoName, "info.plist").then( (content) ->
-          return content.toString()
-        )
-      else if repoType is "local"
-        return readFile(path.join(repoName, "info.plist"), "utf8")
-      return Promise.reject()
-    ).then( (res) ->
-      cache.setStringFile(repoName, "info.plist", res) if isCatched
-      data[repoName] = plist.parse(res)
-      resolve(data[repoName])
-      return
-    ).catch( (err) ->
-      reject(err)
-      return
-    )
-  )
+  if data[repoName]? and !force
+    return data[repoName]
+  isCatched = false
+  try
+    res = await cache.getStringFile(repoName, "info.plist", force)
+  catch
+    isCatched = true
+    if repoType is "remote"
+      content = await request.getFromRemote(repoName, "info.plist")
+      res = content.toString()
+    else if repoType is "local"
+      res = await fs.readFile(path.join(repoName, "info.plist"), "utf8")
+    else
+      throw new Error()
+  cache.setStringFile(repoName, "info.plist", res) if isCatched
+  data[repoName] = plist.parse(res)
+  return data[repoName]
 
 module.exports =
   get: get

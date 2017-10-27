@@ -45,6 +45,9 @@ parse = (plistObj) ->
           [version, platform] = v_.split(":")
         else
           [version, platform] = ["", ""]
+        version = version.replace(/^(\d+\.\d+)$/, "$1.9")
+        version = "" unless /^(?:\d+\.\d+\.\d+)?$/.test(version)
+        platform = "" unless /^(?:[iawm]+)?$/.test(platform)
         obj[name][n][n_] =
           name: "#{id}.#{i}.#{i_}"
           version: version

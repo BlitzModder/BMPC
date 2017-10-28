@@ -3,6 +3,7 @@
  ###
 
 request = require "request"
+requestP = require "request-promise-native"
 path = require "path"
 fs = require "fs-extra"
 
@@ -13,18 +14,10 @@ fs = require "fs-extra"
  * @return {Promise}
  ###
 getFromRemote = (repoName, fileName) ->
-  return new Promise( (resolve, reject) ->
-    names = repoName.split("/")
-    if names.length < 3
-      reject()
-      return
-    request("#{repoName}/#{fileName}", (err, res, body) ->
-      if err? or (res? and res.statusCode is 404)
-        reject(err)
-      resolve(body)
-    )
-    return
-  )
+  names = repoName.split("/")
+  if names.length < 3
+    throw new Error("不明なリモートリポジトリ名")
+  return await requestP("#{repoName}/#{fileName}")
 
 ###
  * 詳細のURLを取得します
@@ -49,53 +42,38 @@ getDetailUrl = ({name, type}, id) ->
  * @return {string}
  ###
 getChangelog = ({name, type}) ->
-  return new Promise( (resolve, reject) ->
-    switch type
-      when "remote"
-        m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
-        if m?
-          url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
-        else
-          url = "#{name}/changelog.txt"
-        request(url, (err, res, body) ->
-          if err? or (res? and res.statusCode is 404)
-            resolve("")
-          resolve(body)
-          return
-        )
-      when "local"
-        try
-          resolve(await fs.readFile(path.join(name, "changelog.txt"), "utf8"))
-        catch
-          resolve("")
+  switch type
+    when "remote"
+      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+      if m?
+        url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
       else
-        resolve("")
-    return
-  )
+        url = "#{name}/changelog.txt"
+      try
+        return await requestP(url)
+    when "local"
+      try
+        return await fs.readFile(path.join(name, "changelog.txt"), "utf8")
+  return ""
 
 ###
  * 最終リリースバージョンを取得します
  * @return {Promise}
  ###
 getLastestVersion = ->
-  return new Promise( (resolve, reject) ->
-    request(
-      url: "https://api.github.com/repos/BlitzModder/BMPC/releases/latest"
-      headers:
-        "User-Agent": "request"
-    , (err, res, body) ->
-      if err? or (res? and res.statusCode is 404)
-        reject(err)
-      try
-        {name, tag_name} = JSON.parse(body)
-        ver = name
-        ver = tag_name if ver is ""
-        resolve(ver)
-      catch
-        reject("Failed to parse JSON")
-    )
-    return
+  body = await requestP(
+    url: "https://api.github.com/repos/BlitzModder/BMPC/releases/latest"
+    headers:
+      "User-Agent": "request"
   )
+  try
+    {name, tag_name} = JSON.parse(body)
+    ver = name
+    ver = tag_name if ver is ""
+    return ver
+  catch
+    throw new Error("Failed to parse JSON")
+  return
 
 ###
  * ステータスコードを取得します
@@ -103,15 +81,8 @@ getLastestVersion = ->
  * @return {Number} ステータスコード
  ###
 getUrlStatus = (url) ->
-  return new Promise( (resolve, reject) ->
-    request(url, (err, {statusCode} = {}, body) ->
-      if err? and statusCode?
-        reject(err)
-      else
-        resolve(statusCode)
-      return
-    )
-  )
+  {statusCode} = await requestP({url, resolveWithFullResponse: true})
+  return statusCode
 
 module.exports = {
   getFromRemote

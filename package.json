@@ -32,6 +32,7 @@
     "popper.js": "^1.12.6",
     "readdirp": "^2.1.0",
     "request": "^2.81.0",
+    "request-promise-native": "^1.0.5",
     "semver": "^5.4.1",
     "unzipper": "^0.8.9",
     "vue": "^2.5.2"

@@ -182,7 +182,7 @@ r = new Vue(
         @infoname = name
         @infoversion = version
         @infomaintainer = maintainer
-      catch err
+      catch
         @hasinfo = false
       return
     getChangelog: ->

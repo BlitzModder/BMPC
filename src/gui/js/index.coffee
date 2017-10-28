@@ -33,10 +33,10 @@ Vue.component("repo",
   methods:
     getInfo: ->
       try
-        {name, maintainer} = plistInfo.get(type: @repotype, name: @name)
+        {name, maintainer} = await plistInfo.get(type: @repotype, name: @name)
         @hasinfo = true
-        @infoname = obj.name
-        @infomaintainer = obj.maintainer
+        @infoname = name
+        @infomaintainer = maintainer
       catch
         @hasinfo = false
       return

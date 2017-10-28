@@ -9,12 +9,11 @@ util = remote.require("./util")
 lang = remote.require("./lang")
 
 langTable = lang.get()
-setLang = ->
+do setLang = ->
   langTable = lang.get()
   transEle = document.getElementsByClassName("translate")
   for te in transEle
     te.textContent = langTable[te.dataset.key]
-setLang()
 
 getFolderByWindow = (func) ->
   focusedWindow = BrowserWindow.getFocusedWindow()
@@ -26,7 +25,7 @@ getFolderByWindow = (func) ->
   return
 getFileByWindow = (func) ->
   focusedWindow = BrowserWindow.getFocusedWindow()
-  dialog.showOpenDialog(focusedWindow,{
+  dialog.showOpenDialog(focusedWindow, {
     filters: [
       {name: "App Files", extensions: ["ipa", "apk", "zip"] }
       {name: "iOS App Files", extensions: ["ipa"] }
@@ -41,24 +40,12 @@ getFileByWindow = (func) ->
   )
   return
 
-formatRepoName = (name) ->
-  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
-  if m?
-    return "#{m[1]}/#{m[2]} (#{name})"
-  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
-  if m?
-    return "#{m[1]}/#{m[2]} (#{name})"
-  m = /^https?:\/\/(.+?)$/.exec(name)
-  if m?
-    return "#{m[1]} (#{name})"
-  return name
-
 Vue.component("repo",
   template: "<li class=\"list-group-item\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"removeRepo\"></li>"
   props: ["name", "num", "repos"]
   computed:
     formatedName: ->
-      return formatRepoName(@name)
+      return util.formatRepoName(@name)
   methods:
     removeRepo: ->
       if confirm(langTable.CONFIRM_DELETE_STRING)
@@ -70,7 +57,7 @@ Vue.component("debug-repo",
   props: ["name"]
   computed:
     formatedName: ->
-      return formatRepoName(@name)
+      return util.formatRepoName(@name)
   methods:
     remove: ->
       if confirm(langTable.CONFIRM_DELETE_STRING)
@@ -83,7 +70,7 @@ Vue.component("blitz-path",
   props: ["name"]
   computed:
     formatedName: ->
-      return formatRepoName(@name)
+      return util.formatRepoName(@name)
 )
 Vue.component("removeRepoButton",
   template: "<button type=\"button\" class=\"close\" @click=\"$emit('remove')\"><span>&times;</span></button>"
@@ -107,26 +94,26 @@ new Vue(
     addRemoteRepo: ->
       str = @remoteRepoAddStr
       err = false
-      if str isnt ""
-        if str.startsWith("http:") or str.startsWith("https:")
-          if str.endsWith("/")
-            @remoteRepos.push(str.slice(0, -1))
+      return if str is ""
+      if str.startsWith("http:") or str.startsWith("https:")
+        if str.endsWith("/")
+          @remoteRepos.push(str.slice(0, -1))
+        else
+          @remoteRepos.push(str)
+      else
+        s = str.split("/")
+        switch s.length
+          when 1
+            @remoteRepos.push("https://github.com/#{str}/BMRepository/raw/master")
+          when 2
+            @remoteRepos.push("https://github.com/#{str}/raw/master")
           else
-            @remoteRepos.push(str)
-        else
-          s = str.split("/")
-          switch s.length
-            when 1
-              @remoteRepos.push("https://github.com/#{str}/BMRepository/raw/master")
-            when 2
-              @remoteRepos.push("https://github.com/#{str}/raw/master")
-            else
-              err = true
-        if err
-          @remoteRepoAddStrErr = true
-        else
-          @remoteRepoAddStr = ""
-          @remoteRepoAddStrErr = false
+            err = true
+      if err
+        @remoteRepoAddStrErr = true
+      else
+        @remoteRepoAddStr = ""
+        @remoteRepoAddStrErr = false
       return
     addLocalRepo: ->
       getFolderByWindow( (dir) =>
@@ -207,13 +194,13 @@ new Vue(
       return
     blitzPathRadio: (val) ->
       config.set("blitzPathRadio", val)
-      if val isnt "other"
-        switch val
-          when "win" then path = config.getDefaultWinBlitzPath()
-          when "macsteam" then path = config.BLITZ_PATH.MACSTEAM
-          when "macapp" then path = config.BLITZ_PATH.MACSTORE
-        config.set("blitzPath", path)
-        @blitzPath = path
+      return if val is "other"
+      switch val
+        when "win" then path = config.getDefaultWinBlitzPath()
+        when "macsteam" then path = config.BLITZ_PATH.MACSTEAM
+        when "macapp" then path = config.BLITZ_PATH.MACSTORE
+      config.set("blitzPath", path)
+      @blitzPath = path
       return
     platform: (val) ->
       config.set("platform", val)

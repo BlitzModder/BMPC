@@ -12,7 +12,7 @@ _table = null
  ###
 get = ->
   lang = config.get("lang")
-  if lang is _langname and _table isnt null
+  if lang is _langname and !_table?
     return _table
   try
     _table = require("../lang/#{lang}.json")
@@ -22,5 +22,6 @@ get = ->
     console.error e
     return {}
 
-module.exports =
-  get: get
+module.exports = {
+  get
+}

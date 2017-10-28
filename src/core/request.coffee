@@ -32,15 +32,15 @@ getFromRemote = (repoName, fileName) ->
  * @param {string} id 取得するmodのid
  * @return {string}
  ###
-getDetailUrl = (repo, id) ->
-  switch repo.type
+getDetailUrl = ({name, type}, id) ->
+  switch type
     when "remote"
-      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
+      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
       if m?
         return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/detail/html/#{id}.html"
-      return "#{repo.name}/detail/html/#{id}.html"
+      return "#{name}/detail/html/#{id}.html"
     when "local"
-      return "file://" + path.join(repo.name, "detail/html/#{id}.html")
+      return "file://" + path.join(name, "detail/html/#{id}.html")
   return ""
 
 ###
@@ -48,15 +48,15 @@ getDetailUrl = (repo, id) ->
  * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
  * @return {string}
  ###
-getChangelog = (repo) ->
+getChangelog = ({name, type}) ->
   return new Promise( (resolve, reject) ->
-    switch repo.type
+    switch type
       when "remote"
-        m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
+        m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
         if m?
           url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
         else
-          url = "#{repo.name}/changelog.txt"
+          url = "#{name}/changelog.txt"
         request(url, (err, res, body) ->
           if err? or (res? and res.statusCode is 404)
             resolve("")
@@ -64,11 +64,10 @@ getChangelog = (repo) ->
           return
         )
       when "local"
-        fs.readFile(path.join(repo.name, "changelog.txt"), "utf8", (err, data) ->
-          if err? then resolve("")
-          resolve(data)
-          return
-        )
+        try
+          resolve(await fs.readFile(path.join(name, "changelog.txt"), "utf8"))
+        catch
+          resolve("")
       else
         resolve("")
     return
@@ -88,10 +87,9 @@ getLastestVersion = ->
       if err? or (res? and res.statusCode is 404)
         reject(err)
       try
-        response = JSON.parse(body)
-        ver = response.name
-        if ver is ""
-          ver = response.tag_name
+        {name, tag_name} = JSON.parse(body)
+        ver = name
+        ver = tag_name if ver is ""
         resolve(ver)
       catch
         reject("Failed to parse JSON")
@@ -106,18 +104,19 @@ getLastestVersion = ->
  ###
 getUrlStatus = (url) ->
   return new Promise( (resolve, reject) ->
-    request(url, (err, res, body) ->
-      if err? and res?
+    request(url, (err, {statusCode} = {}, body) ->
+      if err? and statusCode?
         reject(err)
       else
-        resolve(res.statusCode)
+        resolve(statusCode)
       return
     )
   )
 
-module.exports =
-  getFromRemote: getFromRemote
-  getChangelog: getChangelog
-  getDetailUrl: getDetailUrl
-  getLastestVersion: getLastestVersion
-  getUrlStatus: getUrlStatus
+module.exports = {
+  getFromRemote
+  getChangelog
+  getDetailUrl
+  getLastestVersion
+  getUrlStatus
+}

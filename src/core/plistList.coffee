@@ -82,26 +82,26 @@ getUntilDone = (repo, lang, force = false) ->
 get = ({type: repoType, name: repoName}, lang, force = false) ->
   if data[repoName]?[lang]? and !force
     return data[repoName][lang]
-  isCatched = false
   try
     res = await cache.getStringFile(repoName, "plist/#{lang}.plist", force)
   catch
-    isCatched = true
     if repoType is "remote"
       content = await request.getFromRemote(repoName, "plist/#{lang}.plist")
       res = content.toString()
     else if repoType is "local"
       res = await fs.readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8")
-  cache.setStringFile(repoName, "plist/#{lang}.plist", res) if isCatched
+    else
+      throw new Error("不明なレポジトリ形式")
+    cache.setStringFile(repoName, "plist/#{lang}.plist", res)
   data[repoName] = {} if !data[repoName]?
   data[repoName][lang] = parse(plist.parse(res))
   return data[repoName][lang]
 
-_is_needed = (ok, ver, plat, obj) ->
+_isNeeded = (ver, plat, obj) ->
   ov = obj.version
   op = obj.platform
   if (
-    (!ok or ov is "" or semver.gte(ov, ver)) and
+    (ver is "" or ov is "" or semver.gte(ov, ver)) and
     (op is "" or op.includes(plat))
   )
     return true
@@ -115,21 +115,21 @@ _is_needed = (ok, ver, plat, obj) ->
 filter = (parsedObj, useCache = false) ->
   try
     ver = await util.getVersion(useCache)
-    ok = true
   catch
-    ok = false
+    ver = ""
   plat = config.get("platform")
   obj = {}
   for k1, v1 of parsedObj
     for k2, v2 of v1
       for k3, v3 of v2
-        if _is_needed(ok, ver, plat, v3)
+        if _isNeeded(ver, plat, v3)
           obj[k1] = {} if !obj[k1]?
           obj[k1][k2] = {} if !obj[k1][k2]?
           obj[k1][k2][k3] = v3.name
   return obj
 
-module.exports =
-  getUntilDone: getUntilDone
-  get: get
-  filter: filter
+module.exports = {
+  getUntilDone
+  get
+  filter
+}

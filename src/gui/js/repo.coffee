@@ -10,7 +10,9 @@ lang = remote.require("./lang")
 
 params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
-repo = {type: params.get("type"), name: path}
+repo =
+  type: params.get("type")
+  name: path
 langName = config.get("lang")
 
 langTable = lang.get()
@@ -97,14 +99,14 @@ Vue.component("mod",
     )
     return {
       checked: applied
-      applied: applied
+      applied
     }
   computed:
     link: ->
       return request.getDetailUrl(repo, @val)
   methods:
-    show: (e) ->
-      t = e.target.classList
+    show: ({target}) ->
+      t = target.classList
       return if t.contains("form-check-label")
       return if t.contains("form-check-input")
 
@@ -175,17 +177,16 @@ r = new Vue(
       return
     getInfo: (force = false) ->
       try
-        obj = await plistInfo.get(repo, force)
+        {name, version, maintainer} = await plistInfo.get(repo, force)
         @hasinfo = true
-        @infoname = obj.name
-        @infoversion = obj.version
-        @infomaintainer = obj.maintainer
+        @infoname = name
+        @infoversion = version
+        @infomaintainer = maintainer
       catch err
         @hasinfo = false
       return
     getChangelog: ->
-      text = await request.getChangelog(repo)
-      @changelog = text
+      @changelog = await request.getChangelog(repo)
       return
 )
 
@@ -259,75 +260,73 @@ onBeforeClose = (e) ->
   return
 
 document.getElementById("apply").addEventListener("click", ->
-  if confirm(langTable.CONFIRM_APPLY_STRING)
-    # 閉じる防止
-    window.addEventListener("beforeunload", onBeforeClose)
+  return unless confirm(langTable.CONFIRM_APPLY_STRING)
+  # 閉じる防止
+  window.addEventListener("beforeunload", onBeforeClose)
 
-    addMods = []
-    deleteMods = []
-    for $mod in $("button:not(.applied) input:checked")
-      addMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
-    for $mod in $("button.applied input:not(:checked)")
-      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
+  addMods = []
+  deleteMods = []
+  for $mod in $("button:not(.applied) input:checked")
+    addMods.push({repo, name: $mod.dataset.path, showname: $mod.dataset.name})
+  for $mod in $("button.applied input:not(:checked)")
+    deleteMods.push({repo, name: $mod.dataset.path, showname: $mod.dataset.name})
 
-    $("#progress").modal({ keyboard: false, focus: true, backdrop: "static" })
-    errored = false
-    applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
-      if phase is "done"
-        $button = $("button[data-path=\"#{mod.name}\"]")
-        switch type
-          when "add"
-            $button.addClass("applied")
-            p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
-          when "delete"
-            $button.removeClass("applied")
-            p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
-      else if phase is "fail"
-        $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
-        errored = true
-        switch type
-          when "add"
-            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
-            $checkbox.prop("checked", false)
-          when "delete"
-            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
-            $checkbox.prop("checked", true)
-      else
-        switch phase
-          when "download"
-            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
-          when "downloaded"
-            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
-          when "copydir"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
-          when "zipextract"
-            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
-          when "zipextracted"
-            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
-          when "tempdone"
-            p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
-          when "zipcompress"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
-          when "zipcompressed"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
-      return
-    ).then( ->
-      if !errored
-        p.changePhase("done")
-      else
-        p.changePhase("failed")
-      # 閉じる防止解除
-      window.removeEventListener("beforeunload", onBeforeClose)
-      return
-    )
+  $("#progress").modal({ keyboard: false, focus: true, backdrop: "static" })
+  errored = false
+  await applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
+    if phase is "done"
+      $button = $("button[data-path=\"#{mod.name}\"]")
+      switch type
+        when "add"
+          $button.addClass("applied")
+          p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
+        when "delete"
+          $button.removeClass("applied")
+          p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
+    else if phase is "fail"
+      $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
+      errored = true
+      switch type
+        when "add"
+          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
+          $checkbox.prop("checked", false)
+        when "delete"
+          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
+          $checkbox.prop("checked", true)
+    else
+      switch phase
+        when "download"
+          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
+        when "downloaded"
+          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
+        when "copydir"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
+        when "zipextract"
+          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
+        when "zipextracted"
+          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
+        when "tempdone"
+          p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
+        when "zipcompress"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
+        when "zipcompressed"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
+    return
+  )
+  if !errored
+    p.changePhase("done")
+  else
+    p.changePhase("failed")
+  # 閉じる防止解除
+  window.removeEventListener("beforeunload", onBeforeClose)
   return
 )
 
 webview = document.getElementById("detailweb")
-webview.addEventListener("new-window", (e) ->
-  shell.openExternal(e.url)
+webview.addEventListener("new-window", ({url}) ->
+  shell.openExternal(url)
 )
-webview.addEventListener("will-navigate", (e) ->
-  shell.openExternal(e.url)
+webview.addEventListener("will-navigate", ({url}) ->
+  shell.openExternal(url)
   webview.stop()
 )

@@ -36,7 +36,10 @@ _outputError = (err) ->
  * @private
  ###
 _update = ->
-  fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table, _outputError)
+  try
+    await fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table)
+  catch err
+    _outputError(err)
   return
 
 ###
@@ -46,8 +49,12 @@ _update = ->
 init = ->
   filePath = path.join(CACHE_FOLDER_PATH,"table.json")
   await fs.ensureFile(filePath)
-  content = await fs.readJson(filePath, throws: false)
-  table = if content? then content else DEFAULT_DATA
+  try
+    content = await fs.readJson(filePath, throws: false)
+    table = if content? then content else DEFAULT_DATA
+  catch err
+    table = DEFAULT_DATA
+    _outputError(err)
   _update()
   return
 
@@ -73,7 +80,10 @@ add = (key) ->
 setStringFile = (repoName, fileName, fileContent, callback = _outputError) ->
   num = add("#{repoName}/#{fileName}")
   table["#{repoName}/#{fileName}"] = num
-  fs.outputFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), fileContent, callback)
+  try
+    await fs.outputFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), fileContent)
+  catch
+    callback()
   return
 
 ###
@@ -88,8 +98,9 @@ getStringFile = (repoName, fileName, force = false) ->
 clear = ->
   return fs.remove(CACHE_FOLDER_PATH)
 
-module.exports =
-  init: init
-  setStringFile: setStringFile
-  getStringFile: getStringFile
-  clear: clear
+module.exports = {
+  init
+  setStringFile
+  getStringFile
+  clear
+}

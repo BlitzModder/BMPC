@@ -12,18 +12,6 @@ transEle = document.getElementsByClassName("translate")
 for te in transEle
   te.textContent = langTable[te.dataset.key]
 
-formatRepoName = (name) ->
-  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
-  if m?
-    return "#{m[1]}/#{m[2]}"
-  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
-  if m?
-    return "#{m[1]}/#{m[2]}"
-  m = /^https?:\/\/(.+?)$/.exec(name)
-  if m?
-    return m[1]
-  return name
-
 Vue.component("repo",
   template: """
             <li class=\"list-group-item\">
@@ -36,7 +24,7 @@ Vue.component("repo",
   props: ["name", "repotype", "hasinfo", "infoname", "infomaintainer"]
   computed:
     formatedName: ->
-      return formatRepoName(@name)
+      return util.formatRepoName(@name)
     url: ->
       return "./repo.html?type=#{@repotype}&path=#{encodeURIComponent(@name)}"
   created: ->
@@ -44,20 +32,21 @@ Vue.component("repo",
     return
   methods:
     getInfo: ->
-      return plistInfo.get(type: @repotype, name: @name).then( (obj) =>
+      try
+        {name, maintainer} = plistInfo.get(type: @repotype, name: @name)
         @hasinfo = true
         @infoname = obj.name
         @infomaintainer = obj.maintainer
-      ).catch( =>
+      catch
         @hasinfo = false
-      )
+      return
 )
 Vue.component("debug-repo",
   template: "<a href=\"./debug_repo.html\">{{formatedName}}</a>"
   props: ["name"]
   computed:
     formatedName: ->
-      return formatRepoName(@name)
+      return util.formatRepoName(@name)
 )
 new Vue(
   el: "#repo"
@@ -67,13 +56,13 @@ new Vue(
     debugRepo: config.get("debugRepo")
 )
 
-request.getLastestVersion().then( (newVer) ->
+do ->
+  newVer = await request.getLastestVersion()
   if semver.gt(newVer, app.getVersion())
     for tag in document.getElementsByClassName("newVersion")
       tag.textContent = newVer
     $("#update").removeClass("hidden")
   return
-)
 $("#updateLink").on("click", ->
   shell.openExternal("https://github.com/BlitzModder/BMPC/releases")
   return

@@ -49,46 +49,41 @@ _getFromLocal = (folder, mod, log) ->
 ###*
  * dataイベントから適応する
  *###
-_applyFromData = (outputFolder, entry, pathList, cb) ->
-  pathList.add(entry.path)
-  fstream
-    .Reader(entry.fullPath)
-    .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
-    .on("err", (err) ->
-      cb(false, err)
-    )
-    .on("close", ->
-      cb(true, entry.path)
-      return
-    )
-  return
+_applyFromData = (outputFolder, {path: pa, fullPath}, pathList, cb) ->
+  return new Promise( (resolve, reject) ->
+    pathList.add(pa)
+    fstream
+      .Reader(fullPath)
+      .pipe(fstream.Writer(path.join(outputFolder, pa)))
+      .on("err", (err) ->
+        reject(err)
+        return
+      )
+      .on("close", ->
+        resolve(pa)
+        return
+      )
+    return
+  )
 
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, entry, pathList, cb) ->
-  pathList.add(entry.path)
-  entry
-    .pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
-    .on("err", (err) ->
-      cb(false, err)
-    )
-    .on("close", ->
-      cb(true, entry.path)
-      return
-    )
-  return
-
-###*
- * 終了確認
- *###
-_isEnd = (resolve, reject, pathList) ->
-  return (ok, data) ->
-    reject(data) unless ok
-    pathList.delete(data)
-    if pathList.size is 0
-      resolve()
+_applyFromEntry = (outputFolder, {path: pa}, pathList, cb) ->
+  return new Promise( (resolve, reject) ->
+    pathList.add(pa)
+    entry
+      .pipe(fstream.Writer(path: path.join(outputFolder, pa)))
+      .on("err", (err) ->
+        reject(err)
+        return
+      )
+      .on("close", ->
+        resolve(pa)
+        return
+      )
     return
+  )
 
 ###*
  * MODを適応します
@@ -109,7 +104,7 @@ applyMod = (type, mod, callback) ->
     switch type
       when "add" then folder = "install"
       when "delete" then folder = "remove"
-      else reject("Unknown type")
+      else throw new Error("Unknown type")
 
     log = (phase) ->
       return callback(phase, type, mod)
@@ -118,22 +113,34 @@ applyMod = (type, mod, callback) ->
       stream = _getFromRemote(folder, mod, log)
     else if mod.repo.type is "local"
       stream = _getFromLocal(folder, mod)
-      unless stream? then reject("No Folder and Zip in Path")
+      unless stream? then throw new Error("No Folder and Zip in Path")
     else
-      reject("Unknown RepoType")
+      throw new Error("Unknown RepoType")
 
     await new Promise( (resolve, reject) ->
       hasFile = false
       stream
         .on("data", (entry) ->
           hasFile = true
-          _applyFromData(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
+          try
+            data = await _applyFromData(outputFolder, entry, pathList)
+            pathList.delete(data)
+            if pathList.size is 0
+              resolve()
+          catch e
+            reject(e)
           return
         )
         .on("entry", (entry) ->
           return if entry.type is "Directory"
           hasFile = true
-          _applyFromEntry(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
+          try
+            data = await _applyFromEntry(outputFolder, entry, pathList)
+            pathList.delete(data)
+            if pathList.size is 0
+              resolve()
+          catch err
+            reject(err)
           return
         )
         .on("error", (err) ->
@@ -159,8 +166,8 @@ applyMod = (type, mod, callback) ->
       zip = await jszip.loadAsync(data)
       await new Promise( (resolve, reject) ->
         readdirp(root: outputFolder)
-          .on("data", (entry) ->
-            zip.file(path.join(prefix, entry.path), fs.readFileSync(entry.fullPath))
+          .on("data", ({path: pa, fullPath}) ->
+            zip.file(path.join(prefix, pa), fs.readFileSync(fullPath))
             return
           )
           .on("end", ->
@@ -200,6 +207,7 @@ applyMods = (addMods, deleteMods, callback) ->
   await Promise.all(applyMod("delete", dmod, callback) for dmod in deleteMods)
   return Promise.all(applyMod("add", amod, callback) for amod in addMods)
 
-module.exports =
-  applyMod: applyMod
-  applyMods: applyMods
+module.exports = {
+  applyMod
+  applyMods
+}

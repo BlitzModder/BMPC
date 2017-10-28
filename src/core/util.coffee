@@ -1,7 +1,7 @@
 path = require "path"
 fs = require "fs-extra"
 jszip = require "jszip"
-{shell} = require("electron")
+{shell} = require "electron"
 os = require "os"
 config = require "./config"
 
@@ -123,11 +123,28 @@ isFile = (topath) ->
   catch
     return false
 
-module.exports =
-  escape: escape
-  openBlitz: openBlitz
-  blitzExists: blitzExists
-  getVersion: getVersion
-  getPlatform: getPlatform
-  isDirectory: isDirectory
-  isFile: isFile
+###*
+ * レポジトリ名を整形します
+ ###
+formatRepoName = (name) ->
+  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]}"
+  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]}"
+  m = /^https?:\/\/(.+?)$/.exec(name)
+  if m?
+    return m[1]
+  return name
+
+module.exports = {
+  escape
+  openBlitz
+  blitzExists
+  getVersion
+  getPlatform
+  isDirectory
+  isFile
+  formatRepoName
+}

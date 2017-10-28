@@ -10,7 +10,9 @@ lang = remote.require("./lang")
 
 params = new URLSearchParams(document.location.search)
 path = decodeURIComponent(params.get("path"))
-repo = {type: params.get("type"), name: path}
+repo =
+  type: params.get("type")
+  name: path
 langName = config.get("lang")
 
 langTable = lang.get()
@@ -24,13 +26,15 @@ appliedMods = ->
 Vue.component("description",
   template: """
             <div class="col-12">
-              <div class="card card-outline-primary card-block">
-                <h4 class="card-title" v-if="hasinfo">{{name}}</h4>
-                <h6 class="card-subtitle text-muted" v-if="hasinfo">{{version}}</h6>
-                <p class="card-text" v-if="hasinfo">#{langTable.REPO_MAINTAINER}: {{maintainer}}</p>
-                <button type="button" class="btn btn-info" v-if="hasChangelog" data-toggle="collapse" data-target="#changelog">#{langTable.REPO_CHANGELOG}</button>
-                <div class="collapse" id="changelog">
-                  <div class="card card-block" v-html="changelogHtml"></div>
+              <div class="card border border-primary">
+                <div class="card-body">
+                  <h4 class="card-title" v-if="hasinfo">{{name}}</h4>
+                  <h6 class="card-subtitle text-muted" v-if="hasinfo">{{version}}</h6>
+                  <p class="card-text" v-if="hasinfo">#{langTable.REPO_MAINTAINER}: {{maintainer}}</p>
+                  <button type="button" class="btn btn-info" v-if="hasChangelog" data-toggle="collapse" data-target="#changelog">#{langTable.REPO_CHANGELOG}</button>
+                  <div class="collapse" id="changelog">
+                    <div class="card card-body" v-html="changelogHtml"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -45,9 +49,9 @@ Vue.component("description",
 Vue.component("big-category",
   template: """
             <div class="col-md-6">
-              <div class="card card-block">
-                <h4 class="card-title">{{name}}</h4>
-                <ul class="list-group">
+              <div class="card">
+                <h4 class="card-header">{{name}}</h4>
+                <ul class="list-group list-group-flush-this">
                   <li is="small-category" v-for="(v, k) in val" :parentname="name" :name="k" :val="v"></li>
                 </ul>
               </div>
@@ -57,7 +61,7 @@ Vue.component("big-category",
 )
 Vue.component("small-category",
   template: """
-            <li class="list-group-item flex-column align-items-start">
+            <li class="list-group-item">
               <a data-toggle="collapse" :href="id">{{name}}</a>
               <div class="category collapse" :id="idName">
                 <div class="list-group">
@@ -76,7 +80,7 @@ Vue.component("small-category",
 firstExec = true
 Vue.component("mod",
   template: """
-            <button type="button" class="list-group-item list-group-item-action flex-column align-items-start" :class="{applied: applied}" :data-path="val" @click="show">
+            <button type="button" class="list-group-item list-group-item-action inside-list-item" :class="{applied: applied}" :data-path="val" @click="show">
               <div class="form-check mb-0">
                 <label class="form-check-label checkbox_text">
                   <input type="checkbox" class="form-check-input checkbox" :data-path="val" :data-name="name" v-model="checked">
@@ -95,33 +99,35 @@ Vue.component("mod",
     )
     return {
       checked: applied
-      applied: applied
+      applied
     }
   computed:
     link: ->
       return request.getDetailUrl(repo, @val)
   methods:
-    show: (e) ->
-      t = e.target.classList
+    show: ({target}) ->
+      t = target.classList
       return if t.contains("form-check-label")
       return if t.contains("form-check-input")
 
       detail = $("#detail")
       webview = detail.find("webview")[0]
-      request.getUrlStatus(@link).then( (code) =>
-        return if code is 404
-        if firstExec
-          webview.addEventListener("dom-ready", ready = =>
-            webview.removeEventListener("dom-ready", ready)
-            firstExec = false
-            webview.loadURL(@link)
-            return
-          )
-        else
+      code = await request.getUrlStatus(@link)
+      return if code is 404
+      if firstExec
+        webview.addEventListener("dom-ready", ready = =>
+          webview.removeEventListener("dom-ready", ready)
+          firstExec = false
           webview.loadURL(@link)
-        detail.modal("show")
-        return
-      )
+          return
+        )
+      else
+        detail.on("shown.bs.modal", ready = =>
+          detail.off("shown.bs.modal", ready)
+          webview.loadURL(@link)
+          return
+        )
+      detail.modal("show")
       return
 )
 r = new Vue(
@@ -137,9 +143,10 @@ r = new Vue(
     infomaintainer: ""
     changelog: ""
   created: ->
-    @getPlist().then( ->
-      return r.getPlistWithOutBlackout(true)
-    )
+    do =>
+      await @getPlist()
+      await r.getPlistWithOutBlackout(true)
+      return
     @getInfo()
     @getChangelog()
     return
@@ -147,42 +154,40 @@ r = new Vue(
     getPlist: (force = false) ->
       @loading = true
       @error = false
-      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
-        return plistList.filter(obj)
-      ).then( (obj) =>
+      try
+        obj = await plistList.getUntilDone(repo, langName, force)
+        obj = await plistList.filter(obj)
         @loading = false
         @plist = obj
-      ).catch( (err) =>
+      catch err
         @loading = false
         @error = true
         @errorMsg = err
-      )
+      return
     getPlistWithOutBlackout: (force = false) ->
       @error = false
-      return plistList.getUntilDone(repo, langName, force).then( (obj) =>
-        return plistList.filter(obj, true)
-      ).then( (obj) =>
+      try
+        obj = await plistList.getUntilDone(repo, langName, force)
+        obj = await plistList.filter(obj, true)
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
           @plist = obj
-      ).catch( (err) =>
+      catch err
         @error = true
         @errorMsg = err
-      )
+      return
     getInfo: (force = false) ->
-      return plistInfo.get(repo, force).then( (obj) =>
+      try
+        {name, version, maintainer} = await plistInfo.get(repo, force)
         @hasinfo = true
-        @infoname = obj.name
-        @infoversion = obj.version
-        @infomaintainer = obj.maintainer
-        return
-      ).catch( (err) =>
+        @infoname = name
+        @infoversion = version
+        @infomaintainer = maintainer
+      catch err
         @hasinfo = false
-      )
+      return
     getChangelog: ->
-      return request.getChangelog(repo).then( (text) =>
-        @changelog = text
-        return
-      )
+      @changelog = await request.getChangelog(repo)
+      return
 )
 
 
@@ -255,75 +260,73 @@ onBeforeClose = (e) ->
   return
 
 document.getElementById("apply").addEventListener("click", ->
-  if confirm(langTable.CONFIRM_APPLY_STRING)
-    # 閉じる防止
-    window.addEventListener("beforeunload", onBeforeClose)
+  return unless confirm(langTable.CONFIRM_APPLY_STRING)
+  # 閉じる防止
+  window.addEventListener("beforeunload", onBeforeClose)
 
-    addMods = []
-    deleteMods = []
-    for $mod in $("button:not(.applied) input:checked")
-      addMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
-    for $mod in $("button.applied input:not(:checked)")
-      deleteMods.push({repo: repo, name: $mod.getAttribute("data-path"), showname: $mod.getAttribute("data-name")})
+  addMods = []
+  deleteMods = []
+  for $mod in $("button:not(.applied) input:checked")
+    addMods.push({repo, name: $mod.dataset.path, showname: $mod.dataset.name})
+  for $mod in $("button.applied input:not(:checked)")
+    deleteMods.push({repo, name: $mod.dataset.path, showname: $mod.dataset.name})
 
-    $("#progress").modal({ keyboard: false, focus: true, backdrop: "static" })
-    errored = false
-    applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
-      if phase is "done"
-        $button = $("button[data-path=\"#{mod.name}\"]")
-        switch type
-          when "add"
-            $button.addClass("applied")
-            p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
-          when "delete"
-            $button.removeClass("applied")
-            p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
-      else if phase is "fail"
-        $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
-        errored = true
-        switch type
-          when "add"
-            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
-            $checkbox.prop("checked", false)
-          when "delete"
-            p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
-            $checkbox.prop("checked", true)
-      else
-        switch phase
-          when "download"
-            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
-          when "downloaded"
-            p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
-          when "copydir"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
-          when "zipextract"
-            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
-          when "zipextracted"
-            p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
-          when "tempdone"
-            p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
-          when "zipcompress"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
-          when "zipcompressed"
-            p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
-      return
-    ).then( ->
-      if !errored
-        p.changePhase("done")
-      else
-        p.changePhase("failed")
-      # 閉じる防止解除
-      window.removeEventListener("beforeunload", onBeforeClose)
-      return
-    )
+  $("#progress").modal({ keyboard: false, focus: true, backdrop: "static" })
+  errored = false
+  await applyMod.applyMods(addMods, deleteMods, (phase, type, mod, err) ->
+    if phase is "done"
+      $button = $("button[data-path=\"#{mod.name}\"]")
+      switch type
+        when "add"
+          $button.addClass("applied")
+          p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
+        when "delete"
+          $button.removeClass("applied")
+          p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
+    else if phase is "fail"
+      $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
+      errored = true
+      switch type
+        when "add"
+          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
+          $checkbox.prop("checked", false)
+        when "delete"
+          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
+          $checkbox.prop("checked", true)
+    else
+      switch phase
+        when "download"
+          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
+        when "downloaded"
+          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
+        when "copydir"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
+        when "zipextract"
+          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
+        when "zipextracted"
+          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
+        when "tempdone"
+          p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
+        when "zipcompress"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
+        when "zipcompressed"
+          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
+    return
+  )
+  if !errored
+    p.changePhase("done")
+  else
+    p.changePhase("failed")
+  # 閉じる防止解除
+  window.removeEventListener("beforeunload", onBeforeClose)
   return
 )
 
 webview = document.getElementById("detailweb")
-webview.addEventListener("new-window", (e) ->
-  shell.openExternal(e.url)
+webview.addEventListener("new-window", ({url}) ->
+  shell.openExternal(url)
 )
-webview.addEventListener("will-navigate", (e) ->
-  shell.openExternal(e.url)
+webview.addEventListener("will-navigate", ({url}) ->
+  shell.openExternal(url)
   webview.stop()
 )

@@ -4,7 +4,6 @@
 
 {app} = require "electron"
 path = require "path"
-denodeify = require "denodeify"
 fs = require "fs-extra"
 fstream = require "fstream"
 jszip = require "jszip"
@@ -13,8 +12,6 @@ request = require "request"
 unzip = require "unzipper"
 config = require "./config"
 util = require "./util"
-
-readFile = denodeify(fs.readFile)
 
 TEMP_FOLDER = path.join(app.getPath("temp"), "BlitzModderPC")
 
@@ -52,46 +49,41 @@ _getFromLocal = (folder, mod, log) ->
 ###*
  * dataイベントから適応する
  *###
-_applyFromData = (outputFolder, entry, pathList, cb) ->
-  pathList.add(entry.path)
-  fstream
-    .Reader(entry.fullPath)
-    .pipe(fstream.Writer(path.join(outputFolder, entry.path)))
-    .on("err", (err) ->
-      cb(false, err)
-    )
-    .on("close", ->
-      cb(true, entry.path)
-      return
-    )
-  return
+_applyFromData = (outputFolder, {path: pa, fullPath}, pathList, cb) ->
+  return new Promise( (resolve, reject) ->
+    pathList.add(pa)
+    fstream
+      .Reader(fullPath)
+      .pipe(fstream.Writer(path.join(outputFolder, pa)))
+      .on("err", (err) ->
+        reject(err)
+        return
+      )
+      .on("close", ->
+        resolve(pa)
+        return
+      )
+    return
+  )
 
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, entry, pathList, cb) ->
-  pathList.add(entry.path)
-  entry
-    .pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
-    .on("err", (err) ->
-      cb(false, err)
-    )
-    .on("close", ->
-      cb(true, entry.path)
-      return
-    )
-  return
-
-###*
- * 終了確認
- *###
-_isEnd = (resolve, reject, pathList) ->
-  return (ok, data) ->
-    reject(data) unless ok
-    pathList.delete(data)
-    if pathList.size is 0
-      resolve()
+_applyFromEntry = (outputFolder, {path: pa}, pathList, cb) ->
+  return new Promise( (resolve, reject) ->
+    pathList.add(pa)
+    entry
+      .pipe(fstream.Writer(path: path.join(outputFolder, pa)))
+      .on("err", (err) ->
+        reject(err)
+        return
+      )
+      .on("close", ->
+        resolve(pa)
+        return
+      )
     return
+  )
 
 ###*
  * MODを適応します
@@ -106,13 +98,13 @@ applyMod = (type, mod, callback) ->
     outputFolder = path.normalize(config.get("blitzPath"))
   else
     outputFolder = TEMP_FOLDER
-  return new Promise( (resolve, reject) ->
+  try
     pathList = new Set()
-    fs.ensureDirSync(outputFolder)
+    await fs.ensureDir(outputFolder)
     switch type
       when "add" then folder = "install"
       when "delete" then folder = "remove"
-      else reject("Unknown type")
+      else throw new Error("Unknown type")
 
     log = (phase) ->
       return callback(phase, type, mod)
@@ -121,80 +113,86 @@ applyMod = (type, mod, callback) ->
       stream = _getFromRemote(folder, mod, log)
     else if mod.repo.type is "local"
       stream = _getFromLocal(folder, mod)
-      unless stream? then reject("No Folder and Zip in Path")
+      unless stream? then throw new Error("No Folder and Zip in Path")
     else
-      reject("Unknown RepoType")
+      throw new Error("Unknown RepoType")
 
-    hasFile = false
-    stream
-      .on("data", (entry) ->
-        hasFile = true
-        _applyFromData(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
-        return
-      )
-      .on("entry", (entry) ->
-        return if entry.type is "Directory"
-        hasFile = true
-        _applyFromEntry(outputFolder, entry, pathList, _isEnd(resolve, reject, pathList))
-        return
-      )
-      .on("error", (err) ->
-        reject(err)
-        return
-      )
-      .on("end", ->
-        resolve() unless hasFile
-        return
-      )
-    return
-  ).then( ->
-    return new Promise( (resolve, reject) ->
-      if pathType is "file"
-        callback("tempdone", type, mod)
-        callback("zipcompress", type, mod)
-        blitzPath = path.normalize(config.get("blitzPath"))
-        switch config.get("platform")
-          when "a" then prefix = "assets"
-          when "i" then prefix = "Payload/wotblitz.app"
-          else prefix = ""
-        return readFile(blitzPath).then( (data) ->
-          return jszip.loadAsync(data)
-        ).then( (zip) ->
-          readdirp(root: outputFolder)
-            .on("data", (entry) ->
-              zip.file(path.join(prefix, entry.path), fs.readFileSync(entry.fullPath))
-              return
-            )
-            .on("end", ->
-              zip
-                .generateNodeStream(streamFiles: true)
-                .pipe(fs.createWriteStream(blitzPath))
-                .on("finish", ->
-                  callback("zipcompressed", type, mod)
-                  resolve()
-                  return
-                )
-              return
-            )
-        ).catch((err) ->
-          reject(err)
+    await new Promise( (resolve, reject) ->
+      hasFile = false
+      stream
+        .on("data", (entry) ->
+          hasFile = true
+          try
+            data = await _applyFromData(outputFolder, entry, pathList)
+            pathList.delete(data)
+            if pathList.size is 0
+              resolve()
+          catch e
+            reject(e)
+          return
         )
-      else
-        resolve()
+        .on("entry", (entry) ->
+          return if entry.type is "Directory"
+          hasFile = true
+          try
+            data = await _applyFromEntry(outputFolder, entry, pathList)
+            pathList.delete(data)
+            if pathList.size is 0
+              resolve()
+          catch err
+            reject(err)
+          return
+        )
+        .on("error", (err) ->
+          reject(err)
+          return
+        )
+        .on("end", ->
+          resolve() unless hasFile
+          return
+        )
       return
     )
-  ).then( ->
+
+    if pathType is "file"
+      callback("tempdone", type, mod)
+      callback("zipcompress", type, mod)
+      blitzPath = path.normalize(config.get("blitzPath"))
+      switch config.get("platform")
+        when "a" then prefix = "assets"
+        when "i" then prefix = "Payload/wotblitz.app"
+        else prefix = ""
+      data = await fs.readFile(blitzPath)
+      zip = await jszip.loadAsync(data)
+      await new Promise( (resolve, reject) ->
+        readdirp(root: outputFolder)
+          .on("data", ({path: pa, fullPath}) ->
+            zip.file(path.join(prefix, pa), fs.readFileSync(fullPath))
+            return
+          )
+          .on("end", ->
+            zip
+              .generateNodeStream(streamFiles: true)
+              .pipe(fs.createWriteStream(blitzPath))
+              .on("finish", ->
+                callback("zipcompressed", type, mod)
+                resolve()
+                return
+              )
+            return
+          )
+        return
+      )
+
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
     callback("done", type, mod)
     fs.remove(TEMP_FOLDER)
-    return
-  ).catch( (err) ->
+  catch err
     fs.remove(TEMP_FOLDER)
     callback("fail", type, mod, err)
-    return
-  )
+  return
 
 ###*
  * 複数のMODを適応します
@@ -206,10 +204,10 @@ applyMod = (type, mod, callback) ->
  * @return {Promise}
  ###
 applyMods = (addMods, deleteMods, callback) ->
-  return Promise.all(applyMod("delete", dmod, callback) for dmod in deleteMods).then( ->
-    return Promise.all(applyMod("add", amod, callback) for amod in addMods)
-  )
+  await Promise.all(applyMod("delete", dmod, callback) for dmod in deleteMods)
+  return Promise.all(applyMod("add", amod, callback) for amod in addMods)
 
-module.exports =
-  applyMod: applyMod
-  applyMods: applyMods
+module.exports = {
+  applyMod
+  applyMods
+}

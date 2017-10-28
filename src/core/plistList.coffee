@@ -4,14 +4,11 @@
 fs = require "fs-extra"
 path = require "path"
 plist = require "plist"
-denodeify = require "denodeify"
 semver = require "semver"
 request = require "./request"
 cache = require "./cache"
 config = require "./config"
 util = require "./util"
-
-readFile = denodeify(fs.readFile)
 
 ###*
  * データ
@@ -45,6 +42,9 @@ parse = (plistObj) ->
           [version, platform] = v_.split(":")
         else
           [version, platform] = ["", ""]
+        version = version.replace(/^(\d+\.\d+)$/, "$1.9")
+        version = "" unless /^(?:\d+\.\d+\.\d+)?$/.test(version)
+        platform = "" unless /^(?:[iawm]+)?$/.test(platform)
         obj[name][n][n_] =
           name: "#{id}.#{i}.#{i_}"
           version: version
@@ -59,17 +59,17 @@ parse = (plistObj) ->
  * @return {Object} plistのオブジェクト
  ###
 getUntilDone = (repo, lang, force = false) ->
-  return get(repo, lang, force).catch(->
+  try
+    return await get(repo, lang, force)
+  try
     if lang.includes("_")
-      return get(repo, lang.split("_")[0], force)
-    return Promise.reject()
-  ).catch( ->
-    return get(repo, "en", force)
-  ).catch( ->
-    return get(repo, "ja", force)
-  ).catch( ->
-    return get(repo, "ru", force)
-  )
+      return await get(repo, lang.split("_")[0], force)
+  try
+    return await get(repo, "en", force)
+  try
+    return await get(repo, "ja", force)
+  try
+    return await get(repo, "ru", force)
 
 ###*
  * plistを取得してパースしたものを返します
@@ -80,37 +80,28 @@ getUntilDone = (repo, lang, force = false) ->
  * @return {Object} plistのオブジェクト
  ###
 get = ({type: repoType, name: repoName}, lang, force = false) ->
-  return new Promise( (resolve, reject) ->
-    if data[repoName]?[lang]? and !force
-      resolve(data[repoName][lang])
-      return
-    isCatched = false
-    cache.getStringFile(repoName, "plist/#{lang}.plist", force).catch( ->
-      isCatched = true
-      if repoType is "remote"
-        return request.getFromRemote(repoName, "plist/#{lang}.plist").then( (content) ->
-          return content.toString()
-        )
-      else if repoType is "local"
-        return readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8")
-      return Promise.reject()
-    ).then( (res) ->
-      cache.setStringFile(repoName, "plist/#{lang}.plist", res) if isCatched
-      data[repoName] = {} if !data[repoName]?
-      data[repoName][lang] = parse(plist.parse(res))
-      resolve(data[repoName][lang])
-      return
-    ).catch( (err) ->
-      reject(err)
-      return
-    )
-  )
+  if data[repoName]?[lang]? and !force
+    return data[repoName][lang]
+  try
+    res = await cache.getStringFile(repoName, "plist/#{lang}.plist", force)
+  catch
+    if repoType is "remote"
+      content = await request.getFromRemote(repoName, "plist/#{lang}.plist")
+      res = content.toString()
+    else if repoType is "local"
+      res = await fs.readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8")
+    else
+      throw new Error("不明なレポジトリ形式")
+    cache.setStringFile(repoName, "plist/#{lang}.plist", res)
+  data[repoName] = {} if !data[repoName]?
+  data[repoName][lang] = parse(plist.parse(res))
+  return data[repoName][lang]
 
-_is_needed = (ok, ver, plat, obj) ->
+_isNeeded = (ver, plat, obj) ->
   ov = obj.version
   op = obj.platform
   if (
-    (!ok or ov is "" or semver.gte(ov, ver)) and
+    (ver is "" or ov is "" or semver.gte(ov, ver)) and
     (op is "" or op.includes(plat))
   )
     return true
@@ -122,31 +113,23 @@ _is_needed = (ok, ver, plat, obj) ->
  * @return {Object}
  ###
 filter = (parsedObj, useCache = false) ->
-  return new Promise( (resolve, reject) ->
-    util.getVersion(useCache).then( (ver) ->
-      return {ok: true, ver}
-    , (err) ->
-      return {ok: false}
-    ).then( ({ok, ver}) ->
-      plat = config.get("platform")
-      obj = {}
-      for k1, v1 of parsedObj
-        for k2, v2 of v1
-          for k3, v3 of v2
-            if _is_needed(ok, ver, plat, v3)
-              obj[k1] = {} if !obj[k1]?
-              obj[k1][k2] = {} if !obj[k1][k2]?
-              obj[k1][k2][k3] = v3.name
-      resolve(obj)
-      return
-    ).catch( (err) ->
-      reject(err)
-      return
-    )
-    return
-  )
+  try
+    ver = await util.getVersion(useCache)
+  catch
+    ver = ""
+  plat = config.get("platform")
+  obj = {}
+  for k1, v1 of parsedObj
+    for k2, v2 of v1
+      for k3, v3 of v2
+        if _isNeeded(ver, plat, v3)
+          obj[k1] = {} if !obj[k1]?
+          obj[k1][k2] = {} if !obj[k1][k2]?
+          obj[k1][k2][k3] = v3.name
+  return obj
 
-module.exports =
-  getUntilDone: getUntilDone
-  get: get
-  filter: filter
+module.exports = {
+  getUntilDone
+  get
+  filter
+}

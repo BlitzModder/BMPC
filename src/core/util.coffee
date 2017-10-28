@@ -1,12 +1,9 @@
 path = require "path"
 fs = require "fs-extra"
 jszip = require "jszip"
-{shell} = require("electron")
+{shell} = require "electron"
 os = require "os"
-denodeify = require "denodeify"
 config = require "./config"
-
-readFile = denodeify(fs.readFile)
 
 ###*
  * HTMLエスケープ
@@ -35,7 +32,7 @@ openBlitz = ->
  ###
 blitzExists = ->
   try
-    fs.statSync(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
+    await fs.stat(path.join(require("./config").get("blitzPath"), "wotblitz.exe"))
     return true
   catch
     return false
@@ -64,62 +61,41 @@ _version = ""
  * Blitzのバージョンを取得します
  ###
 getVersion = (useCache = false) ->
-  return new Promise( (resolve, reject) ->
-    if useCache and _version isnt ""
-      return _version
-    config = require("./config")
-    if config.get("blitzPathType") is "file"
-      zip = new jszip()
-      readFile(config.get("blitzPath")).then( (data) ->
-        return zip.loadAsync(data)
-      ).then( ->
-        switch config.get("platform")
-          when "a" then prefix = "assets"
-          when "i" then prefix = "Payload/wotblitz.app"
-          else prefix = ""
-        file = zip.file("#{prefix}/Data/version.txt")
-        if file?
-          return file.async("string")
-        else
-          reject("Error: Version File Not Found Error")
-          return
-      ).then( (str) ->
-        ver = _parseVersion(str)
-        if ver is ""
-          reject("Error: Version Regexp Error")
-        else
-          _version = ver
-          resolve(ver)
-        return
-      ).catch( (err) ->
-        reject(err)
-        return
-      )
-      return
-    readFile(path.join(config.get("blitzPath"), "Data", "version.txt"), "utf-8").then( (text) ->
-      ver = _parseVersion(text)
-      if ver is ""
-        reject("Error: Version Regexp Error (#{text})")
-      else
-        _version = ver
-        resolve(ver)
-      return
-    ).catch( ->
-      return readFile(path.join(config.get("blitzPath"), "Data/version", "resources.txt"), "utf-8").then( (text) ->
-        reg = /^(\d+\.\d+\.\d+)$/.exec(text)
-        if reg?
-          _version = ver
-          resolve(reg[1])
-        else
-          reject("Error: Version Regexp Error (#{text})")
-        return
-      )
-    ).catch( (err) ->
-      reject(err)
-      return
-    )
-    return
-  )
+  if useCache and _version isnt ""
+    return _version
+  config = require("./config")
+  if config.get("blitzPathType") is "file"
+    zip = new jszip()
+    data = await fs.readFile(config.get("blitzPath"))
+    await zip.loadAsync(data)
+    switch config.get("platform")
+      when "a" then prefix = "assets"
+      when "i" then prefix = "Payload/wotblitz.app"
+      else prefix = ""
+    file = zip.file("#{prefix}/Data/version.txt")
+    if !file?
+      throw new Error("Error: Version File Not Found Error")
+    str = await file.async("string")
+    ver = _parseVersion(str)
+    if ver is ""
+      throw new Error("Error: Version Regexp Error")
+    _version = ver
+    return ver
+  try
+    text = await fs.readFile(path.join(config.get("blitzPath"), "Data", "version.txt"), "utf-8")
+    ver = _parseVersion(text)
+    if ver is ""
+      throw new Error("Error: Version Regexp Error (#{text})")
+    _version = ver
+    return ver
+  catch
+    text = await fs.readFile(path.join(config.get("blitzPath"), "Data/version", "resources.txt"), "utf-8")
+    reg = /^(\d+\.\d+\.\d+)$/.exec(text)
+    if !reg?
+      throw new Error("Error: Version Regexp Error (#{text})")
+    _version = ver
+    return reg[1]
+  return
 
 ###*
  * 利用している端末を取得します
@@ -147,11 +123,28 @@ isFile = (topath) ->
   catch
     return false
 
-module.exports =
-  escape: escape
-  openBlitz: openBlitz
-  blitzExists: blitzExists
-  getVersion: getVersion
-  getPlatform: getPlatform
-  isDirectory: isDirectory
-  isFile: isFile
+###*
+ * レポジトリ名を整形します
+ ###
+formatRepoName = (name) ->
+  m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]}"
+  m = /^https?:\/\/(.+?)\.github\.io\/(.+?)$/.exec(name)
+  if m?
+    return "#{m[1]}/#{m[2]}"
+  m = /^https?:\/\/(.+?)$/.exec(name)
+  if m?
+    return m[1]
+  return name
+
+module.exports = {
+  escape
+  openBlitz
+  blitzExists
+  getVersion
+  getPlatform
+  isDirectory
+  isFile
+  formatRepoName
+}

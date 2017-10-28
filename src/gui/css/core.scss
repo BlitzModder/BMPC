@@ -7,9 +7,26 @@
 .navbar {
   flex-direction: row;
 }
-.card-block {
-  margin-top: 5px;
+.card {
+  margin-bottom: 10px;
+}
+.card-body {
+  padding: 15px;
+}
+label.radio_text {
   margin-bottom: 5px;
+}
+
+.list-group-flush-this:last-child > .list-group-item:last-child {
+  border-bottom: 0;
+}
+.list-group-flush-this > .list-group-item {
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+}
+.inside-list-item:first-child {
+  border-top: 1px solid rgba(0,0,0,.125) !important;
 }
 
 .category {
@@ -20,11 +37,19 @@ button.applied::after {
   color: blue;
   margin-left: 20px;
 }
+#detail {
+  padding-right: 15px !important;
+  padding-left: 15px !important;
+}
 webview {
   height: 100%;
 }
 #outwebview {
-  height: 450px;
+  height: 80vh;
+}
+.modal-dialog {
+  max-width: none !important;
+  margin: 10px !important;
 }
 
 #applyInfo textarea {

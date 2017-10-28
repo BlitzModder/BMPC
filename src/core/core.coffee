@@ -38,13 +38,12 @@ createWindow = ->
  ###
 app.on("ready", ->
   # 設定とキャッシュの準備待ち
-  Promise.all([config.init(), cache.init()]).then( ->
+  try
+    await Promise.all([config.init(), cache.init()])
     createWindow()
-    return
-  ).catch((err) ->
+  catch err
     console.error err
-    return
-  )
+  return
 )
 
 app.on("window-all-closed", ->

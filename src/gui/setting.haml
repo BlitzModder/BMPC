@@ -5,150 +5,158 @@
     %meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
     %meta(http-equiv="x-ua-compatible" content="ie=edge")
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
-    %link(rel="stylesheet" type="text/css" href="./css/core.css")
+    %link(rel="stylesheet" type="text/css" href="css/core.css")
   %body
-    %nav.navbar.navbar-toggleable-sm.navbar-dark.sticky-top.bg-faded.mb-4
+    %nav.navbar.navbar-dark.bg-dark.sticky-top.mb-4
       %a(href="./index.html")
         %button.btn(type="button")
           %img(src="./img/circle-left.svg" height="30px" width="30px")
     .container-fluid
       .row#setting
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="REMOTE_REPOSITORY_LIST")
-            %p
-              %span.translate(data-key="REMOTE_REPOSITORY_TEXT")
-            %ul.list-group.mb-1
-              %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
-            %form.form-inline
-              .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
-                %input.form-control.mr-1.mt-1#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
-                %button.btn.btn-primary.mt-1.remoteRepoButton(type="button" @click="addRemoteRepo")
-                  %span.translate(data-key="BUTTON_ADD")
-                .form-control-feedback
-                  %p(v-show="remoteRepoAddStrErr")
-                    %span.translate(data-key="ERROR_INVALID_INPUT")
+            .card-body
+              %p
+                %span.translate(data-key="REMOTE_REPOSITORY_TEXT")
+              %ul.list-group.mb-1
+                %li(is="repo" v-for="(r, i) in remoteRepos" :name="r" :num="i" :repos="remoteRepos")
+              %form.form-inline
+                .form-group(:class="{ 'has-danger': remoteRepoAddStrErr }")
+                  %input.form-control.mr-1.mt-1#remoteRepoInput(type="text" v-model="remoteRepoAddStr")
+                  %button.btn.btn-primary.mt-1.remoteRepoButton(type="button" @click="addRemoteRepo")
+                    %span.translate(data-key="BUTTON_ADD")
+                  .form-control-feedback
+                    %p(v-show="remoteRepoAddStrErr")
+                      %span.translate(data-key="ERROR_INVALID_INPUT")
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="LOCAL_REPOSITORY_LIST")
-            %ul.list-group.mb-1
-              %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
-            %button.btn.btn-primary(type="button" @click="addLocalRepo")
-              %span.translate(data-key="BUTTON_ADD")
+            .card-body
+              %ul.list-group.mb-1
+                %li(is="repo" v-for="(r, i) in localRepos" :name="r" :num="i" :repos="localRepos")
+              %button.btn.btn-primary(type="button" @click="addLocalRepo")
+                %span.translate(data-key="BUTTON_ADD")
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="DEBUG_REPOSITORY_NAME")
-            %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
-            %button.btn.btn-primary(type="button" @click="setDebugRepo")
-              %span.translate(data-key="BUTTON_SET")
+            .card-body
+              %debug-repo(v-if="debugRepo !== \"\"" :name="debugRepo")
+              %button.btn.btn-primary(type="button" @click="setDebugRepo")
+                %span.translate(data-key="BUTTON_SET")
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="PATH_TO_BLITZ")
-            %form.form-inline
-              %label.radio_text
-                %input.radio(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
-                Windows(Steam)
-              %label.radio_text
-                %input.radio(type="radio" name="blitzPathRadio" value="macsteam" v-model="blitzPathRadio")
-                Mac(Steam)
-              %label.radio_text
-                %input.radio(type="radio" name="blitzPathRadio" value="macapp" v-model="blitzPathRadio")
-                Mac(AppStore)
-              %label.radio_text
-                %input.radio(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
-                %span.translate(data-key="OTHER")
-            %blitz-path(:name="blitzPath")
-            .btn-group
-              %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
-                %span.translate(data-key="SET_TO_FOLDER")
-              %button.btn(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
-                %span.translate(data-key="SET_TO_FILE")
+            .card-body
+              %form.form-inline.mb-2
+                %label.radio_text
+                  %input.radio(type="radio" name="blitzPathRadio" value="win" v-model="blitzPathRadio")
+                  Windows(Steam)
+                %label.radio_text
+                  %input.radio(type="radio" name="blitzPathRadio" value="macsteam" v-model="blitzPathRadio")
+                  Mac(Steam)
+                %label.radio_text
+                  %input.radio(type="radio" name="blitzPathRadio" value="macapp" v-model="blitzPathRadio")
+                  Mac(AppStore)
+                %label.radio_text
+                  %input.radio(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
+                  %span.translate(data-key="OTHER")
+              %blitz-path(:name="blitzPath")
+              .btn-group
+                %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
+                  %span.translate(data-key="SET_TO_FOLDER")
+                %button.btn(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFile")
+                  %span.translate(data-key="SET_TO_FILE")
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="APPLY_DEVICE")
-            %form.form-inline
-              %label.radio_text
-                %input.radio(type="radio" name="platform" value="w" v-model="platform")
-                Windows
-              %label.radio_text
-                %input.radio(type="radio" name="platform" value="m" v-model="platform")
-                Mac
-              %label.radio_text
-                %input.radio(type="radio" name="platform" value="a" v-model="platform")
-                Android
-              %label.radio_text
-                %input.radio(type="radio" name="platform" value="i" v-model="platform")
-                iOS
+            .card-body
+              %form.form-inline
+                %label.radio_text
+                  %input.radio(type="radio" name="platform" value="w" v-model="platform")
+                  Windows
+                %label.radio_text
+                  %input.radio(type="radio" name="platform" value="m" v-model="platform")
+                  Mac
+                %label.radio_text
+                  %input.radio(type="radio" name="platform" value="a" v-model="platform")
+                  Android
+                %label.radio_text
+                  %input.radio(type="radio" name="platform" value="i" v-model="platform")
+                  iOS
         .col-md-6
-          .card.card-block
-            %h4.card-title#langHeader 言語(Language)
-            %form.form-inline
-              %label.radio_text
-                %input.radio(type="radio" name="lang" value="en" v-model="lang")
-                English
-              %label.radio_text
-                %input.radio(type="radio" name="lang" value="ja" v-model="lang")
-                日本語
-              %label.radio_text
-                %input.radio(type="radio" name="lang" value="ru" v-model="lang")
-                русский
-              %label.radio_text
-                %input.radio(type="radio" name="lang" value="zh_TW" v-model="lang")
-                繁體中文
-              %label.radio_text
-                %input.radio(type="radio" name="lang" value="zh_CN" v-model="lang")
-                简体中文
+          .card
+            %h4.card-header#langHeader 言語(Language)
+            .card-body
+              %form.form-inline
+                %label.radio_text
+                  %input.radio(type="radio" name="lang" value="en" v-model="lang")
+                  English
+                %label.radio_text
+                  %input.radio(type="radio" name="lang" value="ja" v-model="lang")
+                  日本語
+                %label.radio_text
+                  %input.radio(type="radio" name="lang" value="ru" v-model="lang")
+                  русский
+                %label.radio_text
+                  %input.radio(type="radio" name="lang" value="zh_TW" v-model="lang")
+                  繁體中文
+                %label.radio_text
+                  %input.radio(type="radio" name="lang" value="zh_CN" v-model="lang")
+                  简体中文
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="CLEAR_CACHE")
-            %button.btn.btn-primary(type="button" @click="clearCache")
-              %span.translate(data-key="BUTTON_CLEAR")
+            .card-body
+              %button.btn.btn-primary(type="button" @click="clearCache")
+                %span.translate(data-key="BUTTON_CLEAR")
         .col-md-6
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="OPEN_CONFIG")
-            %button.btn.btn-primary(type="button" @click="openConfigFolder")
-              %span.translate(data-key="BUTTON_OPEN")
+            .card-body
+              %button.btn.btn-primary(type="button" @click="openConfigFolder")
+                %span.translate(data-key="BUTTON_OPEN")
         .col-md-12
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="RESET_SETTING")
-            %button.btn.btn-primary(type="button" @click="reset")
-              %span.translate(data-key="BUTTON_RESET")
+            .card-body
+              %button.btn.btn-primary(type="button" @click="reset")
+                %span.translate(data-key="BUTTON_RESET")
         .col-md-12
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="APPLY_INFO_OUTPUT")
-            %button.btn.btn-primary(type="button" @click="applyInfo")
-              %span.translate(data-key="BUTTON_SHOW")
+            .card-body
+              %button.btn.btn-primary(type="button" @click="applyInfo")
+                %span.translate(data-key="BUTTON_SHOW")
         .modal.fade#applyInfo
           .modal-dialog
             .modal-content
-              .modal-header
-                %button.close(type="button" data-dismiss="modal")
-                  %span &times;
               .modal-body
                 %textarea
               .modal-footer
                 %button.btn.btn-secondary(type="button" data-dismiss="modal")
                   %span.translate(data-key="BUTTON_CLOSE")
         .col-md-12
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="VERSION_INFO")
-            %p.user-select
-              {{appName}} {{version}}
-              %br
-              (C) S(29314) 2016 MIT License
+            .card-body
+              %p.user-select
+                {{appName}} {{version}}
+                %br
+                (C) S(29314) 2016-2017 MIT License
     %script(type="text/javascript")
-      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
-    %script(src="../node_modules/tether/dist/js/tether.min.js")
+      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.slim.min.js");
+    %script(src="../node_modules/popper.js/dist/umd/popper.min.js")
     %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
     %script(src="../node_modules/vue/dist/vue.min.js")
     %script(src="./js/setting.js")

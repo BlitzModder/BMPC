@@ -5,17 +5,12 @@
 fs = require "fs-extra"
 path = require "path"
 {app} = require "electron"
-denodeify = require "denodeify"
 
 ###*
  * キャッシュをおくフォルダ
  * @const
  ###
 CACHE_FOLDER_PATH = path.join(app.getPath("userData"), "plistCache")
-
-ensureFile = denodeify(fs.ensureFile)
-readJson = denodeify(fs.readJson)
-remove = denodeify(fs.remove)
 
 ###
  * キャッシュファイルと実際のファイルのテーブル
@@ -41,7 +36,10 @@ _outputError = (err) ->
  * @private
  ###
 _update = ->
-  fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table, _outputError)
+  try
+    await fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table)
+  catch err
+    _outputError(err)
   return
 
 ###
@@ -50,12 +48,15 @@ _update = ->
  ###
 init = ->
   filePath = path.join(CACHE_FOLDER_PATH,"table.json")
-  return ensureFile(filePath).then( ->
-    return readJson(filePath, throws: false)
-  ).then( (content) ->
+  await fs.ensureFile(filePath)
+  try
+    content = await fs.readJson(filePath, throws: false)
     table = if content? then content else DEFAULT_DATA
-    _update()
-  )
+  catch err
+    table = DEFAULT_DATA
+    _outputError(err)
+  _update()
+  return
 
 ###
  * キャッシュ名を取得
@@ -79,7 +80,10 @@ add = (key) ->
 setStringFile = (repoName, fileName, fileContent, callback = _outputError) ->
   num = add("#{repoName}/#{fileName}")
   table["#{repoName}/#{fileName}"] = num
-  fs.outputFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), fileContent, callback)
+  try
+    await fs.outputFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), fileContent)
+  catch
+    callback()
   return
 
 ###
@@ -87,24 +91,16 @@ setStringFile = (repoName, fileName, fileContent, callback = _outputError) ->
  ###
 getStringFile = (repoName, fileName, force = false) ->
   num = get("#{repoName}/#{fileName}")
-  return new Promise( (resolve, reject) ->
-    if force
-      reject()
-      return
-    fs.readFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), "utf8", (err, content) ->
-      if err?
-        reject(err)
-        return
-      resolve(content)
-      return
-    )
-  )
+  if force
+    throw new Error("キャッシュを無視")
+  return await fs.readFile(path.join(CACHE_FOLDER_PATH,"#{num}.txt"), "utf8")
 
 clear = ->
-  return remove(CACHE_FOLDER_PATH)
+  return fs.remove(CACHE_FOLDER_PATH)
 
-module.exports =
-  init: init
-  setStringFile: setStringFile
-  getStringFile: getStringFile
-  clear: clear
+module.exports = {
+  init
+  setStringFile
+  getStringFile
+  clear
+}

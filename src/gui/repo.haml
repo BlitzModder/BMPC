@@ -7,7 +7,7 @@
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
     %link(rel="stylesheet" type="text/css" href="css/core.css")
   %body
-    %nav.navbar.navbar-dark.sticky-top.bg-faded.mb-4
+    %nav.navbar.navbar-dark.bg-dark.sticky-top.mb-4
       .mr-auto
         %a(href="./index.html")
           %button.btn(type="button")
@@ -38,17 +38,14 @@
     .modal.fade#detail
       .modal-dialog
         .modal-content
-          .modal-header
-            %button.close(type="button" data-dismiss="modal")
-              %span &times;
           .modal-body#outwebview
             %webview#detailweb(src="about:blank" autosize="on")
           .modal-footer
             %button.btn.btn-primary(type="button" data-dismiss="modal")
               %span.translate(data-key="BUTTON_CLOSE")
     %script(type="text/javascript")
-      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.min.js");
-    %script(src="../node_modules/tether/dist/js/tether.min.js")
+      window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.slim.min.js");
+    %script(src="../node_modules/popper.js/dist/umd/popper.min.js")
     %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
     %script(src="../node_modules/vue/dist/vue.min.js")
     %script(src="./js/repo.js")

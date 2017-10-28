@@ -3,6 +3,7 @@
  ###
 
 request = require "request"
+requestP = require "request-promise-native"
 path = require "path"
 fs = require "fs-extra"
 
@@ -13,18 +14,10 @@ fs = require "fs-extra"
  * @return {Promise}
  ###
 getFromRemote = (repoName, fileName) ->
-  return new Promise( (resolve, reject) ->
-    names = repoName.split("/")
-    if names.length < 3
-      reject()
-      return
-    request("#{repoName}/#{fileName}", (err, res, body) ->
-      if err? or (res? and res.statusCode is 404)
-        reject(err)
-      resolve(body)
-    )
-    return
-  )
+  names = repoName.split("/")
+  if names.length < 3
+    throw new Error("不明なリモートリポジトリ名")
+  return await requestP("#{repoName}/#{fileName}")
 
 ###
  * 詳細のURLを取得します
@@ -32,15 +25,15 @@ getFromRemote = (repoName, fileName) ->
  * @param {string} id 取得するmodのid
  * @return {string}
  ###
-getDetailUrl = (repo, id) ->
-  switch repo.type
+getDetailUrl = ({name, type}, id) ->
+  switch type
     when "remote"
-      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
+      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
       if m?
         return "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/detail/html/#{id}.html"
-      return "#{repo.name}/detail/html/#{id}.html"
+      return "#{name}/detail/html/#{id}.html"
     when "local"
-      return "file://" + path.join(repo.name, "detail/html/#{id}.html")
+      return "file://" + path.join(name, "detail/html/#{id}.html")
   return ""
 
 ###
@@ -48,56 +41,39 @@ getDetailUrl = (repo, id) ->
  * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
  * @return {string}
  ###
-getChangelog = (repo) ->
-  return new Promise( (resolve, reject) ->
-    switch repo.type
-      when "remote"
-        m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(repo.name)
-        if m?
-          url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
-        else
-          url = "#{repo.name}/changelog.txt"
-        request(url, (err, res, body) ->
-          if err? or (res? and res.statusCode is 404)
-            resolve("")
-          resolve(body)
-          return
-        )
-      when "local"
-        fs.readFile(path.join(repo.name, "changelog.txt"), "utf8", (err, data) ->
-          if err? then resolve("")
-          resolve(data)
-          return
-        )
+getChangelog = ({name, type}) ->
+  switch type
+    when "remote"
+      m = /^https?:\/\/github\.com\/(.+?)\/(.+?)\/raw\/master$/.exec(name)
+      if m?
+        url = "https://cdn.rawgit.com/#{m[1]}/#{m[2]}/master/changelog.txt"
       else
-        resolve("")
-    return
-  )
+        url = "#{name}/changelog.txt"
+      try
+        return await requestP(url)
+    when "local"
+      try
+        return await fs.readFile(path.join(name, "changelog.txt"), "utf8")
+  return ""
 
 ###
  * 最終リリースバージョンを取得します
  * @return {Promise}
  ###
 getLastestVersion = ->
-  return new Promise( (resolve, reject) ->
-    request(
-      url: "https://api.github.com/repos/BlitzModder/BMPC/releases/latest"
-      headers:
-        "User-Agent": "request"
-    , (err, res, body) ->
-      if err? or (res? and res.statusCode is 404)
-        reject(err)
-      try
-        response = JSON.parse(body)
-        ver = response.name
-        if ver is ""
-          ver = response.tag_name
-        resolve(ver)
-      catch
-        reject("Failed to parse JSON")
-    )
-    return
+  body = await requestP(
+    url: "https://api.github.com/repos/BlitzModder/BMPC/releases/latest"
+    headers:
+      "User-Agent": "request"
   )
+  try
+    {name, tag_name} = JSON.parse(body)
+    ver = name
+    ver = tag_name if ver is ""
+    return ver
+  catch
+    throw new Error("Failed to parse JSON")
+  return
 
 ###
  * ステータスコードを取得します
@@ -105,19 +81,13 @@ getLastestVersion = ->
  * @return {Number} ステータスコード
  ###
 getUrlStatus = (url) ->
-  return new Promise( (resolve, reject) ->
-    request(url, (err, res, body) ->
-      if err? and res?
-        reject(err)
-      else
-        resolve(res.statusCode)
-      return
-    )
-  )
+  {statusCode} = await requestP({url, resolveWithFullResponse: true})
+  return statusCode
 
-module.exports =
-  getFromRemote: getFromRemote
-  getChangelog: getChangelog
-  getDetailUrl: getDetailUrl
-  getLastestVersion: getLastestVersion
-  getUrlStatus: getUrlStatus
+module.exports = {
+  getFromRemote
+  getChangelog
+  getDetailUrl
+  getLastestVersion
+  getUrlStatus
+}

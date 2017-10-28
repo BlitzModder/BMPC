@@ -120,7 +120,11 @@ Vue.component("mod",
           return
         )
       else
-        webview.loadURL(@link)
+        detail.on("shown.bs.modal", ready = =>
+          detail.off("shown.bs.modal", ready)
+          webview.loadURL(@link)
+          return
+        )
       detail.modal("show")
       return
 )

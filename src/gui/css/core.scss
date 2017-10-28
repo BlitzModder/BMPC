@@ -37,11 +37,19 @@ button.applied::after {
   color: blue;
   margin-left: 20px;
 }
+#detail {
+  padding-right: 15px !important;
+  padding-left: 15px !important;
+}
 webview {
   height: 100%;
 }
 #outwebview {
-  height: 450px;
+  height: 80vh;
+}
+.modal-dialog {
+  max-width: none !important;
+  margin: 10px !important;
 }
 
 #applyInfo textarea {

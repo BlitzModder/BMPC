@@ -66,7 +66,7 @@ Vue.component("repo",
       return
 )
 Vue.component("debug-repo",
-  template: "<div class=\"card card-block p-1\" id=\"debugRepo\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"remove\"></div>"
+  template: "<div class=\"card p-1\" id=\"debugRepo\"><div class=\"card-body\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"remove\"></div></div>"
   props: ["name"]
   computed:
     formatedName: ->
@@ -79,7 +79,7 @@ Vue.component("debug-repo",
       return
 )
 Vue.component("blitz-path",
-  template: "<div class=\"card card-block p-1\" id=\"blitzFolder\">{{formatedName}}</div>"
+  template: "<div class=\"card\" id=\"blitzFolder\"><div class=\"card-body\">{{formatedName}}</div></div>"
   props: ["name"]
   computed:
     formatedName: ->

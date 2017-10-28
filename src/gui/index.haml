@@ -7,7 +7,7 @@
     %link(rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css")
     %link(rel="stylesheet" type="text/css" href="css/core.css")
   %body
-    %nav.navbar.navbar-dark.sticky-top.bg-faded.mb-4
+    %nav.navbar.navbar-dark.bg-dark.sticky-top.mb-4
       .mr-auto
         %a(href="./setting.html")
           %button.btn(type="button")
@@ -17,31 +17,32 @@
     .container-fluid
       .row#repo
         .col-md-6(v-if="remoteRepos.length > 0")
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="REMOTE_REPOSITORY_NAME")
-            %ul.list-group
+            %ul.list-group.list-group-flush
               %li(is="repo" v-for="r in remoteRepos" :name="r" repotype="remote")
         .col-md-6(v-if="localRepos.length > 0")
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="LOCAL_REPOSITORY_NAME")
-            %ul.list-group
+            %ul.list-group.list-group-flush
               %li(is="repo" v-for="r in localRepos" :name="r" repotype="local")
         .col-md-6(v-if="debugRepo !== \"\"")
-          .card.card-block
-            %h4.card-title
+          .card
+            %h4.card-header
               %span.translate(data-key="DEBUG_REPOSITORY_NAME")
-            .card.card-block
+            .card
               %debug-repo(:name="debugRepo")
-      .card.card-block.card-inverse.card-info#update.hidden
-        %h4.card-title
-          %span.translate(data-key="UPDATE_NOTIFY_TITLE")
-        %p
-          %span.newVersion
-          %span.translate(data-key="UPDATE_NOTIFY_TEXT")
-        %a.card-link#updateLink(href="#")
-          %span.translate(data-key="BUTTON_OPEN")
+      .card.text-white.bg-info#update.hidden
+        .card-body
+          %h4.card-title
+            %span.translate(data-key="UPDATE_NOTIFY_TITLE")
+          %p
+            %span.newVersion
+            %span.translate(data-key="UPDATE_NOTIFY_TEXT")
+          %a.btn.btn-light#updateLink(href="#")
+            %span.translate(data-key="BUTTON_OPEN")
     %script(type="text/javascript")
       window.jQuery = window.$ = require("../node_modules/jquery/dist/jquery.slim.min.js");
     %script(src="../node_modules/popper.js/dist/umd/popper.min.js")

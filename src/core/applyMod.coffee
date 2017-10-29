@@ -49,7 +49,7 @@ _getFromLocal = (folder, mod, log) ->
 ###*
  * dataイベントから適応する
  *###
-_applyFromData = (outputFolder, {path: pa, fullPath}, pathList, cb) ->
+_applyFromData = (outputFolder, {path: pa, fullPath}, pathList) ->
   return new Promise( (resolve, reject) ->
     pathList.add(pa)
     fstream
@@ -69,7 +69,7 @@ _applyFromData = (outputFolder, {path: pa, fullPath}, pathList, cb) ->
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, entry, pathList, cb) ->
+_applyFromEntry = (outputFolder, entry, pathList) ->
   return new Promise( (resolve, reject) ->
     pathList.add(entry.path)
     entry
@@ -89,15 +89,19 @@ _applyFromEntry = (outputFolder, entry, pathList, cb) ->
  * MODを適応します
  * @param {"add"|"delete"} type 適応するか解除するか
  * @param {string} mod "{repo: {type: repoType, name: repo}, name: name}"
- * @param {Function} callback 適応完了時に実行
+ * @param {Function} progress 進捗報告
  * @return {Promise}
  ###
-applyMod = (type, mod, callback) ->
+applyMod = (type, mod, progress) ->
   pathType = config.get("blitzPathType")
   if pathType is "folder"
     outputFolder = path.normalize(config.get("blitzPath"))
   else
     outputFolder = TEMP_FOLDER
+
+  log = (phase) ->
+    return progress(phase, type, mod)
+
   try
     pathList = new Set()
     await fs.ensureDir(outputFolder)
@@ -105,9 +109,6 @@ applyMod = (type, mod, callback) ->
       when "add" then folder = "install"
       when "delete" then folder = "remove"
       else throw new Error("Unknown type")
-
-    log = (phase) ->
-      return callback(phase, type, mod)
 
     if mod.repo.type is "remote"
       stream = _getFromRemote(folder, mod, log)
@@ -155,8 +156,8 @@ applyMod = (type, mod, callback) ->
     )
 
     if pathType is "file"
-      callback("tempdone", type, mod)
-      callback("zipcompress", type, mod)
+      log("tempdone")
+      log("zipcompress")
       blitzPath = path.normalize(config.get("blitzPath"))
       switch config.get("platform")
         when "a" then prefix = "assets"
@@ -175,7 +176,7 @@ applyMod = (type, mod, callback) ->
               .generateNodeStream(streamFiles: true)
               .pipe(fs.createWriteStream(blitzPath))
               .on("finish", ->
-                callback("zipcompressed", type, mod)
+                log("zipcompressed")
                 resolve()
                 return
               )
@@ -187,11 +188,10 @@ applyMod = (type, mod, callback) ->
     switch type
       when "add" then config.add("appliedMods", {repo: mod.repo.name, name: mod.name})
       when "delete" then config.remove("appliedMods", {repo: mod.repo.name, name: mod.name})
-    callback("done", type, mod)
-    fs.remove(TEMP_FOLDER)
+    log("done")
   catch err
-    fs.remove(TEMP_FOLDER)
-    callback("fail", type, mod, err)
+    progress("fail", type, mod, err)
+  fs.remove(TEMP_FOLDER)
   return
 
 ###*

@@ -125,7 +125,7 @@ filter = (parsedObj, useCache = false) ->
         if _isNeeded(ver, plat, v3)
           obj[k1] = {} if !obj[k1]?
           obj[k1][k2] = {} if !obj[k1][k2]?
-          obj[k1][k2][k3] = v3.name
+          obj[k1][k2][k3] = v3
   return obj
 
 module.exports = {

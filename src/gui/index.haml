@@ -14,7 +14,7 @@
             %img(src="./img/cogs.svg" height="30px" width="30px")
       %button.btn#play(type="button")
         %img(src="./img/play3.svg" height="30px" width="30px")
-    .container-fluid
+    .container-fluid#index
       .row#repo
         .col-md-6(v-if="remoteRepos.length > 0")
           .card
@@ -32,7 +32,7 @@
           .card
             %h4.card-header
               %span.translate(data-key="DEBUG_REPOSITORY_NAME")
-            .card
+            .card-body
               %debug-repo(:name="debugRepo")
       .card.text-white.bg-info#update.hidden
         .card-body

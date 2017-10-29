@@ -6,6 +6,7 @@ request = require "request"
 requestP = require "request-promise-native"
 path = require "path"
 fs = require "fs-extra"
+util = require "./util"
 
 ###*
  * リモートからファイルを取得します
@@ -81,7 +82,13 @@ getLastestVersion = ->
  * @return {Number} ステータスコード
  ###
 getUrlStatus = (url) ->
-  {statusCode} = await requestP({url, resolveWithFullResponse: true})
+  try
+    {statusCode} = await requestP({url, resolveWithFullResponse: true})
+  catch
+    if util.isFile(url)
+      return 200
+    else
+      return 404
   return statusCode
 
 module.exports = {

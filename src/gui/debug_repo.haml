@@ -12,11 +12,12 @@
         %a(href="./index.html")
           %button.btn(type="button")
             %img(src="./img/circle-left.svg" height="30px" width="30px")
+        %span.navbar-brand.pl-2.translate(data-key="DEBUG_REPOSITORY_NAME")
       %button.btn#reload(type="button")
         %img(src="./img/loop2.svg" height="30px" width="30px")
       %button.btn#apply(type="button")
         %img(src="./img/checkmark2.svg" height="30px" width="30px")
-    .container-fluid#repo
+    .container-fluid#debug-repo
       .row#root
         %description(:hasinfo="hasinfo" :name="infoname" :version="infoversion" :maintainer="infomaintainer" :changelog="changelog")
         .col-12.text-center(v-if="loading")
@@ -49,4 +50,4 @@
     %script(src="../node_modules/bootstrap/dist/js/bootstrap.min.js")
     %script(src="../node_modules/vue/dist/vue.min.js")
     %script(src="./js/repo_components.js")
-    %script(src="./js/repo.js")
+    %script(src="./js/debug_repo.js")

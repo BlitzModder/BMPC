@@ -69,17 +69,17 @@ _applyFromData = (outputFolder, {path: pa, fullPath}, pathList, cb) ->
 ###*
  * entryイベントから適応する
  *###
-_applyFromEntry = (outputFolder, {path: pa}, pathList, cb) ->
+_applyFromEntry = (outputFolder, entry, pathList, cb) ->
   return new Promise( (resolve, reject) ->
-    pathList.add(pa)
+    pathList.add(entry.path)
     entry
-      .pipe(fstream.Writer(path: path.join(outputFolder, pa)))
+      .pipe(fstream.Writer(path: path.join(outputFolder, entry.path)))
       .on("err", (err) ->
         reject(err)
         return
       )
       .on("close", ->
-        resolve(pa)
+        resolve(entry.path)
         return
       )
     return

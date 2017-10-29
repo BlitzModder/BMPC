@@ -8,10 +8,9 @@ applyMod = remote.require("./applyMod")
 request = remote.require("./request")
 lang = remote.require("./lang")
 
-params = new URLSearchParams(document.location.search)
-path = decodeURIComponent(params.get("path"))
+path = config.get("debugRepo")
 repo =
-  type: params.get("type")
+  type: "local"
   name: path
 langName = config.get("lang")
 
@@ -46,7 +45,6 @@ r = new Vue(
       @error = false
       try
         obj = await plistList.getUntilDone(repo, langName, force)
-        obj = await plistList.filter(obj)
         @loading = false
         @plist = obj
       catch err
@@ -58,7 +56,6 @@ r = new Vue(
       @error = false
       try
         obj = await plistList.getUntilDone(repo, langName, force)
-        obj = await plistList.filter(obj, true)
         if JSON.stringify(@plist) isnt JSON.stringify(obj)
           @plist = obj
       catch err

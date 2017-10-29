@@ -113,7 +113,7 @@ applyMod = (type, mod, progress) ->
     if mod.repo.type is "remote"
       stream = _getFromRemote(folder, mod, log)
     else if mod.repo.type is "local"
-      stream = _getFromLocal(folder, mod)
+      stream = _getFromLocal(folder, mod, log)
       unless stream? then throw new Error("No Folder and Zip in Path")
     else
       throw new Error("Unknown RepoType")

@@ -37,11 +37,11 @@ _getFromRemote = (folder, mod, log) ->
  ###
 _getFromLocal = (folder, mod, log) ->
   dirpath = path.join(mod.repo.name, folder, mod.name)
-  zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
   if util.isDirectory(dirpath)
     log("copydir")
     return readdirp(root: dirpath)
-  else if util.isFile(zippath)
+  zippath = path.join(mod.repo.name, folder, mod.name + ".zip")
+  if util.isFile(zippath)
     log("zipextract")
     return fs.createReadStream(zippath).pipe(unzip.Parse())
   return
@@ -159,10 +159,11 @@ applyMod = (type, mod, progress) ->
       log("tempdone")
       log("zipcompress")
       blitzPath = path.normalize(config.get("blitzPath"))
-      switch config.get("platform")
-        when "a" then prefix = "assets"
-        when "i" then prefix = "Payload/wotblitz.app"
-        else prefix = ""
+      prefix =
+        switch config.get("platform")
+          when "a" then "assets"
+          when "i" then "Payload/wotblitz.app"
+          else ""
       data = await fs.readFile(blitzPath)
       zip = await jszip.loadAsync(data)
       await new Promise( (resolve, reject) ->

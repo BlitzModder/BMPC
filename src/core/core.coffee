@@ -14,11 +14,11 @@ mainWindow = null
  ###
 createWindow = ->
   mainWindow = new BrowserWindow(
-    width: 800,
-    height: 600,
+    width: 800
+    height: 600
     title: "BlitzModderPC",
-    icon: path.join(app.getAppPath(), "gui/img/image.jpg"),
-    autoHideMenuBar: true,
+    icon: path.join(app.getAppPath(), "gui/img/image.jpg")
+    autoHideMenuBar: true
     show: false
   )
   mainWindow.once("ready-to-show", ->

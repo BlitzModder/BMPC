@@ -71,10 +71,9 @@ getLastestVersion = ->
     {name, tag_name} = JSON.parse(body)
     ver = name
     ver = tag_name if ver is ""
-    return ver
-  catch
-    throw new Error("Failed to parse JSON")
-  return
+  catch err
+    throw new Error("Failed to parse JSON(#{err})")
+  return ver
 
 ###
  * ステータスコードを取得します
@@ -85,10 +84,7 @@ getUrlStatus = (url) ->
   try
     {statusCode} = await requestP({url, resolveWithFullResponse: true})
   catch
-    if util.isFile(url)
-      return 200
-    else
-      return 404
+    statusCode = if util.isFile(url) then 200 else 404
   return statusCode
 
 module.exports = {

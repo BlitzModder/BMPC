@@ -97,9 +97,7 @@ get = ({type: repoType, name: repoName}, lang, force = false) ->
   data[repoName][lang] = parse(plist.parse(res))
   return data[repoName][lang]
 
-_isNeeded = (ver, plat, obj) ->
-  ov = obj.version
-  op = obj.platform
+_isNeeded = (ver, plat, {version: ov, platform: op}) ->
   if (
     (ver is "" or ov is "" or semver.gte(ov, ver)) and
     (op is "" or op.includes(plat))
@@ -121,11 +119,10 @@ filter = (parsedObj, useCache = false) ->
   obj = {}
   for k1, v1 of parsedObj
     for k2, v2 of v1
-      for k3, v3 of v2
-        if _isNeeded(ver, plat, v3)
-          obj[k1] = {} if !obj[k1]?
-          obj[k1][k2] = {} if !obj[k1][k2]?
-          obj[k1][k2][k3] = v3
+      for k3, v3 of v2 when _isNeeded(ver, plat, v3)
+        obj[k1] = {} if !obj[k1]?
+        obj[k1][k2] = {} if !obj[k1][k2]?
+        obj[k1][k2][k3] = v3
   return obj
 
 module.exports = {

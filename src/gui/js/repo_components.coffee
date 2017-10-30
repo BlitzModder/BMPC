@@ -103,15 +103,13 @@ Vue.component("mod",
       code = await request.getUrlStatus(@link)
       return if code is 404
       if firstExec
-        webview.addEventListener("dom-ready", ready = =>
-          webview.removeEventListener("dom-ready", ready)
+        webview.addEventListener("dom-ready", =>
           firstExec = false
           webview.loadURL(@link)
           return
-        )
+        , once: true)
       else
-        detail.on("shown.bs.modal", ready = =>
-          detail.off("shown.bs.modal", ready)
+        detail.one("shown.bs.modal", =>
           webview.loadURL(@link)
           return
         )
@@ -136,13 +134,13 @@ Vue.component("modal-body",
   props: ["phase", "log", "finished"]
   computed:
     message: ->
-      switch @phase
+      return switch @phase
         when "standby", "doing"
-          return langTable.MODAL_TITLE_APPLYING
+          langTable.MODAL_TITLE_APPLYING
         when "done"
-          return langTable.MODAL_TITLE_APPLIED
+          langTable.MODAL_TITLE_APPLIED
         when "failed"
-          return langTable.MODAL_TITLE_FAILED
+          langTable.MODAL_TITLE_FAILED
 )
 
 p = new Vue(
@@ -155,10 +153,8 @@ p = new Vue(
       return @phase is "done" or @phase is "failed"
   methods:
     addLog: (m, d) ->
-      if @log is ""
-        @log = "<b>#{util.escape(m)}</b> - #{util.escape(d)}"
-      else
-        @log += "<br><b>#{util.escape(m)}</b> - #{util.escape(d)}"
+      @log += "<br>" unless @log is ""
+      @log = "<b>#{util.escape(m)}</b> - #{util.escape(d)}"
       return
     nextLog: ->
       @log += "<br>"

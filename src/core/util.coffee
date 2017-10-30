@@ -68,10 +68,11 @@ getVersion = (useCache = false) ->
     zip = new jszip()
     data = await fs.readFile(config.get("blitzPath"))
     await zip.loadAsync(data)
-    switch config.get("platform")
-      when "a" then prefix = "assets"
-      when "i" then prefix = "Payload/wotblitz.app"
-      else prefix = ""
+    prefix =
+      switch config.get("platform")
+        when "a" then "assets"
+        when "i" then "Payload/wotblitz.app"
+        else ""
     file = zip.file("#{prefix}/Data/version.txt")
     if !file?
       throw new Error("Error: Version File Not Found Error")

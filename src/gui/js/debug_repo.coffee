@@ -102,44 +102,36 @@ document.getElementById("apply").addEventListener("click", ->
       switch type
         when "add"
           $button.addClass("applied")
-          p.addLog(mod.showname, langTable.MODAL_LOG_APPLIED)
+          mes = langTable.MODAL_LOG_APPLIED
         when "delete"
           $button.removeClass("applied")
-          p.addLog(mod.showname, langTable.MODAL_LOG_REMOVED)
+          mes = langTable.MODAL_LOG_REMOVED
     else if phase is "fail"
       $checkbox = $("button[data-path=\"#{mod.name}\"]").find("input")
       errored = true
       switch type
         when "add"
-          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_APPLY+"(#{err})")
+          mes = langTable.MODAL_LOG_FAILED_APPLY+"(#{err})"
           $checkbox.prop("checked", false)
         when "delete"
-          p.addLog(mod.showname, langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})")
+          mes = langTable.MODAL_LOG_FAILED_REMOVE+"(#{err})"
           $checkbox.prop("checked", true)
     else
-      switch phase
-        when "download"
-          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_START)
-        when "downloaded"
-          p.addLog(mod.showname, langTable.MODAL_LOG_DOWNLOAD_FINISH)
-        when "copydir"
-          p.addLog(mod.showname, langTable.MODAL_LOG_COPY_START)
-        when "zipextract"
-          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_START)
-        when "zipextracted"
-          p.addLog(mod.showname, langTable.MODAL_LOG_EXTRACT_FINISH)
-        when "tempdone"
-          p.addLog(mod.showname, langTable.MODAL_LOG_TEMP_DONE)
-        when "zipcompress"
-          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_START)
-        when "zipcompressed"
-          p.addLog(mod.showname, langTable.MODAL_LOG_COMPRESS_FINISH)
+      mes =
+        switch phase
+          when "download" then langTable.MODAL_LOG_DOWNLOAD_START
+          when "downloaded" then langTable.MODAL_LOG_DOWNLOAD_FINISH
+          when "copydir" then langTable.MODAL_LOG_COPY_START
+          when "zipextract" then langTable.MODAL_LOG_EXTRACT_START
+          when "zipextracted" then langTable.MODAL_LOG_EXTRACT_FINISH
+          when "tempdone" then langTable.MODAL_LOG_TEMP_DONE
+          when "zipcompress" then langTable.MODAL_LOG_COMPRESS_START
+          when "zipcompressed" then langTable.MODAL_LOG_COMPRESS_FINISH
+    p.addLog(mod.showname, mes)
     return
   )
-  if !errored
-    p.changePhase("done")
-  else
-    p.changePhase("failed")
+  phase = if errored then "failed" else "done"
+  p.changePhase(phase)
   # 閉じる防止解除
   window.removeEventListener("beforeunload", onBeforeClose)
   return

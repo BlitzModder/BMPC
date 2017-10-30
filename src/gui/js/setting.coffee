@@ -1,5 +1,5 @@
 {remote} = require "electron"
-{app, dialog, BrowserWindow, shell} = remote
+{app, dialog, BrowserWindow, shell, clipboard} = remote
 fs = remote.require("fs")
 path = remote.require("path")
 os = remote.require("os")
@@ -163,6 +163,9 @@ new Vue(
         @blitzPathType = config.get("blitzPathType")
         @remoteRepoAddStr = ""
         @remoteRepoAddStrErr = false
+      return
+    copyInfo: ->
+      clipboard.writeText($("#applyInfo").find("textarea").val(), "selection")
       return
     applyInfo: ->
       $("#applyInfo").find("textarea").val(

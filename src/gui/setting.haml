@@ -143,6 +143,8 @@
               .modal-body
                 %textarea
               .modal-footer
+                %button.btn.btn-info(type="button" @click="copyInfo")
+                  %span.translate(data-key="BUTTON_COPY")
                 %button.btn.btn-secondary(type="button" data-dismiss="modal")
                   %span.translate(data-key="BUTTON_CLOSE")
         .col-md-12

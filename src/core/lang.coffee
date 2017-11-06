@@ -1,7 +1,6 @@
 ###*
  * @fileoverview 翻訳関連
  ###
-{app} = require "electron"
 config = require "./config"
 
 _langname = ""

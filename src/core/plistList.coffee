@@ -1,12 +1,9 @@
 ###*
  * @fileoverview 言語.plistの読み込み
  ###
-fs = require "fs-extra"
-path = require "path"
 plist = require "plist"
 semver = require "semver"
 request = require "./request"
-cache = require "./cache"
 config = require "./config"
 util = require "./util"
 
@@ -53,7 +50,7 @@ parse = (plistObj) ->
 
 ###*
  * plistを取得できるまで取得(言語順)
- * @param {repo: "remote"|"local", name: string} repo
+ * @param {type: "remote"|"local", name: string} repo
  * @param {string} lang
  * @param {boolean} force キャッシュを無視して元ファイルを取得するか 既定値は"false"
  * @return {Object} plistのオブジェクト
@@ -61,8 +58,8 @@ parse = (plistObj) ->
 getUntilDone = (repo, lang, force = false) ->
   try
     return await get(repo, lang, force)
-  try
-    if lang.includes("_")
+  if lang.includes("_")
+    try
       return await get(repo, lang.split("_")[0], force)
   try
     return await get(repo, "en", force)
@@ -79,23 +76,14 @@ getUntilDone = (repo, lang, force = false) ->
  * @param {boolean} force キャッシュを無視して元ファイルを取得するか 既定値は"false"
  * @return {Object} plistのオブジェクト
  ###
-get = ({type: repoType, name: repoName}, lang, force = false) ->
-  if data[repoName]?[lang]? and !force
-    return data[repoName][lang]
-  try
-    res = await cache.getStringFile(repoName, "plist/#{lang}.plist", force)
-  catch
-    if repoType is "remote"
-      content = await request.getFromRemote(repoName, "plist/#{lang}.plist")
-      res = content.toString()
-    else if repoType is "local"
-      res = await fs.readFile(path.join(repoName, "plist/#{lang}.plist"), "utf8")
-    else
-      throw new Error("不明なレポジトリ形式")
-    cache.setStringFile(repoName, "plist/#{lang}.plist", res)
-  data[repoName] = {} if !data[repoName]?
-  data[repoName][lang] = parse(plist.parse(res))
-  return data[repoName][lang]
+get = (repo, lang, force = false) ->
+  {name} = repo
+  if data[name]?[lang]? and !force
+    return data[name][lang]
+  res = await request.getWithCache(repo, "plist/#{lang}.plist", force)
+  data[name] ?= {}
+  data[name][lang] = parse(plist.parse(res))
+  return data[name][lang]
 
 _isNeeded = (ver, plat, {version: ov, platform: op}) ->
   if (

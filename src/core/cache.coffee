@@ -51,7 +51,7 @@ init = ->
   await fs.ensureFile(filePath)
   try
     content = await fs.readJson(filePath, throws: false)
-    table = if content? then content else DEFAULT_DATA
+    table = content ? DEFAULT_DATA
   catch err
     table = DEFAULT_DATA
     _outputError(err)

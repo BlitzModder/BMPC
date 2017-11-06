@@ -50,9 +50,10 @@ DEFAULT_DATA =
   blitzPathType: "folder"
 
 getDefaultWinBlitzPath = ->
-  switch os.arch()
-    when "x64" then return BLITZ_PATH.WIN64
-    when "ia32" then return BLITZ_PATH.WIN32
+  return switch os.arch()
+    when "x64" then BLITZ_PATH.WIN64
+    when "ia32" then BLITZ_PATH.WIN32
+    else BLITZ_PATH.WIN32
 
 do ->
   DEFAULT_DATA.platform = util.getPlatform()
@@ -96,7 +97,7 @@ init = ->
   await fs.ensureFile(GENERAL_CONFIG_PATH)
   data = Object.assign({}, DEFAULT_DATA)
   try
-    content = await fs.readJson(GENERAL_CONFIG_PATH, throws: false)
+    content = await fs.readJson(GENERAL_CONFIG_PATH)
   catch err
     _outputError(err)
   if content?

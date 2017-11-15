@@ -2,10 +2,10 @@
  * @fileoverview ファイルを取得するメソッド群
  ###
 
-request = require "request"
 requestP = require "request-promise-native"
 path = require "path"
 fs = require "fs-extra"
+cache = require "./cache"
 util = require "./util"
 
 ###*
@@ -19,6 +19,37 @@ getFromRemote = (repoName, fileName) ->
   if names.length < 3
     throw new Error("不明なリモートリポジトリ名")
   return await requestP("#{repoName}/#{fileName}")
+
+###*
+ * ファイルを取得します
+ * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
+ * @param {string} fileName 取得するファイル名
+ * @return {Promise}
+ ###
+get = ({name, type}, fileName) ->
+  if type is "remote"
+    content = await getFromRemote(name, fileName)
+    res = content.toString()
+  else if type is "local"
+    res = await fs.readFile(path.join(name, fileName), "utf8")
+  else
+    throw new Error("不明なレポジトリ形式")
+  return res
+
+###*
+ * キャッシュを活用してファイルを取得します
+ * @param {Object} repo ファイルのあるリポジトリ名 {type: repoType, name: repo}
+ * @param {string} fileName 取得するファイル名
+ * @param {boolean} force キャッシュを利用しない
+ * @return {Promise}
+ ###
+getWithCache = (repo, fileName, force) ->
+  try
+    res = await cache.getStringFile(repo.name, fileName, force)
+  catch
+    res = await get(repo, fileName)
+    cache.setStringFile(repo.name, fileName, res)
+  return res
 
 ###
  * 詳細のURLを取得します
@@ -71,10 +102,9 @@ getLastestVersion = ->
     {name, tag_name} = JSON.parse(body)
     ver = name
     ver = tag_name if ver is ""
-    return ver
-  catch
-    throw new Error("Failed to parse JSON")
-  return
+  catch err
+    throw new Error("Failed to parse JSON(#{err})")
+  return ver
 
 ###
  * ステータスコードを取得します
@@ -85,14 +115,13 @@ getUrlStatus = (url) ->
   try
     {statusCode} = await requestP({url, resolveWithFullResponse: true})
   catch
-    if util.isFile(url)
-      return 200
-    else
-      return 404
+    statusCode = if util.isFile(url) then 200 else 404
   return statusCode
 
 module.exports = {
   getFromRemote
+  get
+  getWithCache
   getChangelog
   getDetailUrl
   getLastestVersion

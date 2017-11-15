@@ -49,13 +49,17 @@ DEFAULT_DATA =
   lang: "ja"
   blitzPathType: "folder"
 
+getDefaultWinBlitzPath = ->
+  return switch os.arch()
+    when "x64" then BLITZ_PATH.WIN64
+    when "ia32" then BLITZ_PATH.WIN32
+    else BLITZ_PATH.WIN32
+
 do ->
   DEFAULT_DATA.platform = util.getPlatform()
   switch DEFAULT_DATA.platform
     when "w"
-      switch os.arch()
-        when "x64" then DEFAULT_DATA.blitzPath = BLITZ_PATH.WIN64
-        when "ia32" then DEFAULT_DATA.blitzPath = BLITZ_PATH.WIN32
+      DEFAULT_DATA.blitzPath = getDefaultWinBlitzPath()
       DEFAULT_DATA.blitzPathRadio = "win"
     when "m"
       DEFAULT_DATA.blitzPath = BLITZ_PATH.MACSTEAM
@@ -65,10 +69,6 @@ do ->
       DEFAULT_DATA.blitzPathRadio = "other"
   return
 
-getDefaultWinBlitzPath = ->
-  switch os.arch()
-    when "x64" then return BLITZ_PATH.WIN64
-    when "ia32" then return BLITZ_PATH.WIN32
 
 ###
  * エラー出力
@@ -97,21 +97,22 @@ init = ->
   await fs.ensureFile(GENERAL_CONFIG_PATH)
   data = Object.assign({}, DEFAULT_DATA)
   try
-    content = await fs.readJson(GENERAL_CONFIG_PATH, throws: false)
+    content = await fs.readJson(GENERAL_CONFIG_PATH)
   catch err
     _outputError(err)
   if content?
     data = Object.assign(data, content)
   else
     machineLang = app.getLocale()
-    switch true
-      when machineLang is "ja" then data.lang = "ja"
-      when machineLang is "ru" then data.lang = "ru"
-      when machineLang is "zh-TW" then data.lang = "zh_TW"
-      when machineLang is "zh-CN" then data.lang = "zh_CN"
-      when machineLang.includes("en") then data.lang = "en"
-      when machineLang.includes("zh") then data.lang = "zh_CN"
-      else data.lang = "en"
+    data.lang =
+      if machineLang is ["ja", "ru", "zh-TW", "zh-CN"]
+        machineLang
+      else if machineLang.includes("en")
+        "en"
+      else if machineLang.includes("zh")
+        "zh_CN"
+      else
+        "en"
   _update()
   return
 

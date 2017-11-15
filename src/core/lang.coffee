@@ -1,7 +1,6 @@
 ###*
  * @fileoverview 翻訳関連
  ###
-{app} = require "electron"
 config = require "./config"
 
 _langname = ""
@@ -12,7 +11,7 @@ _table = null
  ###
 get = ->
   lang = config.get("lang")
-  if lang is _langname and !_table?
+  if lang is _langname and _table?
     return _table
   try
     _table = require("../lang/#{lang}.json")

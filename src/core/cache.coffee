@@ -37,7 +37,7 @@ _outputError = (err) ->
  ###
 _update = ->
   try
-    await fs.outputJson(path.join(CACHE_FOLDER_PATH,"table.json"), table)
+    await fs.outputJson(path.join(CACHE_FOLDER_PATH, "table.json"), table)
   catch err
     _outputError(err)
   return
@@ -47,11 +47,11 @@ _update = ->
  * @constructor
  ###
 init = ->
-  filePath = path.join(CACHE_FOLDER_PATH,"table.json")
+  filePath = path.join(CACHE_FOLDER_PATH, "table.json")
   await fs.ensureFile(filePath)
   try
     content = await fs.readJson(filePath, throws: false)
-    table = if content? then content else DEFAULT_DATA
+    table = content ? DEFAULT_DATA
   catch err
     table = DEFAULT_DATA
     _outputError(err)

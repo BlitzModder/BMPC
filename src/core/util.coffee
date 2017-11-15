@@ -68,10 +68,11 @@ getVersion = (useCache = false) ->
     zip = new jszip()
     data = await fs.readFile(config.get("blitzPath"))
     await zip.loadAsync(data)
-    switch config.get("platform")
-      when "a" then prefix = "assets"
-      when "i" then prefix = "Payload/wotblitz.app"
-      else prefix = ""
+    prefix =
+      switch config.get("platform")
+        when "a" then "assets"
+        when "i" then "Payload/wotblitz.app"
+        else ""
     file = zip.file("#{prefix}/Data/version.txt")
     if !file?
       throw new Error("Error: Version File Not Found Error")
@@ -79,23 +80,19 @@ getVersion = (useCache = false) ->
     ver = _parseVersion(str)
     if ver is ""
       throw new Error("Error: Version Regexp Error")
-    _version = ver
-    return ver
   try
     text = await fs.readFile(path.join(config.get("blitzPath"), "Data", "version.txt"), "utf-8")
     ver = _parseVersion(text)
     if ver is ""
       throw new Error("Error: Version Regexp Error (#{text})")
-    _version = ver
-    return ver
   catch
     text = await fs.readFile(path.join(config.get("blitzPath"), "Data/version", "resources.txt"), "utf-8")
     reg = /^(\d+\.\d+\.\d+)$/.exec(text)
     if !reg?
       throw new Error("Error: Version Regexp Error (#{text})")
-    _version = ver
-    return reg[1]
-  return
+    ver = reg[1]
+  _version = ver
+  return ver
 
 ###*
  * 利用している端末を取得します

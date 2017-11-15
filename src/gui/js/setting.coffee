@@ -1,5 +1,5 @@
 {remote} = require "electron"
-{app, dialog, BrowserWindow, shell} = remote
+{app, dialog, BrowserWindow, shell, clipboard} = remote
 fs = remote.require("fs")
 path = remote.require("path")
 os = remote.require("os")
@@ -15,30 +15,39 @@ do setLang = ->
   for te in transEle
     te.textContent = langTable[te.dataset.key]
 
-getFolderByWindow = (func) ->
-  focusedWindow = BrowserWindow.getFocusedWindow()
-  dialog.showOpenDialog(focusedWindow, properties: ["openDirectory"], (directory) ->
-    if directory?
-      directory = directory[0] if Array.isArray(directory)
-      func(directory)
+getFolderByWindow = ->
+  return new Promise( (resolve, reject) ->
+    focusedWindow = BrowserWindow.getFocusedWindow()
+    dialog.showOpenDialog(focusedWindow, properties: ["openDirectory"], (directory) ->
+      if directory?
+        directory = directory[0] if Array.isArray(directory)
+        resolve(directory)
+      else
+        reject()
+      return
+    )
+    return
   )
-  return
-getFileByWindow = (func) ->
-  focusedWindow = BrowserWindow.getFocusedWindow()
-  dialog.showOpenDialog(focusedWindow, {
-    filters: [
-      {name: "App Files", extensions: ["ipa", "apk", "zip"] }
-      {name: "iOS App Files", extensions: ["ipa"] }
-      {name: "Android App Files", extensions: ["apk"] }
-      {name: "All Files", extensions: ["*"] }
-    ]
-    properties: ["openFile"]
-  }, (file) ->
-    if file?
-      file = file[0] if Array.isArray(file)
-      func(file)
+getFileByWindow = ->
+  return new Promise( (resolve, reject) ->
+    focusedWindow = BrowserWindow.getFocusedWindow()
+    dialog.showOpenDialog(focusedWindow, {
+      filters: [
+        {name: "App Files", extensions: ["ipa", "apk", "zip"] }
+        {name: "iOS App Files", extensions: ["ipa"] }
+        {name: "Android App Files", extensions: ["apk"] }
+        {name: "All Files", extensions: ["*"] }
+      ]
+      properties: ["openFile"]
+    }, (file) ->
+      if file?
+        file = file[0] if Array.isArray(file)
+        resolve(file)
+      else
+        reject()
+      return
+    )
   )
-  return
 
 Vue.component("repo",
   template: "<li class=\"list-group-item\"><span class=\"mr-auto\">{{formatedName}}</span><removeRepoButton @remove=\"removeRepo\"></li>"
@@ -116,34 +125,27 @@ new Vue(
         @remoteRepoAddStrErr = false
       return
     addLocalRepo: ->
-      getFolderByWindow( (dir) =>
-        @localRepos.push(dir)
-        return
-      )
+      try
+        @localRepos.push(await getFolderByWindow())
       return
     setDebugRepo: ->
-      getFolderByWindow( (dir) =>
-        @debugRepo = dir
-        return
-      )
+      try
+        @debugRepo = await getFolderByWindow()
       return
     setBlitzPathFolder: ->
-      getFolderByWindow( (dir) =>
+      try
+        dir = await getFolderByWindow()
         toBlitz = dir.split(path.sep)
         if toBlitz[toBlitz.length-1] is "Data"
           toBlitz.pop()
           dir = toBlitz.join(path.sep)
         @blitzPath = dir
         @blitzPathType = "folder"
-        return
-      )
       return
     setBlitzPathFile: ->
-      getFileByWindow( (file) =>
-        @blitzPath = file
+      try
+        @blitzPath = await getFileByWindow()
         @blitzPathType = "file"
-        return
-      )
       return
     clearCache: ->
       cache.clear()
@@ -161,6 +163,9 @@ new Vue(
         @blitzPathType = config.get("blitzPathType")
         @remoteRepoAddStr = ""
         @remoteRepoAddStrErr = false
+      return
+    copyInfo: ->
+      clipboard.writeText($("#applyInfo").find("textarea").val(), "selection")
       return
     applyInfo: ->
       $("#applyInfo").find("textarea").val(
@@ -195,10 +200,11 @@ new Vue(
     blitzPathRadio: (val) ->
       config.set("blitzPathRadio", val)
       return if val is "other"
-      switch val
-        when "win" then path = config.getDefaultWinBlitzPath()
-        when "macsteam" then path = config.BLITZ_PATH.MACSTEAM
-        when "macapp" then path = config.BLITZ_PATH.MACSTORE
+      path =
+        switch val
+          when "win" then config.getDefaultWinBlitzPath()
+          when "macsteam" then config.BLITZ_PATH.MACSTEAM
+          when "macapp" then config.BLITZ_PATH.MACSTORE
       config.set("blitzPath", path)
       @blitzPath = path
       return

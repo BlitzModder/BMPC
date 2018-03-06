@@ -65,6 +65,11 @@
                 %label.radio_text
                   %input.radio(type="radio" name="blitzPathRadio" value="other" v-model="blitzPathRadio")
                   %span.translate(data-key="OTHER")
+              %p
+                (
+                %span.translate(data-key="MAC_APPSTORE_CATION")
+                %code sudo chmod -R 777 /Applications/World\ of\ Tanks\ Blitz.app
+                )
               %blitz-path(:name="blitzPath")
               .btn-group
                 %button.btn.btn-primary(type="button" v-if="blitzPathRadio === 'other' " @click="setBlitzPathFolder")
